@@ -16,6 +16,8 @@
         }
         return destination;
     };
+    window.glob = window.glob || {};
+    window.glob.extend = window.___extend;
 
     const fs = require('fs-extra');
     // better copy

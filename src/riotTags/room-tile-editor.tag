@@ -12,8 +12,8 @@ room-tile-editor.room-editor-Tiles.tabbed.tall.flexfix
             span {voc.findTileset}
         .flexrow
             select.wide(onchange="{changeTileLayer}" value="{parent.currentTileLayerId}")
-                option(each="{layer, ind in opts.room.tiles}" selected="{parent.currentTileLayerId === ind}" value="{ind}") {layer.hidden? '❌' : '✅'} {layer.depth}
-            
+                option(each="{layer, ind in opts.room.tileLayers}" selected="{parent.currentTileLayerId === ind}" value="{ind}") {layer.hidden? '❌' : '✅'} {layer.depth}
+
             span.act(title="{vocGlob.delete}" onclick="{deleteTileLayer}")
                 i.icon-trash
             span.act(title="{parent.currentTileLayer.hidden? voc.show: voc.hide}" onclick="{toggleTileLayerVisibility}")
@@ -28,19 +28,13 @@ room-tile-editor.room-editor-Tiles.tabbed.tall.flexfix
         this.parent.tileY = 0;
         this.parent.tileSpanX = 1;
         this.parent.tileSpanY = 1;
-        if (!('tiles' in this.opts.room) || !this.opts.room.tiles.length) {
-            this.opts.room.tiles = [{
-                depth: -10,
-                tiles: []
-            }];
-        }
-        this.parent.currentTileLayer = this.opts.room.tiles[0];
+        this.parent.currentTileLayer = this.opts.room.tileLayers[0];
         this.parent.currentTileLayerId = 0;
 
         this.namespace = 'roomtiles';
         this.mixin(window.riotVoc);
         this.mixin(window.riotWired);
-        
+
         this.deleteTileLayer = e => {
             alertify
             .okBtn(window.languageJSON.common.delete)
@@ -48,11 +42,11 @@ room-tile-editor.room-editor-Tiles.tabbed.tall.flexfix
             .confirm(window.languageJSON.common.confirmDelete.replace('{0}', window.languageJSON.common.tilelayer))
             .then(e => {
                 if (e.buttonClicked === 'ok') {
-                    var tiles = this.opts.room;
-                    var index = tiles.tiles.indexOf(this.parent.currentTileLayer);
-                    tiles.tiles.splice(index, 1);
-                    if (tiles.tiles.length) {
-                        this.parent.currentTileLayer = tiles.tiles[0];
+                    var tiles = this.opts.room.tileLayers;
+                    var index = tiles.indexOf(this.parent.currentTileLayer);
+                    tiles.splice(index, 1);
+                    if (tiles.length) {
+                        this.parent.currentTileLayer = tiles[0];
                         this.parent.currentTileLayerId = 0;
                     } else {
                         this.parent.currentTileLayer = false;
@@ -89,11 +83,11 @@ room-tile-editor.room-editor-Tiles.tabbed.tall.flexfix
                         depth: Number(ee.inputValue),
                         tiles: []
                     };
-                    this.opts.room.tiles.push(layer);
+                    this.opts.room.tileLayers.push(layer);
                     this.parent.currentTileLayer = layer;
-                    this.parent.currentTileLayerId = this.opts.room.tiles.length - 1;
+                    this.parent.currentTileLayerId = this.opts.room.tileLayers.length - 1;
                     this.parent.resortRoom();
-                    console.log(this.parent.currentTileLayerId, this.parent.currentTileLayer, this.opts.room.tiles);
+                    console.log(this.parent.currentTileLayerId, this.parent.currentTileLayer, this.opts.room.tileLayers);
                     this.update();
                 }
             });
@@ -103,7 +97,7 @@ room-tile-editor.room-editor-Tiles.tabbed.tall.flexfix
             this.parent.refreshRoomCanvas();
         };
         this.changeTileLayer = e => {
-            this.parent.currentTileLayer = this.opts.room.tiles[Number(e.target.value)];
+            this.parent.currentTileLayer = this.opts.room.tileLayers[Number(e.target.value)];
             this.parent.currentTileLayerId = Number(e.target.value);
         };
         this.switchTiledImage = e => {
@@ -162,9 +156,9 @@ room-tile-editor.room-editor-Tiles.tabbed.tall.flexfix
             this.parent.tileSpanX = 1;
             this.parent.tileSpanY = 1;
             this.selectingTile = true;
-            this.tileStartX = Math.round((e.layerX - g.offx - g.width*0.5) / (g.width+g.marginx)); 
+            this.tileStartX = Math.round((e.layerX - g.offx - g.width*0.5) / (g.width+g.marginx));
             this.tileStartX = Math.max(0, Math.min(g.grid[0], this.tileStartX));
-            this.tileStartY = Math.round((e.layerY - g.offy - g.height*0.5) / (g.height+g.marginy)); 
+            this.tileStartY = Math.round((e.layerY - g.offy - g.height*0.5) / (g.height+g.marginy));
             this.tileStartY = Math.max(0, Math.min(g.grid[1], this.tileStartY));
             this.parent.tileX = this.tileStartX;
             this.parent.tileY = this.tileStartY;
@@ -173,9 +167,9 @@ room-tile-editor.room-editor-Tiles.tabbed.tall.flexfix
         this.moveTileSelection = e => {
             if (!this.selectingTile) {return;}
             var g = this.parent.currentTileset;
-            this.tileEndX = Math.round((e.layerX - g.offx - g.width*0.5) / (g.width+g.marginx)); 
+            this.tileEndX = Math.round((e.layerX - g.offx - g.width*0.5) / (g.width+g.marginx));
             this.tileEndX = Math.max(0, Math.min(g.grid[0], this.tileEndX));
-            this.tileEndY = Math.round((e.layerY - g.offy - g.height*0.5) / (g.height+g.marginy)); 
+            this.tileEndY = Math.round((e.layerY - g.offy - g.height*0.5) / (g.height+g.marginy));
             this.tileEndY = Math.max(0, Math.min(g.grid[1], this.tileEndY));
             this.parent.tileSpanX = 1 + Math.abs(this.tileStartX - this.tileEndX);
             this.parent.tileSpanY = 1 + Math.abs(this.tileStartY - this.tileEndY);

@@ -127,14 +127,68 @@ textures-panel.panel.view
             }
         };
 
+        // Here tex is a ct.js entity, an asset, not a pixi.js intermediate product/
+        // We get a tex and generate an array of PIXI.Texture, ready to be used in PIXI.AnimatedSprite
+        this.texToTextureArray = tex => {
+            const frames = [];
+            for (var col = 0; col < tex.grid[1]; col++) {
+                for (var row = 0; row < tex.grid[0]; row++) {
+                    const texture = new PIXI.Texture(
+                        glob.pixiTextureResourceMap[tex.uid].texture.baseTexture,
+                        new PIXI.Rectangle(
+                            tex.offx + row * (tex.width + tex.marginx),
+                            tex.offy + col * (tex.height + tex.marginy),
+                            tex.width,
+                            tex.height
+                        )
+                    );
+                    texture.anchor = new PIXI.Point(tex.axis[0] / tex.width, tex.axis[1] / tex.height);
+                    frames.push(texture);
+                    if (col * tex.grid[0] + row >= tex.grid.untill && tex.grid.untill > 0) {
+                        break;
+                    }
+                }
+            }
+            return frames;
+        };
+        textureLoader.onComplete.add(() => {
+            glob.pixiFramesMap = glob.pixiFramesMap || {};
+            for (const tex of window.currentProject.textures) {
+                glob.pixiFramesMap[tex.uid] = this.texToTextureArray(tex);
+            }
+        });
         this.fillTextureMap = () => {
             glob.texturemap = {};
+            glob.pixiTextureResourceMap = glob.pixiTextureResourceMap || {};
+            const loader = textureLoader;
+            const resources = loader.resources;
             window.currentProject.textures.forEach(texture => {
+                const path = 'file://' + sessionStorage.projdir + '/img/' + texture.origname + '?' + texture.lastmod;
                 var img = document.createElement('img');
                 glob.texturemap[texture.uid] = img;
                 img.g = texture;
-                img.src = 'file://' + sessionStorage.projdir + '/img/' + texture.origname + '?' + texture.lastmod;
+                img.src = path;
+
+                if (!(texture.uid in resources)) {
+                    loader.add(texture.uid, path);
+                } else {
+                    if (resources[texture.uid].url !== path) {
+                        delete resources[texture.uid];
+                        loader.add(texture.uid, path);
+                    }
+                }
             });
+            // remove outdated (deleted) textures
+            for (var uid in resources) {
+                if (!window.currentProject.textures.find(tex => tex.uid === uid)) {
+                    delete resources[uid];
+                }
+            }
+            glob.pixiTextureResourceMap = loader.resources;
+
+            loader.load();
+
+            // Create a default empty texture for special uses
             var img = document.createElement('img');
             glob.texturemap[-1] = img;
             img.g = {
@@ -466,7 +520,7 @@ textures-panel.panel.view
             this.editing = true;
         };
         this.openSkeleton = skel => e => {
-
+            // Skeletons cannot be opened, at least yet.
         };
 
         /*
