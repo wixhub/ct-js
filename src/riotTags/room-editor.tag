@@ -32,7 +32,7 @@ room-editor.panel.view
                 i.icon-confirm
                 span {voc.done}
     .editor(ref="canvaswrap")
-        canvas(ref="canvas")
+        canvas(ref="canvas" onmousewheel="{onCanvasWheel}")
         .shift
             button.inline.square(title="{voc.shift}" onclick="{roomShift}")
                 i.icon-move
@@ -81,6 +81,40 @@ room-editor.panel.view
                 this.nameTaken = false;
             }
         });
+        /**
+         * Records the state of Ctrl, Shift, Alt, etc to a `this.state` object
+         * This is used in the Room class
+         */
+        this.state = {
+            alt: false,
+            shift: false,
+            ctrl: false,
+            space: false
+        };
+        this.recordStateKeys = e => {
+            this.state.alt = e.altKey;
+            this.state.ctrl = e.ctrlKey || e.metaKey; // recognise Meta key on MacOS as ctrl, because screw you, MacOS
+            this.state.shift = e.shiftKey;
+        };
+        this.onKeyDown = e => {
+            if (e.key === ' ') {
+                this.state.space = true;
+            }
+            this.recordStateKeys(e);
+        };
+        this.onKeyUp = e => {
+            if (e.key === ' ') {
+                this.state.space = false;
+            }
+            this.recordStateKeys(e);
+        };
+        document.body.addEventListener('keydown', this.onKeyDown);
+        document.body.addEventListener('keyup', this.onKeyUp);
+        this.on('unmount', () => {
+            document.body.removeEventListener('keydown', this.onKeyDown);
+            document.body.removeEventListener('keyup', this.onKeyUp);
+        });
+
         this.on('mount', () => {
             this.room = this.opts.room;
             this.gridCanvas = document.createElement('canvas');
@@ -95,10 +129,13 @@ room-editor.panel.view
                 transparent: true,
                 sharedTicker: true,
                 sharedLoader: true,
-                resizeTo: this.refs.canvaswrap
+                resizeTo: this.refs.canvaswrap,
+                antialias: true
             });
             this.pixiRoom = new Room(this.room);
+            this.pixiRoom.editor = this;
             this.pixiApp.stage.addChild(this.pixiRoom);
+            this.pixiRoom.bindLoop(this.pixiApp.ticker);
         });
         this.openRoomEvents = e => {
             this.editingCode = true;
@@ -111,8 +148,8 @@ room-editor.panel.view
         };
         this.roomToCenter = e => {
             // TODO:
-            this.roomx = this.room.width / 2;
-            this.roomy = this.room.height / 2;
+            this.pixiRoom.x = 0;
+            this.pixiRoom.y = 0;
         };
 
         this.redrawGrid = () => {
@@ -173,6 +210,7 @@ room-editor.panel.view
 
         /** При прокрутке колёсиком меняем фактор зума */
         this.onCanvasWheel = e => {
+            const oldZoomFactor = this.zoomFactor;
             if (e.wheelDelta > 0) {
                 // in
                 if (this.zoomFactor === 2) {
@@ -199,6 +237,14 @@ room-editor.panel.view
                 } else if (this.zoomFactor === 0.25) {
                     this.zoomFactor = 0.125;
                 }
+            }
+            if (oldZoomFactor !== this.zoomFactor) {
+                Ease.ease.add(this.pixiRoom.scale, {
+                    x: this.zoomFactor,
+                    y: this.zoomFactor
+                }, {
+                    duration: 350
+                });
             }
         };
 

@@ -142,7 +142,7 @@ textures-panel.panel.view
                             tex.height
                         )
                     );
-                    texture.anchor = new PIXI.Point(tex.axis[0] / tex.width, tex.axis[1] / tex.height);
+                    texture.defaultAnchor = new PIXI.Point(tex.axis[0] / tex.width, tex.axis[1] / tex.height);
                     frames.push(texture);
                     if (col * tex.grid[0] + row >= tex.grid.untill && tex.grid.untill > 0) {
                         break;

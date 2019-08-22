@@ -134,7 +134,6 @@ style-editor.panel.view
     texture-selector(if="{selectingTexture}" onselected="{applyTexture}" ref="textureselector")
     script.
         const fs = require('fs-extra');
-
         this.namespace = 'styleview';
         this.mixin(window.riotVoc);
         this.mixin(window.riotWired);
@@ -145,7 +144,7 @@ style-editor.panel.view
             weight: 400,
             italic: false
         };
-        
+
         this.changingAnyColor = false;
         this.tab = 'stylefont';
         this.changeTab = tab => e => {
@@ -178,7 +177,7 @@ style-editor.panel.view
             this.refreshStyleTexture();
         });
         this.on('update', () => {
-            if (window.currentProject.styles.find(style => 
+            if (window.currentProject.styles.find(style =>
                 this.styleobj.name === style.name && this.styleobj !== style
             )) {
                 this.nameTaken = true;
@@ -189,9 +188,9 @@ style-editor.panel.view
         this.on('updated', e => {
             this.refreshStyleTexture();
         });
-        
+
         this.selectingTexture = false;
-        
+
         this.styleSetAlign = align => e => {
             this.styleobj.font.halign = align;
         };
@@ -200,7 +199,7 @@ style-editor.panel.view
                 delete this.styleobj.fill;
             } else {
                 this.styleobj.fill = {
-                    
+
                 };
             }
         };
@@ -243,7 +242,7 @@ style-editor.panel.view
                 this.parent.update();
             });
         };
-        
+
         /**
          * Generates a thumbnail for the current style
          * @returns {Promise}

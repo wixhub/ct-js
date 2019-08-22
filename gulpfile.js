@@ -101,7 +101,9 @@ const compileScripts = gulp.series(compileRiot, () =>
     streamQueue({objectMode: true},
         gulp.src(['src/js/3rdparty/ace/ace.js']),
         gulp.src(['src/js/3rdparty/ace/**', '!src/js/3rdparty/ace/ace.js']),
-        gulp.src(['src/js/3rdparty/**', '!src/js/3rdparty/ace/**']),
+        gulp.src(['src/js/3rdparty/**', '!src/js/3rdparty/ace/**', '!src/js/3rdparty/pixi*']),
+        gulp.src('src/js/3rdparty/pixi.min.js'),
+        gulp.src('src/js/3rdparty/pixi.ease.js'),
         gulp.src(['src/js/**', '!src/js/3rdparty/**']),
         gulp.src('temp/riot.js')
     )

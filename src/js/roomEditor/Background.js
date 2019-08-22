@@ -14,8 +14,8 @@ class Background extends PIXI.TilingSprite {
         this.simulatedY += (this.extends.movementY || 0) * PIXI.Ticker.shared.deltaTime;
 
         const tex = glob.texturemap[this.tex].g;
-        this.width = 100; // TODO:
-        this.height = 100;
+        this.width = this.parent.getEditorWidth() / this.parent.scale.x; // TODO:
+        this.height = this.parent.getEditorHeight() / this.parent.scale.x;
         if (this.extends.repeat === 'no-repeat' || this.extends.repeat === 'repeat-x') {
             this.height = tex.height * (this.extends.scaleY || 1);
         }
@@ -29,17 +29,21 @@ class Background extends PIXI.TilingSprite {
             this.tileScale.y = Number(this.extends.scaleY);
         }
 
+        const zero = {
+            x: 0,
+            y: 0
+        };
+        this.x = -this.parent.toGlobal(zero).x / this.parent.scale.x;
+        this.y = -this.parent.toGlobal(zero).y / this.parent.scale.y;
         if (this.repeat !== 'repeat-x' && this.repeat !== 'no-repeat') {
-            this.y = this.parent.y + this.simulatedY;
             this.tilePosition.y = -this.y*this.extends.parallaxY + this.extends.shiftY;
         } else {
-            this.y = this.extends.shiftY + this.parent.y * (this.extends.parallaxY - 1) + this.simulatedY;
+            this.y = this.extends.shiftY + this.parent.pivot.y * (this.extends.parallaxY - 1) + this.simulatedY;
         }
         if (this.repeat !== 'repeat-y' && this.repeat !== 'no-repeat') {
-            this.x = this.parent.x + this.simulatedX;
             this.tilePosition.x = -this.x*this.extends.parallaxX + this.extends.shiftX;
         } else {
-            this.y = this.shiftX + this.parent.x * (this.extends.parallaxX - 1) + this.simulatedX;
+            this.x = this.shiftX + this.parent.pivot.x * (this.extends.parallaxX - 1) + this.simulatedX;
         }
     }
     serialize() {
