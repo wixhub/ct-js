@@ -51,7 +51,6 @@ room-editor.panel.view
                 span {voc[room.gridX > 0? 'gridoff' : 'grid']}
         .center
             button#roomcenter(onclick="{roomToCenter}") {voc.tocenter}
-            span.aMouseCoord ({mouseX}:{mouseY})
     room-events-editor(if="{editingCode}" room="{room}")
     script.
         this.editingCode = false;
@@ -121,30 +120,28 @@ room-editor.panel.view
             this.gridCanvas.x = this.gridCanvas.getContext('2d');
             this.redrawGrid();
 
-            this.pixiApp = new PIXI.Application({
-                width: 10,
-                height: 10,
+            this.pixiApp = new RoomEditor({
                 view: this.refs.canvas,
-                autoDensity: true,
-                transparent: true,
-                sharedTicker: true,
-                sharedLoader: true,
-                resizeTo: this.refs.canvaswrap,
-                antialias: true
-            });
-            this.pixiRoom = new Room(this.room);
-            this.pixiRoom.editor = this;
-            this.pixiApp.stage.addChild(this.pixiRoom);
-            this.pixiRoom.bindLoop(this.pixiApp.ticker);
+                resizeTo: this.refs.canvaswrap
+            }, this);
+            this.pixiRoom = this.pixiApp.room;
         });
         this.openRoomEvents = e => {
             this.editingCode = true;
         };
 
         // Room navigation and zoom settings
+        this.updateCameraZoom = () => {
+            Ease.ease.add(this.pixiApp.camera.scale, {
+                x: 1 / this.zoomFactor, // to zoom out, we need to enlarge the area covered by a camera,
+                y: 1 / this.zoomFactor  // thus we use an inverted scale here
+            }, {
+                duration: 350
+            });
+        }
         this.roomToggleZoom = zoomFactor => e => {
             this.zoomFactor = zoomFactor;
-            // TODO:
+            this.updateCameraZoom();
         };
         this.roomToCenter = e => {
             // TODO:
@@ -193,21 +190,6 @@ room-editor.panel.view
             this.currentType = -1;
         };
 
-        /**
-         * Updating mouse coordinates display at the bottom-left corner
-         */
-        this.updateMouseCoords = function (e) {
-            // TODO:
-            var dx = dy = 0;
-            if (this.room.gridX === 0 || e.altKey) {
-                this.mouseX = dx;
-                this.mouseY = dy;
-            } else {
-                this.mouseX = Math.round(dx / this.room.gridX) * this.room.gridX;
-                this.mouseY = Math.round(dy / this.room.gridY) * this.room.gridY;
-            }
-        };
-
         /** При прокрутке колёсиком меняем фактор зума */
         this.onCanvasWheel = e => {
             const oldZoomFactor = this.zoomFactor;
@@ -239,9 +221,15 @@ room-editor.panel.view
                 }
             }
             if (oldZoomFactor !== this.zoomFactor) {
-                Ease.ease.add(this.pixiRoom.scale, {
-                    x: this.zoomFactor,
-                    y: this.zoomFactor
+                this.updateCameraZoom();
+                const local = this.pixiRoom.toLocal({
+                    x: e.offsetX,
+                    y: e.offsetY
+                });
+                k = 1/this.zoomFactor / this.pixiApp.camera.scale.x;
+                Ease.ease.add(this.pixiApp.camera, {
+                    x: this.pixiApp.camera.x*k + local.x*(1-k),
+                    y: this.pixiApp.camera.y*k + local.y*(1-k)
                 }, {
                     duration: 350
                 });

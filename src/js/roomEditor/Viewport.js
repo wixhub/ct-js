@@ -1,3 +1,10 @@
+/* global PIXI */
+
+/**
+ * This is a graphic depiction of a camera in an exported game.
+ * It can be moved around and writes to `room.x`, `room.y`.
+ * @param {Object} data A rectangle; a camera's position
+ */
 // eslint-disable-next-line no-unused-vars
 class Viewport extends PIXI.Container {
     constructor(data) {

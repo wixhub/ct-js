@@ -33,7 +33,7 @@ window.migrationProcess = window.migrationProcess || [];
         version: '1.0.0-next-4',
         process: project => new Promise((resolve) => {
             for (const room of project.rooms) {
-                room.tileLayers = [];
+                room.tileLayers = room.tileLayers || [];
                 for (const oldLayer of room.tiles) {
                     const newLayer = {
                         depth: oldLayer.depth,
@@ -45,6 +45,8 @@ window.migrationProcess = window.migrationProcess || [];
                     room.tileLayers.push(newLayer);
                 }
                 delete room.tiles;
+                room.x = room.x || 0; // The starting position of the camera
+                room.y = room.y || 0;
             }
             resolve();
         })
