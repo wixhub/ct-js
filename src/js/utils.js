@@ -19,6 +19,20 @@
     window.glob = window.glob || {};
     window.glob.extend = window.___extend;
 
+    window.glob.equal = function(one, two) {
+        for (const property in one) {
+            if (one[property] !== two[property]) {
+                return false;
+            }
+        }
+        for (const property in two) {
+            if (two[property] !== one[property]) {
+                return false;
+            }
+        }
+        return true;
+    };
+
     const fs = require('fs-extra');
     // better copy
     /*
