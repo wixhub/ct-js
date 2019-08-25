@@ -120,6 +120,7 @@ room-editor.panel.view
             this.gridCanvas.x = this.gridCanvas.getContext('2d');
             this.redrawGrid();
 
+            const RoomEditor = require('./data/node_requires/roomEditor/RoomEditor');
             this.pixiApp = new RoomEditor({
                 view: this.refs.canvas,
                 resizeTo: this.refs.canvaswrap

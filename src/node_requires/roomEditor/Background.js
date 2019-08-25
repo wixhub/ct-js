@@ -55,3 +55,5 @@ class Background extends PIXI.TilingSprite {
         };
     }
 }
+
+exports = Background;

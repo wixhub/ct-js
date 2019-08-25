@@ -26,3 +26,5 @@ class Viewport extends PIXI.Container {
         .drawRect(0, 0, this.displayWidth, this.displayHeight);
     }
 }
+
+exports = Viewport;

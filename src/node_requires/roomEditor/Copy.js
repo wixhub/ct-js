@@ -40,3 +40,4 @@ class Copy extends PIXI.AnimatedSprite {
     }
 }
 
+exports = Copy;

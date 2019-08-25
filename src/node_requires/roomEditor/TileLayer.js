@@ -15,3 +15,5 @@ class TileLayer extends PIXI.Container {
         }
     }
 }
+
+exports = TileLayer;

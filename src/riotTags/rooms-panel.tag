@@ -3,7 +3,7 @@ rooms-panel.panel.view
         .flexfix-header
             div
                 .toright
-                    b {vocGlob.sort}   
+                    b {vocGlob.sort}
                     button.inline.square(onclick="{switchSort('date')}" class="{selected: sort === 'date' && !searchResults}")
                         i.icon-clock
                     button.inline.square(onclick="{switchSort('name')}" class="{selected: sort === 'name' && !searchResults}")
