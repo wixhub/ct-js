@@ -1,5 +1,5 @@
-/* global PIXI */
-// eslint-disable-next-line no-unused-vars
+const PIXI = require('pixi.js');
+
 class Transformer extends PIXI.Container {
     constructor(items) {
         if (!items || !items.length) {
@@ -42,4 +42,4 @@ class Transformer extends PIXI.Container {
     }
 }
 
-exports = Transformer;
+module.exports = Transformer;

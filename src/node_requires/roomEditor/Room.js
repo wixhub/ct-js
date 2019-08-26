@@ -1,4 +1,5 @@
-/* global PIXI glob */
+const PIXI = require('pixi.js');
+const glob = require('glob');
 const Transformer = require('./Transformer');
 const Copy = require('./Copy');
 const Background = require('./Background');
@@ -194,4 +195,4 @@ class Room extends PIXI.Container {
     }
 }
 
-exports = Room;
+module.exports = Room;

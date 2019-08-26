@@ -1,4 +1,5 @@
-/* global PIXI glob */
+const PIXI = require('pixi.js');
+const glob = require('glob');
 const copyDefaults = {
     x: 0,
     y: 0,
@@ -18,7 +19,7 @@ const serializePlain = [
     'uid', // the type
     'frame'
 ];
-// eslint-disable-next-line no-unused-vars
+
 class Copy extends PIXI.AnimatedSprite {
     constructor(copyInfo) {
         const type = window.currentProject.types[glob.typemap[copyInfo.uid]],
@@ -40,4 +41,4 @@ class Copy extends PIXI.AnimatedSprite {
     }
 }
 
-exports = Copy;
+module.exports = Copy;

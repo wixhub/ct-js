@@ -1,5 +1,6 @@
-/* global PIXI glob */
-// eslint-disable-next-line no-unused-vars
+const PIXI = require('pixi.js');
+const glob = require('glob');
+
 class TileLayer extends PIXI.Container {
     constructor(data) {
         super();
@@ -16,4 +17,4 @@ class TileLayer extends PIXI.Container {
     }
 }
 
-exports = TileLayer;
+module.exports = TileLayer;

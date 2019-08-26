@@ -1,5 +1,6 @@
-/* global PIXI glob */
-// eslint-disable-next-line no-unused-vars
+const PIXI = require('pixi.js');
+const glob = require('glob');
+
 class Background extends PIXI.TilingSprite {
     constructor(data) {
         super(glob.pixiFramesMap[data.texture][data.frame || 0] || PIXI.Texture.EMPTY);
@@ -56,4 +57,4 @@ class Background extends PIXI.TilingSprite {
     }
 }
 
-exports = Background;
+module.exports = Background;

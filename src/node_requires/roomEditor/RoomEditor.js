@@ -1,4 +1,6 @@
-/* global PIXI glob */
+const PIXI = require('pixi.js');
+
+/* global glob */
 const Room = require('./Room');
 
 const roomEditorDefaults = {
@@ -25,7 +27,6 @@ const defaultDragData = {
     dragging: false
 };
 
-// eslint-disable-next-line no-unused-vars
 class RoomEditor extends PIXI.Application {
     /**
      * Creates a pixi.js app — a room editor
@@ -122,4 +123,4 @@ class RoomEditor extends PIXI.Application {
         );
     }
 }
-exports = RoomEditor;
+module.exports = RoomEditor;
