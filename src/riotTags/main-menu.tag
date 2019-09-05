@@ -48,6 +48,8 @@ main-menu.flexcol
         const fs = require('fs-extra'),
               path = require('path');
         const archiver = require('archiver');
+        const runCtExport = require('./data/node_requires/exporter');
+        const glob = require('./data/node_requires/glob');
 
         this.namespace = 'menu';
         this.mixin(window.riotVoc);
@@ -129,11 +131,15 @@ main-menu.flexcol
             keymage.unbind('ctrl-s', this.saveProject);
         });
 
-        const nstatic = require('node-static');
-        const exec = path.dirname(process.execPath).replace(/\\/g,'/');
-        const fileServer = new nstatic.Server(path.join(exec, '/export/'), {
-            cache: false,
-            serverInfo: 'ctjsgameeditor'
+        const {getWritableDir} = require('./data/node_requires/platformUtils');
+        let fileServer;
+        getWritableDir().then(dir => {
+            const nstatic = require('node-static');
+            fileServer = new nstatic.Server(path.join(dir, '/export/'), {
+                cache: false,
+                serverInfo: 'ctjsgameeditor'
+            });
+            console.log('[serverPath]', path.join(dir, '/export/'));
         });
 
         const server = require('http').createServer(function (request, response) {
@@ -145,7 +151,7 @@ main-menu.flexcol
 
         var previewWindow;
         this.runProject = e => {
-            window.runCtProject()
+            runCtExport(currentProject, sessionStorage.projdir)
             .then(path => {
                 if (previewWindow) {
                     var nwWin = nw.Window.get(previewWindow);
@@ -181,9 +187,10 @@ main-menu.flexcol
             });
         };
 
-        this.zipProject = e => {
-            var inDir = exec + '/zipppedProject/',
-                outName = exec + `/${sessionStorage.projname}.zip`;
+        this.zipProject = async e => {
+            const writable = await getWritableDir();
+            var inDir = path.join(writable, '/zipppedProject/'),
+                outName = path.join(writable, `/${sessionStorage.projname}.zip`);
             this.saveProject()
             .then(fs.remove(outName))
             .then(fs.emptyDir(inDir))
@@ -210,11 +217,12 @@ main-menu.flexcol
             })
             .catch(alertify.error);
         };
-        this.zipExport = e => {
-            let exportFile = exec + '/export.zip',
-                inDir = exec + '/export/';
-            fs.remove(exportFile)
-            .then(() => window.runCtProject())
+        this.zipExport = async e => {
+            const writable = await getWritableDir();
+            let exportFile = path.join(writable, '/export.zip'),
+                inDir = path.join(writable, '/export/');
+            await fs.remove(exportFile);
+            runCtExport(currentProject, sessionStorage.projdir)
             .then(() => {
                 let archive = archiver('zip'),
                     output = fs.createWriteStream(exportFile);
@@ -350,15 +358,14 @@ main-menu.flexcol
         }));
 
         this.switchLanguage = filename => {
+            const i18n = require('./data/node_requires/i18n.js');
+            const {extend} = require('./data/node_requires/objectUtils');
             try {
-                const vocDefault = fs.readJSONSync('./data/i18n/English.json');
-                const voc = fs.readJSONSync(`./data/i18n/${filename}.json`);
-                console.log('loaded');
-                window.languageJSON = window.___extend(vocDefault, voc);
+                window.languageJSON = i18n.loadLanguage(filename);
                 localStorage.appLanguage = filename;
                 window.signals.trigger('updateLocales');
                 window.riot.update();
-                console.log('changed');
+                console.log('Applied a new language file.');
             } catch(e) {
                 alert('Could not open a language file: ' + e);
             }

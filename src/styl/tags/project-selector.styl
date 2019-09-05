@@ -9,11 +9,10 @@ project-selector
     z-index 30
     label.file
         margin 1em 0
-    .modal
+    .panel
         width 48rem
         max-width 95%
-        top 8rem
-        transform translate(-50%, 0)
+        margin 0 auto 2rem
         padding 1rem
         background rgba(white, 0.9)
         flex-flow column nowrap
@@ -38,6 +37,12 @@ project-selector
         // @stylint on
         *
             vertical-align text-bottom
+        .aPartyCarrot
+            width 2rem
+            display inline-block
+            position relative
+            top -0.1rem
+            margin-left 0.5rem
         i
             margin-right 0.5rem
 
@@ -58,6 +63,9 @@ project-selector
     background-size cover
     background-position center center
     z-index 25
+    text-align center
+    .panel
+        text-align initial
 
 #id
     width 14.75em

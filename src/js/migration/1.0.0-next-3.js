@@ -4,12 +4,14 @@ window.migrationProcess.push({
     version: '1.0.0-next-3',
     process: project => new Promise((resolve) => {
         // Add fields for Actions system
-        project.actions = [];
+        project.actions = project.actions || [];
         if ('keyboard' in project.libs) {
             delete project.libs.keyboard;
             project.libs['keyboard.legacy'] = {};
         }
-        project.libs['mouse.legacy'] = {};
+        if (!('mouse' in project.libs)) {
+            project.libs['mouse.legacy'] = {};
+        }
 
         // Rename Graphics into Textures
         if (project.textures) {

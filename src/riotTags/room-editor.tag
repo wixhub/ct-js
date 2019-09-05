@@ -58,6 +58,7 @@ room-editor.panel.view
         const fs = require('fs-extra'),
               gui = require('nw.gui');
         const win = gui.Window.get();
+        const glob = require('./data/node_requires/glob');
         this.namespace = 'roomview';
         this.mixin(window.riotVoc);
         this.mixin(window.riotWired);
@@ -263,13 +264,13 @@ room-editor.panel.view
             this.room.lastmod = +(new Date());
             this.roomGenSplash()
             .then(() => {
-                window.glob.modified = true;
+                glob.modified = true;
                 this.parent.editing = false;
                 this.parent.update();
             })
             .catch(err => {
                 console.error(err);
-                window.glob.modified = true;
+                glob.modified = true;
                 this.parent.editing = false;
                 this.parent.update();
             });

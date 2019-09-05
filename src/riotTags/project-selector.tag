@@ -1,48 +1,52 @@
 project-selector
-    #bg.stretch
-    #intro.modal
-        div.flexrow
-            .c4.np
-            .c8.npt.npb
-                h2 {voc.latest}
-        div.flexrow
-            .c4.npl.npt.project-selector-aPreview.center
-                img(src="{projectSplash}")
-            .c8.npr.npt.npl.flexfix
-                ul.menu.flexfix-body
-                    li(
-                        each="{project in lastProjects}" title="{requirePath.basename(project,'.json')}"
-                        onclick="{updatePreview(project)}"
-                        ondblclick="{loadRecentProject}"
-                    ) 
-                        .toright
-                            i.icon-x(onclick="{forgetProject}" title="{voc.forgetProject}")
-                        span {project}
-                label.file.flexfix-footer
-                    input(type="file" ref="fileexternal" accept=".ict" onchange="{openProjectFind}")
-                    .button.wide.inline
-                        i.icon.icon-folder
-                        span {voc.browse}
-        #newProject.inset.flexrow.flexmiddle
-            .c4.npl.npt.npb
-                h3.nm.right {voc.newProject.text}
-            .c5.np
-                input( 
-                    type='text'
-                    placeholder='{voc.newProject.input}'
-                    pattern='[a-zA-Z_0-9]\\{1,\\}'
-                    ref="projectname"
-                ).wide
-            .c3.npr.npt.npb
-                button.nm.wide.inline(onclick="{newProject}") {voc.newProject.button}
-    .aVersionNumber 
+    #bg.stretch.middle
+        #intro.panel.middleinner
+            div.flexrow
+                .c4.np
+                .c8.npt.npb
+                    h2 {voc.latest}
+            div.flexrow
+                .c4.npl.npt.project-selector-aPreview.center
+                    img(src="{projectSplash}")
+                .c8.npr.npt.npl.flexfix
+                    ul.menu.flexfix-body
+                        li(
+                            each="{project in lastProjects}" title="{requirePath.basename(project,'.json')}"
+                            onclick="{updatePreview(project)}"
+                            ondblclick="{loadRecentProject}"
+                        )
+                            .toright
+                                i.icon-x(onclick="{forgetProject}" title="{voc.forgetProject}")
+                            span {project}
+                    label.file.flexfix-footer.nmb
+                        input(type="file" ref="fileexternal" accept=".ict" onchange="{openProjectFind}")
+                        .button.wide.inline.nml.nmr
+                            i.icon.icon-folder
+                            span {voc.browse}
+            #newProject.inset.flexrow.flexmiddle
+                .c4.npl.npt.npb
+                    h3.nm.right {voc.newProject.text}
+                .c5.np
+                    input(
+                        type='text'
+                        placeholder='{voc.newProject.input}'
+                        pattern='[a-zA-Z_0-9]\\{1,\\}'
+                        ref="projectname"
+                    ).wide
+                .c3.npr.npt.npb
+                    button.nm.wide.inline(onclick="{newProject}") {voc.newProject.button}
+    .aVersionNumber
         a(href="https://discord.gg/CggbPkb" title="{voc.discord}" onclick="{openExternal('https://discord.gg/CggbPkb')}")
             i.icon-discord
         a(href="https://twitter.com/ctjsrocks" title="{voc.twitter}" onclick="{openExternal('https://twitter.com/ctjsrocks')}")
             i.icon-twitter
-        .inlineblock v{nw.App.manifest.version}.  
-        a(href="https://ctjs.rocks/" onclick="{openExternal}")   {voc.homepage}.  
-        .inlineblock(if="{newVersion}")   {newVersion}
+        .inlineblock v{nw.App.manifest.version}.
+        |
+        |
+        // as itch releases are always in sync with the fetched version number, let's route users to itch.io page
+        a.inlineblock(if="{newVersion}" href="https://comigo.itch.io/ct#download" onclick="{openExternal}")
+            | {newVersion}
+            img(src="data/img/partycarrot.gif" if="{newVersion}").aPartyCarrot
     script.
         const fs = require('fs-extra'),
               path = require('path');
@@ -61,29 +65,37 @@ project-selector
         });
         this.projectSplash = '/data/img/notexture.png';
         this.newVersion = false;
-        
-        // Загрузка списка последних проектов из локального хранилища
-        if (('lastProjects' in localStorage) && 
+
+        // Loads recently opened projects
+        if (('lastProjects' in localStorage) &&
             (localStorage.lastProjects !== '')) {
             this.lastProjects = localStorage.lastProjects.split(';');
         } else {
             this.lastProjects = [];
         }
-        
+
         /**
-         * При нажатии на проект в списке последних проектов обновляет сплэш проекта
+         * Update a splash image of a selected project
          */
         this.updatePreview = projectPath => e => {
             this.projectSplash = 'file://' + path.dirname(projectPath) + '/' + path.basename(projectPath, '.ict') + '/img/splash.png';
         };
-        
+
         /**
-         * Создаёт в памяти пустой проект, а затем открывает его. 
-         * Также записывает файл пустого проекта в папку с проектами рядом с исполняемым файлом ctjs
-         * и делает основные директории.
+         * Creates a mew project.
+         * Technically it creates an empty project in-memory, then saves it to a directory.
+         * Creates basic directories for sounds and textures.
          */
-        this.newProject = function() {
-            const way = path.dirname(process.execPath).replace(/\\/g,'/') + '/projects';
+        this.newProject = async () => {
+            const {getWritableDir} = require('./data/node_requires/platformUtils');
+            let way = path.dirname(process.execPath).replace(/\\/g,'/');
+            try {
+                way = path.join(await getWritableDir(), '/projects');
+            } catch (e) {
+                alertify.error(this.voc.unableToWriteToFolders);
+                throw e;
+            }
+            await fs.ensureDir(way);
             var codename = this.refs.projectname.value;
             var projectData = {
                 ctjsVersion: nw.App.manifest.version,
@@ -96,6 +108,7 @@ project-selector
                     fittoscreen: {
                         mode: "scaleFit"
                     },
+                    mouse: {},
                     keyboard: {},
                     'keyboard.polyfill': {},
                     'sound.howler': {},
@@ -104,10 +117,12 @@ project-selector
                     }
                 },
                 textures: [],
+                skeletons: [],
                 types: [],
                 sounds: [],
                 styles: [],
                 rooms: [],
+                actions: [],
                 starting: 0,
                 settings: {
                     minifyhtmlcss: false,
@@ -127,17 +142,17 @@ project-selector
             };
             fs.writeJSON(path.join(way, codename + '.ict'), projectData, function(e) {
                 if (e) {
+                    alertify.error(this.voc.unableToWriteToFolders + '\n' + e);
                     throw e;
                 }
             });
             sessionStorage.projdir = path.join(way, codename);
             sessionStorage.projname = codename + '.ict';
-            fs.ensureDir(sessionStorage.projdir);
-            fs.ensureDir(sessionStorage.projdir + '/img');
+            await fs.ensureDir(sessionStorage.projdir + '/img');
             fs.ensureDir(sessionStorage.projdir + '/snd');
             fs.ensureDir(sessionStorage.projdir + '/include');
             setTimeout(() => { // for some reason, it must be done through setTimeout; otherwise it fails
-                window.megacopy('./data/img/notexture.png', path.join(sessionStorage.projdir + '/img/splash.png'), e => {
+                fs.copy('./data/img/notexture.png', path.join(sessionStorage.projdir + '/img/splash.png'), e => {
                     if (e) {
                         alertify.error(e);
                         console.error(e);
@@ -146,7 +161,7 @@ project-selector
             }, 0);
             window.loadProject(path.join(way, codename + '.ict'));
         };
-        
+
         /**
          * Opens a recent project when an item in the Recent Project list is double-clicked
          */
@@ -164,7 +179,7 @@ project-selector
             e.stopPropagation();
         }
         /**
-         * Событие открытия файла через проводник
+         * Handler for a manual search for a project, triggered by an input[type="file"]
          */
         this.openProjectFind = e => {
             var fe = this.refs.fileexternal,
@@ -181,7 +196,9 @@ project-selector
 
         // Checking for updates
         setTimeout(() => {
-            fetch('https://itch.io/api/1/x/wharf/latest?target=comigo/ct&channel_name=linux32')
+            const {isWin, isLinux} = require('./data/node_requires/platformUtils.js');
+            const channel = isWin? 'win64' : (isLinux? 'linux64': 'osx64');
+            fetch(`https://itch.io/api/1/x/wharf/latest?target=comigo/ct&channel_name=${channel}`)
             .then(data => data.json())
             .then(json => {
                 if (!json.errors) {
@@ -189,6 +206,9 @@ project-selector
                         this.newVersion = this.voc.latestVersion.replace('$1', json.latest);
                         this.update();
                     }
+                } else {
+                    console.error('Update check failed:');
+                    console.log(json.errors);
                 }
             });
         }, 0);

@@ -12,51 +12,83 @@
     /* global nw */
     const fs = require('fs-extra'),
           path = require('path');
-
+    // @see https://semver.org/
+    const semverRegex = /(\d+)\.(\d+)\.(\d+)(-[A-Za-z.-]*(\d+)?[A-Za-z.-]*)?/;
+    const semverToArray = string => {
+        const raw = semverRegex.exec(string);
+        return [
+            raw[1],
+            raw[2],
+            raw[3],
+            // -next- versions and other postfixes will count as a fourth component.
+            // They all will apply before regular versions
+            raw[4]? raw[5] || 1 : null
+        ];
+    };
 
     var adapter = async project => {
-
-        // execute all the migration
-        var version = (project.ctjsVersion || '0.2.0').replace('-next-', '.');
+        var version = semverToArray(project.ctjsVersion || '0.2.0');
 
         const migrationToExecute = window.migrationProcess
-            .sort((m1, m2) => {
-                    const m1Version = m1.version.replace('-next-', '.').split('.');
-                    const m2Version = m2.version.replace('-next-', '.').split('.');
+        // Sort all the patches chronologically
+        .sort((m1, m2) => {
+            const m1Version = semverToArray(m1.version);
+            const m2Version = semverToArray(m2.version);
 
-                    for (let i = 0; i < m1Version.length; i++) {
-                        if (m1Version[i] < m2Version[i]) {
-                            return -1;
-                        } else if (m1Version[i] > m2Version[i]) {
-                            return 1;
-                        }
-                    }
-
-                    return 0;
-            })
-            .filter((migration) => {
-                const migrationVersion = migration.version.replace('-next-', '.').split('.');
-                const currentVersion = version.split('.');
-
-                for (let i = 0; i < migrationVersion.length; i++) {
-                    if (migrationVersion[i] < currentVersion[i]) {
-                        return false;
-                    } else if (migrationVersion[i] > currentVersion[i]) {
-                        return true;
-                    }
+            for (let i = 0; i < 4; i++) {
+                if (m1Version[i] < m2Version[i] || m1Version[i] === null) {
+                    return -1;
+                } else if (m1Version[i] > m2Version[i]) {
+                    return 1;
                 }
+            }
+            // eslint-disable-next-line no-console
+            console.warn(`Two equivalent versions found for migration, ${m1.version} and ${m2.version}.`);
+            return 0;
+        })
+        // Throw out patches for current and previous versions
+        .filter((migration) => {
+            const migrationVersion = semverToArray(migration.version);
+            for (let i = 0; i < 3; i++) {
+                // if any of the first three version numbers is lower than project's,
+                // skip the patch
+                if (migrationVersion[i] < version[i]) {
+                    return false;
+                }
+                if (migrationVersion[i] > version[i]) {
+                    return true;
+                }
+            }
+            // a lazy check for equal base versions
+            if (migrationVersion.slice(0, 3).join('.') === version.slice(0, 3).join('.')) {
+                // handle the case with two postfixed versions
+                if (migrationVersion[3] !== null && version[3] !== null) {
+                    return migrationVersion[3] > version[3];
+                }
+                // postfixed source, unpostfixed patch
+                if (migrationVersion[3] === null && version[3] !== null) {
+                    return true;
+                }
+                return false;
+            }
+            return true;
+        });
 
-                return true;
-            });
-
+        if (migrationToExecute.length) {
+            // eslint-disable-next-line no-console
+            console.debug(`Applying migration sequence: patches ${migrationToExecute.map(m => m.version).join(', ')}.`);
+        }
         for (const migration of migrationToExecute) {
             // eslint-disable-next-line no-console
-            console.debug('Migrating project to version ' + migration.version);
+            console.debug(`Migrating project from version ${project.ctjsVersion || '0.2.0'} to ${migration.version}`);
             // We do need to apply updates in a sequence
             // eslint-disable-next-line no-await-in-loop
             await migration.process(project);
         }
-
+        // Unfortunately, recent versions of eslint give false positives on this line
+        // @see https://github.com/eslint/eslint/issues/11900
+        // @see https://github.com/eslint/eslint/issues/11899
+        // eslint-disable-next-line require-atomic-updates
         project.ctjsVersion = nw.App.manifest.version;
     };
 
@@ -67,8 +99,10 @@
      * @returns {void}
      */
     var loadProject = async projectData => {
+        const glob = require('./data/node_requires/glob');
         window.currentProject = projectData;
         window.alertify.log(window.languageJSON.intro.loadingProject);
+        glob.modified = false;
 
         try {
             await adapter(projectData);
@@ -85,7 +119,6 @@
                 lastProjects.pop();
             }
             localStorage.lastProjects = lastProjects.join(';');
-            window.glob.modified = false;
             window.signals.trigger('hideProjectSelector');
             window.signals.trigger('projectLoaded');
 
@@ -99,8 +132,6 @@
         } catch (err) {
             window.alertify.alert(window.languageJSON.intro.loadingProjectError + err);
         }
-
-
     };
 
     /**

@@ -1,6 +1,6 @@
 {
   "name": "ctjsbuildenvironment",
-  "version": "0.0.0",
+  "version": "1.0.1",
   "description": "",
   "directories": {
     "doc": "docs"
@@ -18,18 +18,21 @@
   },
   "license": "MIT",
   "dependencies": {
+    "filemode": "^3.0.0",
     "fs-extra": "4.0.2",
-    "google-closure-compiler-js": "^20180610.0.0",
-    "gulp": "^4.0.0",
+    "globby": "^10.0.1",
+    "gulp": "^4.0.2",
     "gulp-append-prepend": "^1.0.4",
+    "gulp-chmod": "^3.0.0",
     "gulp-concat": "^2.6.1",
-    "gulp-eslint": "^4.0.2",
+    "gulp-eslint": "^6.0.0",
     "gulp-if": "^2.0.2",
     "gulp-pug": "^3.3.0",
     "gulp-riot": "^1.1.4",
     "gulp-sourcemaps": "^2.6.4",
     "gulp-stylint": "^4.0.2",
     "gulp-stylus": "^2.7.0",
+    "gulp-zip": "^5.0.0",
     "minimist": "^1.2.0",
     "node-notifier": "^5.2.1",
     "nw-builder": "^3.5.7",

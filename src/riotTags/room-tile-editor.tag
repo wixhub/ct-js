@@ -115,6 +115,7 @@ room-tile-editor.room-editor-Tiles.tabbed.tall.flexfix
         };
 
         this.redrawTileset = e => {
+            const glob = require('./data/node_requires/glob');
             var c = this.refs.tiledImage,
                 cx = c.getContext('2d'),
                 g = this.parent.currentTileset,

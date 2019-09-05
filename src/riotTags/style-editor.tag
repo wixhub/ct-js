@@ -134,6 +134,8 @@ style-editor.panel.view
     texture-selector(if="{selectingTexture}" onselected="{applyTexture}" ref="textureselector")
     script.
         const fs = require('fs-extra');
+        const PIXI = require('pixi.js');
+
         this.namespace = 'styleview';
         this.mixin(window.riotVoc);
         this.mixin(window.riotWired);
@@ -225,10 +227,12 @@ style-editor.panel.view
                 };
             }
         };
-        // Рендер превью в редакторе
+        // Render a preview image in the editor
+        const {extend} = require('./data/node_requires/objectUtils');
+        const {styleToTextStyle} = require('./data/node_requires/styleUtils');
         this.refreshStyleTexture = e => {
             this.pixiStyle.reset();
-            window.___extend(this.pixiStyle, window.styleToTextStyle(this.styleobj));
+            extend(this.pixiStyle, styleToTextStyle(this.styleobj));
             for (const label of this.labels) {
                 label.text = label.text;
             }
@@ -249,9 +253,10 @@ style-editor.panel.view
          */
         this.styleGenPreview = function(destination, size) {
             return new Promise((accept, decline) => {
-                var img = this.pixiApp.renderer.plugins.extract. base64(this.labelThumbnail);
+                var img = this.pixiApp.renderer.plugins.extract.base64(this.labelThumbnail);
+                console.log(img);
                 var data = img.replace(/^data:image\/\w+;base64,/, '');
-                var buf = new Buffer(data, 'base64');
+                var buf = new Buffer(data, 'base64'); // TODO: replace as plain Buffer constructor is deprecated
                 fs.writeFile(destination, buf, function(err) {
                     if (err) {
                         console.log(err);
