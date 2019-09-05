@@ -153,6 +153,7 @@ textures-panel.panel.view
             }
             return frames;
         };
+        const {textureLoader} = require('./data/node_requires/glob');
         textureLoader.onComplete.add(() => {
             glob.pixiFramesMap = glob.pixiFramesMap || {};
             for (const tex of window.currentProject.textures) {

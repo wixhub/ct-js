@@ -1,5 +1,5 @@
-const PIXI = require('pixi.js');
-const glob = require('glob');
+const glob = require('./../glob');
+const {extend} = require('./../objectUtils');
 const copyDefaults = {
     x: 0,
     y: 0,
@@ -22,11 +22,11 @@ const serializePlain = [
 
 class Copy extends PIXI.AnimatedSprite {
     constructor(copyInfo) {
-        const type = window.currentProject.types[glob.typemap[copyInfo.uid]],
+        const type = glob.currentProject.types[glob.typemap[copyInfo.uid]],
               frames = glob.pixiFramesMap[type.texture];
         super(frames);
-        glob.extend(this, copyDefaults);
-        glob.extend(this, copyInfo);
+        extend(this, copyDefaults);
+        extend(this, copyInfo);
     }
     serialize() {
         const out = {};

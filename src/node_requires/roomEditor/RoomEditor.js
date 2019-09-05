@@ -1,7 +1,5 @@
-const PIXI = require('pixi.js');
-
-/* global glob */
 const Room = require('./Room');
+const {extend} = require('./../objectUtils');
 
 const roomEditorDefaults = {
     width: 10,
@@ -11,7 +9,8 @@ const roomEditorDefaults = {
     sharedLoader: true,
     roundPixels: true,
     resolution: devicePixelRatio,
-    antialias: true
+    antialias: true,
+    preserveDrawingBuffer: true
 };
 
 const defaultTextStyle = new PIXI.TextStyle({
@@ -37,7 +36,7 @@ class RoomEditor extends PIXI.Application {
      * @param {RiotTag} editor a tag instance of a `room-editor`
      */
     constructor(opts, editor) {
-        const data = glob.extend(glob.extend({}, roomEditorDefaults), opts);
+        const data = extend(extend({}, roomEditorDefaults), opts);
         super(data);
 
         this.room = new Room(editor.room);
@@ -69,7 +68,7 @@ class RoomEditor extends PIXI.Application {
         this.stage.on('pointerup', this.onUp.bind(this));
         this.stage.on('pointerupoutside', this.onUp.bind(this));
 
-        this.drag = glob.extend({}, defaultDragData);
+        this.drag = extend({}, defaultDragData);
 
 
         this.loop = () => {

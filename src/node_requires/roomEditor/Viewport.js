@@ -1,5 +1,3 @@
-const PIXI = require('pixi.js');
-
 /**
  * This is a graphic depiction of a camera in an exported game.
  * It can be moved around and writes to `room.x`, `room.y`.

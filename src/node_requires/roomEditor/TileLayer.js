@@ -1,5 +1,4 @@
-const PIXI = require('pixi.js');
-const glob = require('glob');
+const glob = require('./../glob');
 
 class TileLayer extends PIXI.Container {
     constructor(data) {

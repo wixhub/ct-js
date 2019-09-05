@@ -100,7 +100,7 @@
      */
     var loadProject = async projectData => {
         const glob = require('./data/node_requires/glob');
-        window.currentProject = projectData;
+        window.currentProject = glob.currentProject = projectData;
         window.alertify.log(window.languageJSON.intro.loadingProject);
         glob.modified = false;
 

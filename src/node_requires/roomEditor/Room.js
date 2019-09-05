@@ -1,5 +1,5 @@
-const PIXI = require('pixi.js');
-const glob = require('glob');
+const glob = require('./../glob');
+const {extend, equal} = require('./../objectUtils');
 const Transformer = require('./Transformer');
 const Copy = require('./Copy');
 const Background = require('./Background');
@@ -53,7 +53,7 @@ class Room extends PIXI.Container {
                                     // otherwise, a Room will catch clicks on copies and bgs only
         this.populate();
 
-        this.select = glob.extend({}, defaultSelectData);
+        this.select = extend({}, defaultSelectData);
         this.selectBox = new PIXI.Graphics();
         this.selectBox.depth = Infinity;
         this.addChild(this.selectBox);
@@ -124,7 +124,7 @@ class Room extends PIXI.Container {
     }
     onDown(e) {
         // start selecting if a left mouse is pressed with no modifiers
-        if (e.data.button === 0 && glob.equal(this.editor.state, {
+        if (e.data.button === 0 && equal(this.editor.state, {
             shift: false,
             ctrl: false,
             alt: false,

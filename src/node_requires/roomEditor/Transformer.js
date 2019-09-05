@@ -1,5 +1,3 @@
-const PIXI = require('pixi.js');
-
 class Transformer extends PIXI.Container {
     constructor(items) {
         if (!items || !items.length) {

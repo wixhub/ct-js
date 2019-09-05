@@ -2,8 +2,9 @@
  * `glob` is a shared object for storing textures, handy mappings and global state.
  */
 
-let modified = false;
+const textureLoader = new global.PIXI.Loader();
 
+let modified = false;
 const glob = {
     get modified() {
         return modified;
@@ -16,7 +17,8 @@ const glob = {
         }
         modified = v;
         return modified;
-    }
+    },
+    textureLoader
 };
 
 module.exports = glob;

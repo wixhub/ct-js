@@ -134,7 +134,6 @@ style-editor.panel.view
     texture-selector(if="{selectingTexture}" onselected="{applyTexture}" ref="textureselector")
     script.
         const fs = require('fs-extra');
-        const PIXI = require('pixi.js');
 
         this.namespace = 'styleview';
         this.mixin(window.riotVoc);

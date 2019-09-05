@@ -1,5 +1,4 @@
-const PIXI = require('pixi.js');
-const glob = require('glob');
+const glob = require('./../glob');
 
 class Background extends PIXI.TilingSprite {
     constructor(data) {
