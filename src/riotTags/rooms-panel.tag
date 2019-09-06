@@ -105,9 +105,7 @@ rooms-panel.panel.view
                     onleave: '',
                     width: 800,
                     height: 600,
-                    backgrounds: [],
-                    copies: [],
-                    tiles: [],
+                    layers: [],
                     uid: guid,
                     thumbnail: thumbnail
                 };
