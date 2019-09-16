@@ -1,3 +1,10 @@
+/*
+    As the editor works with pixi entities, and ct.js cannot directly save or export them,
+    the room editor will create pixi entities, tied to plain js objects. The common name for
+    the latter ones is `template`. As pixi does not have an MVC framework as well, each class
+    is responsible for updating the source data (the templates).
+*/
+
 const Room = require('./Room');
 const {extend} = require('./../objectUtils');
 
@@ -41,6 +48,7 @@ class RoomEditor extends PIXI.Application {
 
         this.room = new Room(editor.room);
         this.room.bindLoop(this.ticker);
+        this.layers = this.room.layers;
         this.stage.addChild(this.room);
 
         this.editor = this.room.editor = editor;
@@ -113,6 +121,10 @@ class RoomEditor extends PIXI.Application {
     onUp() {
         this.drag.dragging = false;
     }
+    /**
+     * Updates room position based on the camera position.
+     * @returns {void}
+     */
     realignCamera() {
         this.room.transform.setFromMatrix(
             this.camera.worldTransform
@@ -120,6 +132,27 @@ class RoomEditor extends PIXI.Application {
             .invert()
             .translate(this.view.width / devicePixelRatio / 2, this.view.height / devicePixelRatio / 2)
         );
+    }
+
+    /**
+     * The horizontal position of the in-editor camera
+     */
+    get x() {
+        return this.camera.x;
+    }
+    /**
+     * The vertical position of the in-editor camera
+     */
+    get y() {
+        return this.camera.y;
+    }
+    set x(val) {
+        this.camera.x = val;
+        this.realignCamera();
+    }
+    set y(val) {
+        this.camera.y = val;
+        this.realignCamera();
     }
 }
 module.exports = RoomEditor;

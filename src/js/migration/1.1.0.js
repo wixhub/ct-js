@@ -5,6 +5,7 @@ window.migrationProcess = window.migrationProcess || [];
  */
 
 (function () {
+    const i18n = require('./data/node_requires/i18n');
     const patchIntoTiles = (patch, project) => {
         /**
          * Previous data included a `grid` entry, which was an array with values:
@@ -39,7 +40,7 @@ window.migrationProcess = window.migrationProcess || [];
                         depth: Number(oldLayer.depth),
                         type: 'tiles',
                         tiles: [],
-                        name: `Tiles at ${oldLayer.depth} depth`
+                        name: i18n.languageJSON.roomview.layerTypes.tiles
                     };
                     for (const patch of (oldLayer.tiles)) {
                         newLayer.tiles.push(...patchIntoTiles(patch, project));
@@ -50,6 +51,7 @@ window.migrationProcess = window.migrationProcess || [];
                 for (const bg of backgrounds) {
                     bg.type = 'background';
                     bg.depth = Number(bg.depth);
+                    bg.name = i18n.languageJSON.roomview.layerTypes.background;
                 }
                 for (const copy of room.copies) {
                     delete copy.lastX; // these should have been temporal variables :[
@@ -70,12 +72,24 @@ window.migrationProcess = window.migrationProcess || [];
                 room.layers = [...tileLayers, ...backgrounds, {
                     depth: 0,
                     type: 'copies',
+                    name: i18n.languageJSON.roomview.layerTypes.copies,
                     copies: room.copies
+                }, {
+                    type: 'viewport',
+                    depth: Infinity,
+                    x: room.width / 2,
+                    y: room.height / 2,
+                    name: i18n.languageJSON.roomview.layerTypes.camera,
+                    width: room.width,
+                    height: room.height
                 }];
                 room.layers.sort((a, b) => a.depth - b.depth);
                 delete room.tiles;
                 delete room.backgrounds;
                 delete room.copies;
+                for (const layer of room.layers) {
+                    delete layer.depth;
+                }
             }
             resolve();
         })

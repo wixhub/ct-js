@@ -1,0 +1,1306 @@
+{
+  "ctjsVersion": "1.1.0",
+  "notes": "/* empty */",
+  "libs": {
+    "place": {
+      "gridX": 160,
+      "gridY": 160
+    },
+    "fittoscreen": {
+      "mode": "fastScale"
+    },
+    "mouse": {},
+    "keyboard": {},
+    "keyboard.polyfill": {},
+    "sound.howler": {},
+    "akatemplate": {
+      "csscss": "body {\n    background: #000;\n}"
+    }
+  },
+  "textures": [
+    {
+      "name": "Walls",
+      "untill": 23,
+      "grid": [
+        5,
+        5
+      ],
+      "axis": [
+        0,
+        0
+      ],
+      "marginx": 0,
+      "marginy": 0,
+      "imgWidth": 80,
+      "imgHeight": 80,
+      "width": 16,
+      "height": 16,
+      "offx": 0,
+      "offy": 0,
+      "origname": "ifa360a4f-6bc4-4a68-9bc3-ea6869046a38.png",
+      "source": "C:\\Users\\Master\\Desktop\\Walls.png",
+      "shape": "rect",
+      "left": 0,
+      "right": 16,
+      "top": 0,
+      "bottom": 16,
+      "uid": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+      "lastmod": 1567922219812
+    },
+    {
+      "name": "Floor",
+      "untill": 0,
+      "grid": [
+        8,
+        4
+      ],
+      "axis": [
+        0,
+        0
+      ],
+      "marginx": 0,
+      "marginy": 0,
+      "imgWidth": 128,
+      "imgHeight": 64,
+      "width": 16,
+      "height": 16,
+      "offx": 0,
+      "offy": 0,
+      "origname": "8aebc70a-c6c2-430f-9a1d-703284ab15b9.png",
+      "source": "C:\\Users\\Master\\Desktop\\Floor.png",
+      "shape": "rect",
+      "left": 0,
+      "right": 16,
+      "top": 0,
+      "bottom": 16,
+      "uid": "8aebc70a-c6c2-430f-9a1d-703284ab15b9",
+      "lastmod": 1567926553742
+    },
+    {
+      "name": "Door",
+      "untill": 0,
+      "grid": [
+        14,
+        1
+      ],
+      "axis": [
+        16,
+        32
+      ],
+      "marginx": 0,
+      "marginy": 0,
+      "imgWidth": 448,
+      "imgHeight": 32,
+      "width": 32,
+      "height": 32,
+      "offx": 0,
+      "offy": 0,
+      "origname": "i05b3eac0-fe60-477e-b9c5-fc527f798be0.png",
+      "source": "D:\\Downloads\\v1.1 dungeon crawler 16x16 pixel pack\\tiles\\wall\\door_spritesheet.png",
+      "shape": "rect",
+      "left": 16,
+      "right": 16,
+      "top": 32,
+      "bottom": 0,
+      "uid": "05b3eac0-fe60-477e-b9c5-fc527f798be0",
+      "lastmod": 1567921944914
+    },
+    {
+      "name": "Door_Open",
+      "untill": 0,
+      "grid": [
+        1,
+        1
+      ],
+      "axis": [
+        0,
+        0
+      ],
+      "marginx": 0,
+      "marginy": 0,
+      "imgWidth": 32,
+      "imgHeight": 32,
+      "width": 32,
+      "height": 32,
+      "offx": 0,
+      "offy": 0,
+      "origname": "i258c7840-c3bc-4b31-aecc-2f17acec3044.png",
+      "source": "D:\\Downloads\\v1.1 dungeon crawler 16x16 pixel pack\\tiles\\wall\\door_fullyopen.png",
+      "shape": "rect",
+      "left": 0,
+      "right": 32,
+      "top": 0,
+      "bottom": 32,
+      "uid": "258c7840-c3bc-4b31-aecc-2f17acec3044"
+    },
+    {
+      "name": "Knight_Run",
+      "untill": 0,
+      "grid": [
+        6,
+        1
+      ],
+      "axis": [
+        8,
+        15
+      ],
+      "marginx": 0,
+      "marginy": 0,
+      "imgWidth": 96,
+      "imgHeight": 16,
+      "width": 16,
+      "height": 16,
+      "offx": 0,
+      "offy": 0,
+      "origname": "idde809ff-645e-4684-bd4d-70813cb50320.png",
+      "source": "D:\\Downloads\\v1.1 dungeon crawler 16x16 pixel pack\\heroes\\knight\\knight_run_spritesheet.png",
+      "shape": "rect",
+      "left": 5,
+      "right": 5,
+      "top": 12,
+      "bottom": 0,
+      "uid": "dde809ff-645e-4684-bd4d-70813cb50320",
+      "lastmod": 1567922060162
+    },
+    {
+      "name": "Knight_Idle",
+      "untill": 0,
+      "grid": [
+        6,
+        1
+      ],
+      "axis": [
+        8,
+        15
+      ],
+      "marginx": 0,
+      "marginy": 0,
+      "imgWidth": 96,
+      "imgHeight": 16,
+      "width": 16,
+      "height": 16,
+      "offx": 0,
+      "offy": 0,
+      "origname": "iec0d4d8d-46a4-4c89-9f36-c8fb6be708c3.png",
+      "source": "D:\\Downloads\\v1.1 dungeon crawler 16x16 pixel pack\\heroes\\knight\\knight_idle_spritesheet.png",
+      "shape": "rect",
+      "left": 5,
+      "right": 5,
+      "top": 12,
+      "bottom": 0,
+      "uid": "ec0d4d8d-46a4-4c89-9f36-c8fb6be708c3",
+      "lastmod": 1567922020443
+    },
+    {
+      "name": "Potion_Yellow",
+      "untill": 0,
+      "grid": [
+        1,
+        1
+      ],
+      "axis": [
+        8,
+        12
+      ],
+      "marginx": 0,
+      "marginy": 0,
+      "imgWidth": 16,
+      "imgHeight": 16,
+      "width": 16,
+      "height": 16,
+      "offx": 0,
+      "offy": 0,
+      "origname": "i6ab024f1-ea28-44f7-ba70-425e0fbb5404.png",
+      "source": "D:\\Downloads\\v1.1 dungeon crawler 16x16 pixel pack\\props_itens\\potion_yellow.png",
+      "shape": "rect",
+      "left": 4,
+      "right": 3,
+      "top": 9,
+      "bottom": 0,
+      "uid": "6ab024f1-ea28-44f7-ba70-425e0fbb5404",
+      "lastmod": 1567922215900
+    },
+    {
+      "name": "Chest_Opened",
+      "untill": 0,
+      "grid": [
+        1,
+        1
+      ],
+      "axis": [
+        8,
+        16
+      ],
+      "marginx": 0,
+      "marginy": 0,
+      "imgWidth": 16,
+      "imgHeight": 16,
+      "width": 16,
+      "height": 16,
+      "offx": 0,
+      "offy": 0,
+      "origname": "ia693d126-987d-4882-b915-b98dd62d76b5.png",
+      "source": "D:\\Downloads\\v1.1 dungeon crawler 16x16 pixel pack\\props_itens\\chest_open.png",
+      "shape": "rect",
+      "left": 8,
+      "right": 8,
+      "top": 16,
+      "bottom": 0,
+      "uid": "a693d126-987d-4882-b915-b98dd62d76b5",
+      "lastmod": 1567922185884
+    },
+    {
+      "name": "Potion_Green",
+      "untill": 0,
+      "grid": [
+        1,
+        1
+      ],
+      "axis": [
+        7,
+        12
+      ],
+      "marginx": 0,
+      "marginy": 0,
+      "imgWidth": 16,
+      "imgHeight": 16,
+      "width": 16,
+      "height": 16,
+      "offx": 0,
+      "offy": 0,
+      "origname": "i46c017c0-fdb6-414d-96d8-852f0dc9aed2.png",
+      "source": "D:\\Downloads\\v1.1 dungeon crawler 16x16 pixel pack\\props_itens\\potion_green.png",
+      "shape": "rect",
+      "left": 3,
+      "right": 4,
+      "top": 10,
+      "bottom": 0,
+      "uid": "46c017c0-fdb6-414d-96d8-852f0dc9aed2",
+      "lastmod": 1567922273722
+    },
+    {
+      "name": "prisoner",
+      "untill": 0,
+      "grid": [
+        1,
+        1
+      ],
+      "axis": [
+        0,
+        0
+      ],
+      "marginx": 0,
+      "marginy": 0,
+      "imgWidth": 16,
+      "imgHeight": 16,
+      "width": 16,
+      "height": 16,
+      "offx": 0,
+      "offy": 0,
+      "origname": "i5eb884b6-a29f-484c-8e9c-ec9e3f1c5652.png",
+      "source": "D:\\Downloads\\v1.1 dungeon crawler 16x16 pixel pack\\props_itens\\prisoner.png",
+      "shape": "rect",
+      "left": 0,
+      "right": 16,
+      "top": 0,
+      "bottom": 16,
+      "uid": "5eb884b6-a29f-484c-8e9c-ec9e3f1c5652"
+    },
+    {
+      "name": "Potion_Red",
+      "untill": 0,
+      "grid": [
+        1,
+        1
+      ],
+      "axis": [
+        7,
+        12
+      ],
+      "marginx": 0,
+      "marginy": 0,
+      "imgWidth": 16,
+      "imgHeight": 16,
+      "width": 16,
+      "height": 16,
+      "offx": 0,
+      "offy": 0,
+      "origname": "i8b2655bd-61f9-4e49-8b28-002c58ee77dc.png",
+      "source": "D:\\Downloads\\v1.1 dungeon crawler 16x16 pixel pack\\props_itens\\potion_red.png",
+      "shape": "rect",
+      "left": 3,
+      "right": 4,
+      "top": 10,
+      "bottom": 0,
+      "uid": "8b2655bd-61f9-4e49-8b28-002c58ee77dc",
+      "lastmod": 1567922292402
+    },
+    {
+      "name": "Bomb",
+      "untill": 0,
+      "grid": [
+        10,
+        1
+      ],
+      "axis": [
+        8,
+        15
+      ],
+      "marginx": 0,
+      "marginy": 0,
+      "imgWidth": 160,
+      "imgHeight": 16,
+      "width": 16,
+      "height": 16,
+      "offx": 0,
+      "offy": 0,
+      "origname": "ib24cbbb6-c563-467a-b989-4ddb05d9ff96.png",
+      "source": "D:\\Downloads\\v1.1 dungeon crawler 16x16 pixel pack\\props_itens\\bomb_anim_spritesheet.png",
+      "shape": "rect",
+      "left": 5,
+      "right": 5,
+      "top": 10,
+      "bottom": 0,
+      "uid": "b24cbbb6-c563-467a-b989-4ddb05d9ff96",
+      "r": 8,
+      "lastmod": 1567922153804
+    },
+    {
+      "name": "Torch",
+      "untill": 0,
+      "grid": [
+        6,
+        1
+      ],
+      "axis": [
+        0,
+        0
+      ],
+      "marginx": 0,
+      "marginy": 0,
+      "imgWidth": 96,
+      "imgHeight": 16,
+      "width": 16,
+      "height": 16,
+      "offx": 0,
+      "offy": 0,
+      "origname": "i13431611-3228-4859-8213-37b397f209ae.png",
+      "source": "D:\\Downloads\\v1.1 dungeon crawler 16x16 pixel pack\\props_itens\\torch_spritesheet.png",
+      "shape": "rect",
+      "left": 0,
+      "right": 16,
+      "top": 0,
+      "bottom": 16,
+      "uid": "13431611-3228-4859-8213-37b397f209ae",
+      "lastmod": 1567922376531
+    },
+    {
+      "name": "Table",
+      "untill": 0,
+      "grid": [
+        1,
+        1
+      ],
+      "axis": [
+        0,
+        0
+      ],
+      "marginx": 0,
+      "marginy": 0,
+      "imgWidth": 32,
+      "imgHeight": 16,
+      "width": 32,
+      "height": 16,
+      "offx": 0,
+      "offy": 0,
+      "origname": "iddab0bbe-e9dd-4b3b-8e74-f80b199eb5ad.png",
+      "source": "D:\\Downloads\\v1.1 dungeon crawler 16x16 pixel pack\\props_itens\\table_2.png",
+      "shape": "rect",
+      "left": 0,
+      "right": 32,
+      "top": 0,
+      "bottom": 16,
+      "uid": "ddab0bbe-e9dd-4b3b-8e74-f80b199eb5ad"
+    },
+    {
+      "name": "Barrel",
+      "untill": 0,
+      "grid": [
+        1,
+        1
+      ],
+      "axis": [
+        8,
+        14
+      ],
+      "marginx": 0,
+      "marginy": 0,
+      "imgWidth": 16,
+      "imgHeight": 16,
+      "width": 16,
+      "height": 16,
+      "offx": 0,
+      "offy": 0,
+      "origname": "i122fa279-5b83-4c01-8d3b-0727d6fee993.png",
+      "source": "D:\\Downloads\\v1.1 dungeon crawler 16x16 pixel pack\\props_itens\\barrel.png",
+      "shape": "rect",
+      "left": 6,
+      "right": 5,
+      "top": 16,
+      "bottom": 0,
+      "uid": "122fa279-5b83-4c01-8d3b-0727d6fee993",
+      "lastmod": 1567922319715
+    },
+    {
+      "name": "Coins",
+      "untill": 0,
+      "grid": [
+        1,
+        1
+      ],
+      "axis": [
+        0,
+        0
+      ],
+      "marginx": 0,
+      "marginy": 0,
+      "imgWidth": 16,
+      "imgHeight": 16,
+      "width": 16,
+      "height": 16,
+      "offx": 0,
+      "offy": 0,
+      "origname": "idc7de07a-f73d-4e90-8770-709ab9c4ed33.png",
+      "source": "D:\\Downloads\\v1.1 dungeon crawler 16x16 pixel pack\\props_itens\\bag_coins.png",
+      "shape": "rect",
+      "left": 0,
+      "right": 16,
+      "top": 0,
+      "bottom": 16,
+      "uid": "dc7de07a-f73d-4e90-8770-709ab9c4ed33"
+    },
+    {
+      "name": "Chest",
+      "untill": 0,
+      "grid": [
+        8,
+        1
+      ],
+      "axis": [
+        8,
+        16
+      ],
+      "marginx": 0,
+      "marginy": 0,
+      "imgWidth": 128,
+      "imgHeight": 16,
+      "width": 16,
+      "height": 16,
+      "offx": 0,
+      "offy": 0,
+      "origname": "i0fec5f23-2543-4d4e-a2d3-543ea7428d00.png",
+      "source": "D:\\Downloads\\v1.1 dungeon crawler 16x16 pixel pack\\props_itens\\chest_spritesheet.png",
+      "shape": "rect",
+      "left": 8,
+      "right": 8,
+      "top": 16,
+      "bottom": 0,
+      "uid": "0fec5f23-2543-4d4e-a2d3-543ea7428d00",
+      "lastmod": 1567922183332
+    },
+    {
+      "name": "flag_green",
+      "untill": 0,
+      "grid": [
+        1,
+        1
+      ],
+      "axis": [
+        0,
+        0
+      ],
+      "marginx": 0,
+      "marginy": 0,
+      "imgWidth": 16,
+      "imgHeight": 16,
+      "width": 16,
+      "height": 16,
+      "offx": 0,
+      "offy": 0,
+      "origname": "iadf3f1d2-4ad9-4089-a988-820140d49aee.png",
+      "source": "D:\\Downloads\\v1.1 dungeon crawler 16x16 pixel pack\\props_itens\\flag_green.png",
+      "shape": "rect",
+      "left": 0,
+      "right": 16,
+      "top": 0,
+      "bottom": 16,
+      "uid": "adf3f1d2-4ad9-4089-a988-820140d49aee"
+    },
+    {
+      "name": "flag_red",
+      "untill": 0,
+      "grid": [
+        1,
+        1
+      ],
+      "axis": [
+        0,
+        0
+      ],
+      "marginx": 0,
+      "marginy": 0,
+      "imgWidth": 16,
+      "imgHeight": 16,
+      "width": 16,
+      "height": 16,
+      "offx": 0,
+      "offy": 0,
+      "origname": "idedc9c8d-e0ab-4e31-bc9e-d5011ea55952.png",
+      "source": "D:\\Downloads\\v1.1 dungeon crawler 16x16 pixel pack\\props_itens\\flag_red.png",
+      "shape": "rect",
+      "left": 0,
+      "right": 16,
+      "top": 0,
+      "bottom": 16,
+      "uid": "dedc9c8d-e0ab-4e31-bc9e-d5011ea55952"
+    },
+    {
+      "name": "key_silver",
+      "untill": 0,
+      "grid": [
+        1,
+        1
+      ],
+      "axis": [
+        8,
+        16
+      ],
+      "marginx": 0,
+      "marginy": 0,
+      "imgWidth": 16,
+      "imgHeight": 16,
+      "width": 16,
+      "height": 16,
+      "offx": 0,
+      "offy": 0,
+      "origname": "i9cd37aac-79d7-446a-a6d7-676becc85775.png",
+      "source": "D:\\Downloads\\v1.1 dungeon crawler 16x16 pixel pack\\props_itens\\key_silver.png",
+      "shape": "rect",
+      "left": 8,
+      "right": 8,
+      "top": 16,
+      "bottom": 0,
+      "uid": "9cd37aac-79d7-446a-a6d7-676becc85775",
+      "lastmod": 1567922193027
+    },
+    {
+      "name": "BG",
+      "untill": 0,
+      "grid": [
+        1,
+        1
+      ],
+      "axis": [
+        0,
+        0
+      ],
+      "marginx": 0,
+      "marginy": 0,
+      "imgWidth": 96,
+      "imgHeight": 96,
+      "width": 96,
+      "height": 96,
+      "offx": 0,
+      "offy": 0,
+      "origname": "i70c6d809-0ae6-4ee8-b9ca-51f7c06bd4bc.png",
+      "source": "C:\\Users\\Master\\Desktop\\BG.png",
+      "shape": "rect",
+      "left": 0,
+      "right": 96,
+      "top": 0,
+      "bottom": 96,
+      "uid": "70c6d809-0ae6-4ee8-b9ca-51f7c06bd4bc"
+    }
+  ],
+  "skeletons": [],
+  "types": [
+    {
+      "name": "Hero",
+      "depth": 0,
+      "oncreate": "this.maxSpeed = 10;",
+      "onstep": "this.hspeed = ct.actions.MoveX.value * this.maxSpeed;\nthis.vspeed = ct.actions.MoveY.value * this.maxSpeed;\n\n// Fix max speed on keyboard layout when moving diagonally\nthis.speed = Math.min(this.speed, this.maxSpeed);\n\n// Perform the standard movement\nthis.move();\n\n// Jump back if we have clipped into textures\nif (ct.place.occupied(this, 'Solid')) {\n    this.x = this.xprev;\n    this.y = this.yprev;\n}",
+      "ondraw": "",
+      "ondestroy": "",
+      "uid": "9fb2bfc1-32e4-495c-ba21-606b4b27c3d3",
+      "texture": "ec0d4d8d-46a4-4c89-9f36-c8fb6be708c3",
+      "extends": {
+        "ctype": "Hero"
+      },
+      "lastmod": 1567922344387
+    },
+    {
+      "name": "Mob_Bounce_Horizontal",
+      "depth": 0,
+      "oncreate": "this.speed = 10;\nthis.direction = 0;",
+      "onstep": "this.move();\n// If we have clipped into textures, jump back and move to another side\nif (ct.place.occupied(this, 'Solid')) {\n    this.x = this.xprev;\n    this.y = this.yprev;\n    this.direction = this.direction + 180; // Move in the opposite direction\n}\n",
+      "ondraw": "",
+      "ondestroy": "",
+      "uid": "46e348fb-37e6-476a-bbdc-0913760642a3",
+      "texture": -1,
+      "extends": {
+        "ctype": "Enemy"
+      },
+      "lastmod": 1567847243283
+    },
+    {
+      "name": "Barrel",
+      "depth": 0,
+      "oncreate": "",
+      "onstep": "this.move();",
+      "ondraw": "",
+      "ondestroy": "",
+      "uid": "6b5447ed-3eb1-453d-a9bd-76026430b7a1",
+      "texture": "122fa279-5b83-4c01-8d3b-0727d6fee993",
+      "extends": {
+        "ctype": "Solid"
+      },
+      "lastmod": 1567922336587
+    },
+    {
+      "name": "Torch",
+      "depth": -9,
+      "oncreate": "",
+      "onstep": "this.move();",
+      "ondraw": "",
+      "ondestroy": "",
+      "uid": "db7e6817-00ff-4c90-8aa8-4eacff469115",
+      "texture": "13431611-3228-4859-8213-37b397f209ae",
+      "extends": {},
+      "lastmod": 1567924230742
+    }
+  ],
+  "sounds": [],
+  "styles": [],
+  "rooms": [
+    {
+      "name": "Level_01",
+      "oncreate": "",
+      "onstep": "",
+      "ondraw": "",
+      "onleave": "",
+      "width": 320,
+      "height": 240,
+      "uid": "647beb5e-985c-44fa-9923-51b79ae037f5",
+      "thumbnail": "51b79ae037f5",
+      "gridX": 16,
+      "gridY": 16,
+      "lastmod": 1567924313038,
+      "x": 0,
+      "y": 0,
+      "layers": [
+        {
+          "texture": "70c6d809-0ae6-4ee8-b9ca-51f7c06bd4bc",
+          "extends": {},
+          "type": "background"
+        },
+        {
+          "type": "tiles",
+          "tiles": [
+            {
+              "x": 32,
+              "y": 96,
+              "texture": "8aebc70a-c6c2-430f-9a1d-703284ab15b9",
+              "frame": 0
+            },
+            {
+              "x": 96,
+              "y": 96,
+              "texture": "8aebc70a-c6c2-430f-9a1d-703284ab15b9",
+              "frame": 2
+            },
+            {
+              "x": 48,
+              "y": 96,
+              "texture": "8aebc70a-c6c2-430f-9a1d-703284ab15b9",
+              "frame": 1
+            },
+            {
+              "x": 64,
+              "y": 96,
+              "texture": "8aebc70a-c6c2-430f-9a1d-703284ab15b9",
+              "frame": 1
+            },
+            {
+              "x": 80,
+              "y": 96,
+              "texture": "8aebc70a-c6c2-430f-9a1d-703284ab15b9",
+              "frame": 1
+            },
+            {
+              "x": 32,
+              "y": 112,
+              "texture": "8aebc70a-c6c2-430f-9a1d-703284ab15b9",
+              "frame": 8
+            },
+            {
+              "x": 32,
+              "y": 128,
+              "texture": "8aebc70a-c6c2-430f-9a1d-703284ab15b9",
+              "frame": 8
+            },
+            {
+              "x": 32,
+              "y": 144,
+              "texture": "8aebc70a-c6c2-430f-9a1d-703284ab15b9",
+              "frame": 8
+            },
+            {
+              "x": 48,
+              "y": 112,
+              "texture": "8aebc70a-c6c2-430f-9a1d-703284ab15b9",
+              "frame": 9
+            },
+            {
+              "x": 80,
+              "y": 128,
+              "texture": "8aebc70a-c6c2-430f-9a1d-703284ab15b9",
+              "frame": 13
+            },
+            {
+              "x": 64,
+              "y": 112,
+              "texture": "8aebc70a-c6c2-430f-9a1d-703284ab15b9",
+              "frame": 4
+            },
+            {
+              "x": 32,
+              "y": 160,
+              "texture": "8aebc70a-c6c2-430f-9a1d-703284ab15b9",
+              "frame": 8
+            },
+            {
+              "x": 96,
+              "y": 160,
+              "texture": "8aebc70a-c6c2-430f-9a1d-703284ab15b9",
+              "frame": 10
+            },
+            {
+              "x": 96,
+              "y": 144,
+              "texture": "8aebc70a-c6c2-430f-9a1d-703284ab15b9",
+              "frame": 10
+            },
+            {
+              "x": 112,
+              "y": 112,
+              "texture": "8aebc70a-c6c2-430f-9a1d-703284ab15b9",
+              "frame": 1
+            },
+            {
+              "x": 96,
+              "y": 112,
+              "texture": "8aebc70a-c6c2-430f-9a1d-703284ab15b9",
+              "frame": 14
+            },
+            {
+              "x": 96,
+              "y": 128,
+              "texture": "8aebc70a-c6c2-430f-9a1d-703284ab15b9",
+              "frame": 6
+            },
+            {
+              "x": 112,
+              "y": 128,
+              "texture": "8aebc70a-c6c2-430f-9a1d-703284ab15b9",
+              "frame": 17
+            },
+            {
+              "x": 80,
+              "y": 112,
+              "texture": "8aebc70a-c6c2-430f-9a1d-703284ab15b9",
+              "frame": 5
+            },
+            {
+              "x": 80,
+              "y": 144,
+              "texture": "8aebc70a-c6c2-430f-9a1d-703284ab15b9",
+              "frame": 21
+            },
+            {
+              "x": 80,
+              "y": 160,
+              "texture": "8aebc70a-c6c2-430f-9a1d-703284ab15b9",
+              "frame": 9
+            },
+            {
+              "x": 64,
+              "y": 160,
+              "texture": "8aebc70a-c6c2-430f-9a1d-703284ab15b9",
+              "frame": 9
+            },
+            {
+              "x": 48,
+              "y": 160,
+              "texture": "8aebc70a-c6c2-430f-9a1d-703284ab15b9",
+              "frame": 9
+            },
+            {
+              "x": 48,
+              "y": 144,
+              "texture": "8aebc70a-c6c2-430f-9a1d-703284ab15b9",
+              "frame": 19
+            },
+            {
+              "x": 48,
+              "y": 128,
+              "texture": "8aebc70a-c6c2-430f-9a1d-703284ab15b9",
+              "frame": 3
+            },
+            {
+              "x": 64,
+              "y": 144,
+              "texture": "8aebc70a-c6c2-430f-9a1d-703284ab15b9",
+              "frame": 21
+            },
+            {
+              "x": 64,
+              "y": 128,
+              "texture": "8aebc70a-c6c2-430f-9a1d-703284ab15b9",
+              "frame": 4
+            }
+          ],
+          "name": "Tiles at -20 depth"
+        },
+        {
+          "type": "tiles",
+          "tiles": [
+            {
+              "x": 16,
+              "y": 112,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 5
+            },
+            {
+              "x": 16,
+              "y": 144,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 5
+            },
+            {
+              "x": 32,
+              "y": 64,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 1
+            },
+            {
+              "x": 48,
+              "y": 64,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 1
+            },
+            {
+              "x": 64,
+              "y": 64,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 1
+            },
+            {
+              "x": 80,
+              "y": 64,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 1
+            },
+            {
+              "x": 96,
+              "y": 64,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 1
+            },
+            {
+              "x": 112,
+              "y": 64,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 2
+            },
+            {
+              "x": 32,
+              "y": 176,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 16
+            },
+            {
+              "x": 96,
+              "y": 80,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 17
+            },
+            {
+              "x": 48,
+              "y": 80,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 16
+            },
+            {
+              "x": 80,
+              "y": 80,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 16
+            },
+            {
+              "x": 48,
+              "y": 176,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 16
+            },
+            {
+              "x": 64,
+              "y": 176,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 16
+            },
+            {
+              "x": 80,
+              "y": 176,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 16
+            },
+            {
+              "x": 96,
+              "y": 176,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 17
+            },
+            {
+              "x": 16,
+              "y": 160,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 10
+            },
+            {
+              "x": 112,
+              "y": 160,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 12
+            },
+            {
+              "x": 112,
+              "y": 144,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 7
+            },
+            {
+              "x": 112,
+              "y": 80,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 8
+            },
+            {
+              "x": 112,
+              "y": 96,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 15
+            },
+            {
+              "x": 128,
+              "y": 112,
+              "texture": "8aebc70a-c6c2-430f-9a1d-703284ab15b9",
+              "frame": 1
+            },
+            {
+              "x": 160,
+              "y": 112,
+              "texture": "8aebc70a-c6c2-430f-9a1d-703284ab15b9",
+              "frame": 1
+            },
+            {
+              "x": 144,
+              "y": 112,
+              "texture": "8aebc70a-c6c2-430f-9a1d-703284ab15b9",
+              "frame": 1
+            },
+            {
+              "x": 128,
+              "y": 128,
+              "texture": "8aebc70a-c6c2-430f-9a1d-703284ab15b9",
+              "frame": 17
+            },
+            {
+              "x": 144,
+              "y": 128,
+              "texture": "8aebc70a-c6c2-430f-9a1d-703284ab15b9",
+              "frame": 17
+            },
+            {
+              "x": 160,
+              "y": 128,
+              "texture": "8aebc70a-c6c2-430f-9a1d-703284ab15b9",
+              "frame": 17
+            },
+            {
+              "x": 64,
+              "y": 80,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 20
+            },
+            {
+              "x": 32,
+              "y": 80,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 15
+            },
+            {
+              "x": 16,
+              "y": 64,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 0
+            },
+            {
+              "x": 16,
+              "y": 80,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 5
+            },
+            {
+              "x": 16,
+              "y": 96,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 5
+            },
+            {
+              "x": 16,
+              "y": 128,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 5
+            }
+          ],
+          "name": "Tiles at -10 depth"
+        },
+        {
+          "type": "copies",
+          "copies": [
+            {
+              "x": 80,
+              "y": 128,
+              "uid": "9fb2bfc1-32e4-495c-ba21-606b4b27c3d3",
+              "scale": {
+                "x": 1,
+                "y": 1
+              },
+              "rotation": 0,
+              "alpha": 1,
+              "tint": 16777215,
+              "extends": {}
+            }
+          ]
+        },
+        {
+          "type": "tiles",
+          "tiles": [
+            {
+              "x": 32,
+              "y": 160,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 11
+            },
+            {
+              "x": 48,
+              "y": 160,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 11
+            },
+            {
+              "x": 80,
+              "y": 160,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 11
+            },
+            {
+              "x": 64,
+              "y": 160,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 11
+            },
+            {
+              "x": 96,
+              "y": 160,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 11
+            },
+            {
+              "x": 112,
+              "y": 128,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 3
+            },
+            {
+              "x": 128,
+              "y": 128,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 11
+            },
+            {
+              "x": 144,
+              "y": 128,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 11
+            },
+            {
+              "x": 160,
+              "y": 128,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 11
+            },
+            {
+              "x": 128,
+              "y": 80,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 1
+            },
+            {
+              "x": 144,
+              "y": 80,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 1
+            },
+            {
+              "x": 160,
+              "y": 80,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 1
+            },
+            {
+              "x": 128,
+              "y": 96,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 16
+            },
+            {
+              "x": 144,
+              "y": 96,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 16
+            },
+            {
+              "x": 160,
+              "y": 96,
+              "texture": "fa360a4f-6bc4-4a68-9bc3-ea6869046a38",
+              "frame": 16
+            },
+            {
+              "x": 144,
+              "y": 96,
+              "texture": "dedc9c8d-e0ab-4e31-bc9e-d5011ea55952",
+              "frame": 0
+            },
+            {
+              "x": 48,
+              "y": 80,
+              "texture": "5eb884b6-a29f-484c-8e9c-ec9e3f1c5652",
+              "frame": 0
+            },
+            {
+              "x": 80,
+              "y": 80,
+              "texture": "5eb884b6-a29f-484c-8e9c-ec9e3f1c5652",
+              "frame": 0
+            }
+          ],
+          "name": "Tiles at 10 depth"
+        },
+        {
+          "type": "viewport",
+          "x": 160,
+          "y": 120,
+          "width": 320,
+          "height": 240
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "name": "MoveY",
+      "methods": [
+        {
+          "code": "keyboard.KeyW",
+          "multiplier": -1
+        },
+        {
+          "code": "keyboard.ArrowUp",
+          "multiplier": -1
+        },
+        {
+          "code": "keyboard.KeyS"
+        },
+        {
+          "code": "keyboard.ArrowDown"
+        }
+      ]
+    },
+    {
+      "name": "MoveX",
+      "methods": [
+        {
+          "code": "keyboard.KeyA",
+          "multiplier": -1
+        },
+        {
+          "code": "keyboard.ArrowLeft",
+          "multiplier": -1
+        },
+        {
+          "code": "keyboard.KeyD"
+        },
+        {
+          "code": "keyboard.ArrowRight"
+        }
+      ]
+    },
+    {
+      "name": "Attack",
+      "methods": [
+        {
+          "code": "keyboard.ControlLeft"
+        },
+        {
+          "code": "mouse.Left"
+        }
+      ]
+    },
+    {
+      "name": "Strafe",
+      "methods": [
+        {
+          "code": "keyboard.Space"
+        },
+        {
+          "code": "mouse.Middle"
+        }
+      ]
+    }
+  ],
+  "starting": 0,
+  "settings": {
+    "minifyhtmlcss": false,
+    "minifyjs": false,
+    "fps": 30,
+    "version": [
+      0,
+      0,
+      0
+    ],
+    "versionPostfix": "",
+    "export": {
+      "windows64": true,
+      "windows32": true,
+      "linux64": true,
+      "linux32": true,
+      "mac64": true,
+      "debug": false
+    },
+    "pixelatedrender": true
+  },
+  "scripts": [],
+  "fonts": [],
+  "palette": []
+}

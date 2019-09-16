@@ -1,0 +1,185 @@
+room-editor
+    .room-editor-TypeSwatches .aSearchWrap
+        display block
+        flex 1 1 100%
+        margin 0 0 3px
+        input
+            box-sizing border-box
+            width 100%
+            font-size 90%
+            border-radius 0
+    .toolbar
+        display flex
+        flex-direction column
+        padding 0.5em
+        width 17em
+        box-sizing border-box
+        flex 1 1 auto
+        flex-grow 0
+        resize horizontal
+        .settings .fifty
+            padding 0.5rem
+        .palette
+            flex 1 1 auto
+        .settings button
+            margin 0.5em 0
+        .nav
+            border-bottom-right-radius 0
+            border-bottom-left-radius 0
+    .palette
+        position relative
+        .tabwrap
+            position absolute
+            left 0
+            right 0
+            top 0
+            bottom 0
+    .editor
+        display flex
+        position relative
+        flex 1 1 auto
+        .shift
+            position absolute
+            top 0.5rem
+            left 22rem
+        .shift, .center
+            span
+                text-shadow 0 1px 0 white
+        .zoom
+            position absolute
+            top 0.5rem
+            right 17.5rem
+            b
+                text-shadow 0 1px 0 white
+        .grid
+            position absolute
+            bottom 0.5rem
+            right 0.5rem
+        .center
+            position absolute
+            bottom 0.5rem
+            left 0.5rem
+        canvas
+            position absolute
+            left 0
+            right 0
+
+.Layers
+    position absolute
+    right 1rem
+    top 0.5rem
+    padding 1rem
+    width 16rem
+    @extends .panel
+.aLayerList
+    padding-top 1rem
+.aLayer
+    padding 0.25rem 0
+    position relative
+    cursor pointer
+    &.active
+        color act
+    i
+        vertical-align sub
+.aLayerActionBlock
+    visibility hidden
+    opacity 0
+    {trans}
+    position absolute
+    right 0
+    top 0.25rem
+    i
+        padding 0.5rem 0 0.5rem 0.5rem
+        display inline-block
+    background white
+    if (themeDark)
+        background bl
+    box-shadow 0 0 0.5rem @background
+.aLayer:hover .aLayerActionBlock
+    visibility visible
+    opacity 1
+    {transshort}
+
+.aPropertiesPanel
+    @extends .panel
+    position absolute
+    min-width 20rem
+    width 20rem
+    top 0.5rem
+    left 1rem
+    padding 1rem
+    border-radius br
+    resize horizontal
+    .aLayerName
+        padding-bottom 1rem
+        display block
+
+.room-editor-TypeSwatches
+    padding 0 0 0 1px !important
+    display flex
+    flex-flow row wrap
+    align-content start
+    align-items flex-start
+.room-editor-aTypeSwatch
+    list-style none
+    border 1px solid bl
+    flex 1 0 5rem
+    display inline-block
+    box-sizing border-box
+    text-align center
+    margin -1px 0 0 -1px
+    cursor pointer
+    padding 1.75rem 0.4em 0
+    font-size 80%
+    line-height 1.7
+    {trans}
+    position relative
+    z-index 1
+    .icon-move
+        font-size 2.5rem
+        color act
+        line-height 3rem
+        margin-top 0.85rem
+        display block
+        padding-bottom 0.5rem
+    span
+        display block
+        text-overflow ellipsis
+        overflow hidden
+        width auto
+        position absolute
+        left 0.5rem
+        top 0.25rem
+        right 0.5rem
+    &:hover
+        border-color act
+        z-index 10
+        {transshort}
+    &.active
+        border-color accent1
+        z-index 10
+    img
+        height 64px
+        width 64px
+    &.filler
+        height 0
+        visibility hidden
+
+.room-editor-Tiles
+    canvas
+        cursor pointer
+    .act
+        color text
+        cursor pointer
+        display inline-block
+        padding 0.35rem 0
+        line-height 1
+        margin-left 0.5rem
+        {trans}
+        &:hover
+            color act
+            {transshort}
+    .flexfix-footer button
+        margin-bottom 0.25rem
+    select
+        padding 0.25rem

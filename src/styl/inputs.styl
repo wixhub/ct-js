@@ -219,37 +219,46 @@ input[type="reset"],
 
 select, label
     cursor pointer
-.selectbox
-    width 10em
+.aSelect
     position relative
-    li
-        list-style none
-    & > ul
-        position absolute
-        left -1px // why?
-        right -1px
-        top 100%
-        background white
-        color text
-        border 1px solid bd
-        border-radius 0 0 br br
-        border-bottom 0
-        border-top 1px solid act
-    ul
+    .Options
         display none
-        margin 0
-        padding 0
-    &.focus
-        border-bottom-left-radius 0
-        border-bottom-right-radius 0
-        ul
-            display block
-    i
-        transform rotate(90deg) translate(-50%, 0)
         position absolute
-        right 0.5em
-        top 50%
-
+        left 0
+        top 100%
+        margin-top 0.5rem
+        padding 0.5rem 0.5rem 0.5rem 1rem
+        right 0
+        box-sizing border-box
+        background white
+        if (themeDark)
+            background bl
+        border 1px solid bl
+        if (themeDark)
+            border 1px solid bd
+        border-radius br
+    &.opened
+        .Options
+            display block
+    .anOption
+        cursor pointer
+        text-overflow ellipsis
+        {trans}
+        padding 0 0.5rem 0 0
+        i
+            color act
+            vertical-align sub
+        &:hover, &.hover
+            {transshort}
+            border-bottom-color bd
+            color acttext
+            padding 0 0 0 0.5rem
+        &:active, &.active
+            background act
+            border-bottom-color transparent
+            color white
+            i
+                color white
 // выбор файла
 label
     & + &

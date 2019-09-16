@@ -244,7 +244,7 @@ texture-editor.panel.view
             this.loadImg(
                 this.texture.uid,
                 this.texture.source,
-                sessionStorage.projdir + '/img/i' + this.texture.uid + path.extname(this.refs.textureReplacer.value)
+                sessionStorage.projdir + '/img/' + this.texture.uid + path.extname(this.texture.source)
             );
         }
 
@@ -262,6 +262,7 @@ texture-editor.panel.view
                     this.texture.imgWidth = image.width;
                     this.texture.imgHeight = image.height;
                     this.texture.origname = path.basename(dest);
+                    this.texture.source = filename;
                     textureCanvas.img = image;
                     this.texture.lastmod = +(new Date());
                     this.parent.imgGenPreview(dest, dest + '_prev.png', 64, () => {

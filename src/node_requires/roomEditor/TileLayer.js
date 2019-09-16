@@ -1,18 +1,18 @@
-const glob = require('./../glob');
+const Layer = require('./Layer');
+const Tile = require('./Tile');
 
-class TileLayer extends PIXI.Container {
+class TileLayer extends Layer {
     constructor(data) {
-        super();
+        super(data);
 
-        this.depth = data.depth;
         this.tiles = data.tiles;
-        for (const tile of data.tiles) {
-            const textures = glob.pixiFramesMap[tile.texture];
-            const sprite = new PIXI.Sprite(textures[tile.frame]);
-            this.addChild(sprite);
-            sprite.x = tile.x;
-            sprite.y = tile.y;
+        for (const tileData of data.tiles) {
+            this.addTile(tileData);
         }
+    }
+    addTile(data) {
+        const tile = new Tile(data);
+        this.addChild(tile);
     }
 }
 

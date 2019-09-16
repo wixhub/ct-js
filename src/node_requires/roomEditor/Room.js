@@ -1,14 +1,20 @@
 const glob = require('./../glob');
 const {extend, equal} = require('./../objectUtils');
 const Transformer = require('./Transformer');
-const Copy = require('./Copy');
 const Background = require('./Background');
 const TileLayer = require('./TileLayer');
+const CopyLayer = require('./CopyLayer');
 const Viewport = require('./Viewport');
 const everywhere = {
     contains() {
         return true;
     }
+};
+const layerMap = {
+    copies: CopyLayer,
+    tiles: TileLayer,
+    background: Background,
+    viewport: Viewport
 };
 
 const defaultSelectData = {
@@ -43,14 +49,11 @@ class Room extends PIXI.Container {
     constructor(template) {
         super();
         this.template = template;
-        this.copies = [];
-        this.backgrounds = [];
-        this.tileLayers = [];
-        this.viewports = [];
+        this.layers = this.children;
 
         this.interactive = true;
         this.hitArea = everywhere; // set a custom hit area so we can drag the room from anywhere
-                                    // otherwise, a Room will catch clicks on copies and bgs only
+                                   // otherwise, a Room will catch clicks on copies and bgs only
         this.populate();
 
         this.select = extend({}, defaultSelectData);
@@ -65,63 +68,50 @@ class Room extends PIXI.Container {
         this.on('pointerupoutside', this.onUp);
 
         this.loop = () => {
-            for (const bg of this.backgrounds) {
-                bg.onDraw();
+            for (const child of this.children) {
+                if (child.onDraw) {
+                    child.onDraw();
+                }
             }
         };
     }
+    /**
+     * A helper function to add a listener to a specific Ticker
+     * @param {PIXI.Ticker} ticker The ticker to add a listener to.
+     * @returns {void}
+     */
     bindLoop(ticker) {
         ticker.add(this.loop);
     }
-    addCopy(data) {
-        const copy = new Copy(data);
-        this.addChild(copy);
-        this.copies.push(copy);
-    }
-    addBackground(data) {
-        const bg = new Background(data);
-        this.addChild(bg);
-        this.backgrounds.push(bg);
-        //bg.onDraw();
-    }
-    addTileLayer(data) {
-        const layer = new TileLayer(data);
-        this.addChild(layer);
-        this.tileLayers.push(layer);
-    }
-    addViewport(data) {
-        const view = new Viewport(data);
-        this.viewports.push(view);
-        this.addChild(view);
-    }
+    /**
+     * Creates all the needed layers on startup, based on template's layer collection
+     * @returns {void}
+     */
     populate() {
-        for (const copy of this.template.copies) {
-            this.addCopy(copy);
+        for (const layer of this.template.layers) {
+            this.addLayerFromTemplate(layer, true);
         }
-        for (const bg of this.template.backgrounds) {
-            this.addBackground(bg);
+    }
+    /**
+     * Adds a layer of a corresponding type
+     * @param {Object} data The template data of the layer
+     * @param {Boolean} [noTemplateUpdate] If set to true, the function will not add
+     *        the new layer to this.template.layers.
+     * @returns {Layer} The created layer
+     */
+    addLayerFromTemplate(data, noTemplateUpdate) {
+        const layer = new (layerMap[data.type])(data);
+        this.addChild(layer);
+        if (!noTemplateUpdate) {
+            this.template.layers.push(data);
         }
-        for (const layer of this.template.tileLayers) {
-            this.addTileLayer(layer);
-        }
-        this.addViewport({
-            width: this.template.width,
-            height: this.template.height,
-            x: this.template.x,
-            y: this.template.y
-        });
-        this.sort();
+        return layer;
     }
-    sort() {
-        this.children.sort((a, b) =>
-            ((a.depth || 0) - (b.depth || 0)) || 0
-        );
-    }
-    writeToTemplate() {
-        this.template.copies = this.copies.map(copy => copy.serialize());
-        this.template.backgrounds = this.backgrounds.map(bg => bg.serialize());
-        this.template.tiles = this.tileLayers.map(layer => layer.serialize());
-    }
+    /**
+     * Mouse/touch event handler
+     * @param {Object} e Pixi's event object
+     * @returns {void}
+     */
     onDown(e) {
         // start selecting if a left mouse is pressed with no modifiers
         if (e.data.button === 0 && equal(this.editor.state, {
@@ -139,6 +129,11 @@ class Room extends PIXI.Container {
             this.buttonMode = false;
         }
     }
+    /**
+     * Mouse/touch event handler
+     * @param {Object} e Pixi's event object
+     * @returns {void}
+     */
     onMove(e) {
         // Show a different cursor when Space key is pressed
         if (this.editor.state.space) {
@@ -157,6 +152,10 @@ class Room extends PIXI.Container {
             this.interactiveChildren = true;
         }
     }
+    /**
+     * Mouse/touch event handler
+     * @returns {void}
+     */
     onUp() {
         // There was a selection. Let's hide the selection box
         // and create a Transformer.
@@ -177,13 +176,25 @@ class Room extends PIXI.Container {
         }
         this.select.selecting = false;
     }
+    /**
+     * Returns the width of the drawing canvas of the editor, in pixels
+     * @returns {Number} The width of the drawing canvas of the editor
+     */
     getEditorWidth() {
         return this.editor.pixiApp.view.width;
     }
+    /**
+     * Returns the height of the drawing canvas of the editor, in pixels
+     * @returns {Number} The height of the drawing canvas of the editor
+     */
     getEditorHeight() {
         return this.editor.pixiApp.view.height;
     }
 
+    /**
+     * Updates the graphical depiction of the selection box
+     * @returns {void}
+     */
     redrawSelectBox() {
         this.selectBox.clear();
         this.selectBox

@@ -299,18 +299,15 @@
         "makestarting": "Set as the starting room"
     },
     "roombackgrounds": {
-        "add": "Add a Background",
-        "depth": "Depth:",
         "movement": "Movement speed (X, Y):",
         "parallax": "Parallax (X, Y):",
         "repeat": "Repeat:",
         "scale": "Scaling (X, Y):",
-        "shift": "Shift (X, Y):"
+        "shift": "Shift (X, Y):",
+        "changeTexture": "Change Texture"
     },
     "roomtiles": {
         "moveTileLayer": "Move to a new depth",
-        "show": "Show the layer",
-        "hide": "Hide the layer",
         "findTileset": "Find a Tileset"
     },
     "roomview": {
@@ -348,7 +345,30 @@
         "deletetile": "Delete a tile",
         "deletetiles": "Delete tiles",
         "movetilestolayer": "Move to layer",
-        "shifttiles": "Shift tiles"
+        "shifttiles": "Shift tiles",
+
+        "addLayer": "Add new layer",
+        "showLayer": "Show the layer",
+        "hideLayer": "Hide the layer",
+        "dragLayerHint" : "Drag this handle to reorder layers",
+        "removeLayer" : "Delete this layer",
+
+        "layerTypes": {
+            "copies": "Layer of copies",
+            "tiles": "Tile layer",
+            "background": "Background",
+            "camera": "Camera frame"
+        },
+        "newLayerNames": {
+            "copies": "New layer of copies",
+            "tiles": "New tile layer",
+            "background": "New background",
+            "camera": "New frame"
+        },
+        "genericLayerActions": {
+            "delete": "Delete layer",
+            "duplicate": "Duplicate layer"
+        }
     },
     "notepad": {
         "local": "Project's notepad",
