@@ -3,6 +3,7 @@ const glob = require('./../glob');
 class Background extends PIXI.TilingSprite {
     constructor(data) {
         super(glob.pixiFramesMap[data.texture][data.frame || 0] || PIXI.Texture.EMPTY);
+        this.template = data;
         this.depth = data.depth === void 0? -10 : data.depth;
         this.extends = data.extends || {};
         this.frame = data.frame || 0;
@@ -53,6 +54,17 @@ class Background extends PIXI.TilingSprite {
             extends: this.extends,
             frame: this.frame
         };
+    }
+    get visible() {
+        if (this.template) {
+            return !this.template.hidden;
+        }
+        return true;
+    }
+    set visible(val) {
+        if (this.template) {
+            this.template.hidden = !val;
+        }
     }
 }
 

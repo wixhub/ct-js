@@ -226,14 +226,14 @@ class Room extends PIXI.Container {
      * @returns {Number} The width of the drawing canvas of the editor
      */
     getEditorWidth() {
-        return this.editor.pixiApp.view.width;
+        return this.editor.roomEditor.view.width;
     }
     /**
      * Returns the height of the drawing canvas of the editor, in pixels
      * @returns {Number} The height of the drawing canvas of the editor
      */
     getEditorHeight() {
-        return this.editor.pixiApp.view.height;
+        return this.editor.roomEditor.view.height;
     }
 
     /**
