@@ -1,10 +1,14 @@
 const glob = require('./../glob');
 const {extend, equal} = require('./../objectUtils');
 const Transformer = require('./Transformer');
+
 const Background = require('./Background');
+
+const Layer = require('./Layer');
 const TileLayer = require('./TileLayer');
 const CopyLayer = require('./CopyLayer');
 const Viewport = require('./Viewport');
+
 const everywhere = {
     contains() {
         return true;
@@ -49,7 +53,7 @@ class Room extends PIXI.Container {
     constructor(template) {
         super();
         this.template = template;
-        this.layers = this.children;
+        this.layers = [];
 
         this.interactive = true;
         this.hitArea = everywhere; // set a custom hit area so we can drag the room from anywhere
@@ -97,15 +101,56 @@ class Room extends PIXI.Container {
      * @param {Object} data The template data of the layer
      * @param {Boolean} [noTemplateUpdate] If set to true, the function will not add
      *        the new layer to this.template.layers.
+     * @param {Number} [customPos] If set, the new layer will be inserted to a given
+     *        position (starting from the most bottom layer at 0)
      * @returns {Layer} The created layer
      */
-    addLayerFromTemplate(data, noTemplateUpdate) {
+    addLayerFromTemplate(data, noTemplateUpdate, customPos) {
         const layer = new (layerMap[data.type])(data);
+        if (customPos) {
+            this.addChildAt(layer, customPos);
+            this.layers.splice(customPos, 0, layer);
+        } else {
         this.addChild(layer);
+            this.layers.push(layer);
+        }
         if (!noTemplateUpdate) {
+            if (customPos) {
+                this.template.layers.splice(customPos, 0, data);
+            } else {
             this.template.layers.push(data);
         }
+            console.log(this.template.layers);
+        }
         return layer;
+    }
+
+    /**
+     * Gets a currently active Layer, according to that one that is set in a room-editor.tag
+     * Their arrays of layers are expected to be parallel
+     * @returns {Layer} The currently active layer.
+     */
+    get currentLayer() {
+        return this.layers[this.template.layers.indexOf(this.editor.activeLayer)];
+    }
+    /**
+     * Removes a given layer
+     * @param {Object} layer The layer to remove (a source template data)
+     * @returns {void}
+     */
+    removeLayer(layer) {
+        const ind = this.template.layers.indexOf(layer);
+        this.removeLayerAt(ind);
+    }
+    /**
+     * Removes a layer at a given index
+     * @param {Number} ind The position of a layer to delete, starting with 0
+     * @returns {void}
+     */
+    removeLayerAt(ind) {
+        const [layer] = this.layers.splice(ind, 1);
+        this.removeChild(layer);
+        this.template.layers.splice(ind, 1);
     }
     /**
      * Mouse/touch event handler

@@ -25,7 +25,7 @@ room-editor.panel.view
                 b {voc.name}
                 input(type="text" onchange="{wire('this.activeLayer.name')}")
             room-background-editor(if="{activeLayer.type === 'background'}" layer="{activeLayer}")
-        room-generic-actions.flexfix-footer(layer="{activeLayer}" layers="{room.layers}")
+        room-generic-actions.flexfix-footer(layer="{activeLayer}" layers="{room.layers}" room="{pixiRoom}")
     .Layers
         .aSelect(class="{opened: addingLayer}")
             button.wide(onmousedown="{toggleLayerDropdown}")
@@ -46,7 +46,11 @@ room-editor.panel.view
                     i.icon-maximize
                     span   {voc.layerTypes.camera}
         .aLayerList
-            .aLayer(each="{layer in room.layers}" class="{active: activeLayer === layer}")
+            .aLayer(
+                each="{layer in room.layers}"
+                class="{active: activeLayer === layer}"
+                onclick="{selectLayer}"
+            )
                 i(class="icon-{layerIconMap[layer.type]}")
                 span   {layer.name}
                 .aLayerActionBlock
@@ -102,6 +106,7 @@ room-editor.panel.view
                 copies: []
             };
             this.roomEditor.room.addLayerFromTemplate(layer);
+            this.activeLayer = layer;
             this.addingLayer = false;
         };
         this.addTileLayer = e => {
@@ -111,6 +116,7 @@ room-editor.panel.view
                 tiles: []
             };
             this.roomEditor.room.addLayerFromTemplate(layer);
+            this.activeLayer = layer;
             this.addingLayer = false;
         };
         this.addBackgroundLayer = e => {
@@ -121,6 +127,7 @@ room-editor.panel.view
                 extends: {}
             };
             this.roomEditor.room.addLayerFromTemplate(layer);
+            this.activeLayer = layer;
             this.addingLayer = false;
         };
         this.addCameraFrame = e => {
@@ -133,8 +140,31 @@ room-editor.panel.view
                 y: this.roomEditor.y
             };
             this.roomEditor.room.addLayerFromTemplate(layer);
+            this.activeLayer = layer;
             this.addingLayer = false;
         };
+
+        /* UI Layer controls */
+        this.selectLayer = e => {
+            e.stopPropagation();
+            const layer = e.item.layer;
+            this.activeLayer = layer;
+        }
+        this.toggleLayer = e => {
+            e.stopPropagation();
+            const layer = e.item.layer;
+            layer.hidden = !layer.hidden;
+        }
+        this.removeLayer = e => {
+            e.stopPropagation();
+            const layer = e.item.layer;
+            const ind = this.room.layers.indexOf(layer);
+            if (ind !== -1) {
+                this.pixiRoom.removeLayerAt(ind);
+            } else {
+                throw new Error('Tried to remove a non-existing layer');
+            }
+        }
 
         this.on('update', () => {
             if (window.currentProject.rooms.find(room =>
@@ -191,6 +221,10 @@ room-editor.panel.view
                 resizeTo: this.refs.canvaswrap
             }, this);
             this.pixiRoom = this.roomEditor.room;
+
+            console.debug('The editor is ', this.roomEditor);
+            console.debug('The room is ', this.pixiRoom);
+            console.debug('The template is ', this.room);
         });
         this.openRoomEvents = e => {
             this.editingCode = true;
