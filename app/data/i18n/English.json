@@ -310,6 +310,11 @@
         "moveTileLayer": "Move to a new depth",
         "findTileset": "Find a Tileset"
     },
+    "roomviews": {
+        "width": "View width:",
+        "height": "View height:",
+        "setAsDefault": "Set as default"
+    },
     "roomview": {
         "name": "Name:",
         "width": "View width:",

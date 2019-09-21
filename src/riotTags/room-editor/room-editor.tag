@@ -25,6 +25,7 @@ room-editor.panel.view
                 b {voc.name}
                 input(type="text" onchange="{wire('this.activeLayer.name')}")
             room-background-editor(if="{activeLayer.type === 'background'}" layer="{activeLayer}")
+            room-viewport-editor(if="{activeLayer.type === 'viewport'}" layer="{activeLayer}" room="{pixiRoom}")
         room-generic-actions.flexfix-footer(layer="{activeLayer}" layers="{room.layers}" room="{pixiRoom}")
     .Layers
         .aSelect(class="{opened: addingLayer}")

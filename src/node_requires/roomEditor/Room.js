@@ -25,24 +25,37 @@ const defaultSelectData = {
     selecting: false
 };
 
-const getCopySelection = function (copies, rect) {
+/**
+ * Takes a Layer and a PIXI.Rectangle
+ * and returns all the items that are contained inside the given rectangle
+ * @param {Layer} layer A layer with items
+ * @param {PIXI.Rectangle} rect A rectangular selection
+ * @returns {Array<Copy|Tile>} The selected items
+ */
+const getSelection = function (layer, rect) {
     const selection = [];
-    for (const copy of copies) {
-        // the texture object of a copy;
-        const {g} = glob.texturemap[window.currentProject.types[glob.typemap[copy.uid]].texture];
-        const x1 = copy.x - g.axis[0] * (copy.tx || 1),
-                x2 = copy.x - (g.axis[0] - g.width) * (copy.tx || 1),
-                y1 = copy.y - g.axis[1] * (copy.ty || 1),
-                y2 = copy.y - (g.axis[1] - g.height) * (copy.ty || 1),
-                xcmin = Math.min(x1, x2), // sort values so negatively scaled copies count as well
-                ycmin = Math.min(y1, y2),
-                xcmax = Math.max(x1, x2),
-                ycmax = Math.max(y1, y2);
-        if (xcmin > rect.x1 && xcmax < rect.x2 && // inclusion into a rect
-            ycmin > rect.y1 && ycmax < rect.y2) {
-            const ind = this.selectedCopies.indexOf(copy);
+    let items;
+    if (layer instanceof CopyLayer) {
+        items = layer.copies;
+    } else if (layer instanceof TileLayer) {
+        items = layer.tiles;
+    } else {
+        // BGs are not instances of Layer, so they require a separate check
+        if (layer instanceof Background) {
+            return selection; // it will be an empty array
+        }
+        if (!(layer instanceof Layer)) {
+            throw new Error('getSelection requires a layer to be given');
+        }
+        // Other Layer instances that do not support selection
+        return selection; // it will be an empty array
+    }
+    for (const item of items) {
+        const bbox = item.getBounds();
+        if (rect.contains(bbox.left, bbox.top) && rect.contains(bbox.right, bbox.bottom)) {
+            const ind = selection.indexOf(item);
             if (ind === -1) {
-                this.selectedCopies.push(copy);
+                selection.push(item);
             }
         }
     }
@@ -111,16 +124,15 @@ class Room extends PIXI.Container {
             this.addChildAt(layer, customPos);
             this.layers.splice(customPos, 0, layer);
         } else {
-        this.addChild(layer);
+            this.addChild(layer);
             this.layers.push(layer);
         }
         if (!noTemplateUpdate) {
             if (customPos) {
                 this.template.layers.splice(customPos, 0, data);
             } else {
-            this.template.layers.push(data);
-        }
-            console.log(this.template.layers);
+                this.template.layers.push(data);
+            }
         }
         return layer;
     }
@@ -132,6 +144,15 @@ class Room extends PIXI.Container {
      */
     get currentLayer() {
         return this.layers[this.template.layers.indexOf(this.editor.activeLayer)];
+    }
+    /**
+     * Gets a Layer instance that corresponds to a given template
+     * Their arrays of layers are expected to be parallel
+     * @param {Object} template The template to match to
+     * @returns {Layer} The corresponds layer
+     */
+    templateToLayer(template) {
+        return this.layers[this.template.layers.indexOf(template)];
     }
     /**
      * Removes a given layer
@@ -204,15 +225,14 @@ class Room extends PIXI.Container {
     onUp() {
         // There was a selection. Let's hide the selection box
         // and create a Transformer.
-        const rect = {
-            x1: Math.min(this.select.fromX, this.select.toX),
-            y1: Math.min(this.select.fromY, this.select.toY),
-            x2: Math.max(this.select.fromX, this.select.toX),
-            y2: Math.max(this.select.fromY, this.select.toY)
-        };
+        const x1 = Math.min(this.select.fromX, this.select.toX),
+              y1 = Math.min(this.select.fromY, this.select.toY),
+              x2 = Math.max(this.select.fromX, this.select.toX),
+              y2 = Math.max(this.select.fromY, this.select.toY);
+        const rect = new PIXI.Rectangle(x1, y1, x2-x1, y2-y1);
         if (this.select.selecting) {
             this.selectBox.clear();
-            const selection = getCopySelection(this.copies, rect);
+            const selection = getSelection(this.currentLayer, rect);
             if (selection && selection.length) {
                 const transformer = new Transformer(selection);
                 this.addChild(transformer);
@@ -248,6 +268,22 @@ class Room extends PIXI.Container {
         this.selectBox
         .lineStyle(1, 0xffffff)
         .drawRect(this.select.fromX - 0.5, this.select.fromY - 0.5, this.select.toX - this.select.fromX + 1, this.select.toY - this.select.fromY + 1);
+    }
+
+    /**
+     * Sets a default viewport for the current room
+     * @param {Viewport|Object} view The new default viewport
+     * @returns {void}
+     */
+    setDefaultViewport(view) {
+        for (const layer of this.layers) {
+            if (layer instanceof Viewport) {
+                layer.setDefault(
+                    layer === view ||
+                    layer === this.layers[this.template.layers.indexOf(view)]
+                );
+            }
+        }
     }
 }
 
