@@ -81,7 +81,8 @@ window.migrationProcess = window.migrationProcess || [];
                     y: room.height / 2,
                     name: i18n.languageJSON.roomview.layerTypes.camera,
                     width: room.width,
-                    height: room.height
+                    height: room.height,
+                    default: true
                 }];
                 room.layers.sort((a, b) => a.depth - b.depth);
                 delete room.tiles;
