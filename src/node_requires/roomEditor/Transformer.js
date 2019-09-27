@@ -25,6 +25,7 @@ class Transformer extends PIXI.Container {
             t.copyFrom(item.localTransform);
             return t;
         });
+        this.applyingTransform = new PIXI.Transform();
         this.outline = new PIXI.Graphics();
         this.rotHandle = new TransformHandle('grab');
         this.moveHandle = new TransformHandle('move');
@@ -59,28 +60,74 @@ class Transformer extends PIXI.Container {
         this.x = bbox.x + bbox.width / 2;
         this.y = bbox.y + bbox.height / 2;
 
+        const hw = bbox.width / 2; // half-width, half height
+        const hh = bbox.height / 2;
+        this.applyingTransform.updateLocalTransform();
+        const t = this.applyingTransform.localTransform;
+
+        const tl = t.apply({
+            x: -hw,
+            y: -hh
+        });
+        const tr = t.apply({
+            x: hw,
+            y: -hh
+        });
+        const br = t.apply({
+            x: hw,
+            y: hh
+        });
+        const bl = t.apply({
+            x: -hw,
+            y: hh
+        });
         this.outline.clear();
         this.outline
         .lineStyle(3, 0x446adb)
-        .drawRoundedRect(-bbox.width / 2 - 0.5, -bbox.height / 2 - 0.5, bbox.width + 1, bbox.height + 1, 0.1);
+        .moveTo(tl.x, tl.y)
+        .lineTo(tr.x, tr.y)
+        .lineTo(br.x, br.y)
+        .lineTo(bl.x, bl.y)
+        .lineTo(tl.x, tl.y)
+        .closePath();
         this.outline
         .lineStyle(1, 0xffffff)
-        .drawRoundedRect(-bbox.width / 2 - 0.5, -bbox.height / 2 - 0.5, bbox.width + 1, bbox.height + 1, 0.1);
+        .moveTo(tl.x, tl.y)
+        .lineTo(tr.x, tr.y)
+        .lineTo(br.x, br.y)
+        .lineTo(bl.x, bl.y)
+        .lineTo(tl.x, tl.y)
+        .closePath();
 
-        this.moveHandle.x = this.scaleYHandle.x = 0;
-        this.moveHandle.y = this.scaleXHandle.y = this.rotHandle.y = 0;
-        this.scaleXYHandle.x = this.scaleXHandle.x = bbox.width / 2;
-        this.scaleXYHandle.y = this.scaleYHandle.y = bbox.height / 2;
-        this.rotHandle.x = bbox.width / 2 + 32;
+        // Position the handles relative to the target transform matrix
+        this.moveHandle.x = this.moveHandle.y = 0;
+        t.apply({
+            x: hw,
+            y: hh
+        }, this.scaleXYHandle.position);
+        t.apply({
+            x: hw,
+            y: 0
+        }, this.scaleXHandle.position);
+        t.apply({
+            x: 0,
+            y: hh
+        }, this.scaleYHandle.position);
+        t.apply({
+            x: hw + 32,
+            y: 0
+        }, this.rotHandle.position);
 
         this.selectionBounds = bbox;
     }
+
     deleteSelf() {
         this.parent.removeChild(this);
     }
     captureMouseDown(e) {
-        this.previousLocalTransform = this.localTransform.clone();
-        this.previousRotation = this.rotation;
+        this.previousTransformL = this.applyingTransform.localTransform.clone();
+        this.selfPreviousGlobalTransform = this.worldTransform.clone();
+        this.previousRotation = this.applyingTransform.rotation;
         this.drag = {
             fromX: e.data.global.x,
             fromY: e.data.global.y,
@@ -95,19 +142,37 @@ class Transformer extends PIXI.Container {
         }
         this.drag.toX = e.data.global.x;
         this.drag.toY = e.data.global.y;
+        const globPos = this.getGlobalPosition();
+        const hw = this.selectionBounds.width / 2; // half-width, half height
+        const hh = this.selectionBounds.height / 2;
+        const t = this.applyingTransform;
 
         if (this.drag.target === this.rotHandle) {
-            const globPos = this.getGlobalPosition();
             const from = trigo.pdnRad(globPos.x, globPos.y, this.drag.fromX, this.drag.fromY),
                   to = trigo.pdnRad(globPos.x, globPos.y, this.drag.toX, this.drag.toY);
             let delta = trigo.deltaDirRad(from, to);
             if (this.state.shift) {
                 delta = trigo.degToRad(Math.round(trigo.radToDeg(delta) / 15) * 15);
             }
-            this.rotation = this.previousRotation + delta;
+            t.rotation = this.previousRotation + delta;
+        } else if (this.drag.target === this.scaleXHandle) {
+            const fromDist = this.drag.fromX - this.selfPreviousGlobalTransform.tx; // k === 1;
+            const toDist = this.drag.toX - this.selfPreviousGlobalTransform.tx;
+
+            let k = toDist / fromDist;
+            if (!this.state.alt) {
+                k = (k - 1) / 2 + 1;
+                t.position.x = this.previousTransformL.tx + Math.cos(t.rotation) * hw * ((k-1)* 2 - 1);
+                t.position.y = this.previousTransformL.ty + Math.sin(t.rotation) * hh * ((k-1)* 2 - 1);
+            } else {
+                t.position.x = this.previousTransformL.tx;
+                t.position.y = this.previousTransformL.ty;
+            }
+            t.scale.x = this.previousTransformL.a * k;
         }
+        this.realign();
     }
-    stopDragging(e) {
+    stopDragging() {
         this.drag = false;
     }
 }
