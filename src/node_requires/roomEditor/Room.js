@@ -1,4 +1,3 @@
-const glob = require('./../glob');
 const {extend, equal} = require('./../objectUtils');
 const Transformer = require('./Transformer');
 
@@ -28,38 +27,36 @@ const defaultSelectData = {
 /**
  * Takes a Layer and a PIXI.Rectangle
  * and returns all the items that are contained inside the given rectangle
- * @param {Layer} layer A layer with items
+ * @param {Layer|Background} layer A layer with items
  * @param {PIXI.Rectangle} rect A rectangular selection
  * @returns {Array<Copy|Tile>} The selected items
  */
 const getSelection = function (layer, rect) {
     const selection = [];
-    let items;
-    if (layer instanceof CopyLayer) {
-        items = layer.copies;
-    } else if (layer instanceof TileLayer) {
-        items = layer.tiles;
-    } else {
-        // BGs are not instances of Layer, so they require a separate check
-        if (layer instanceof Background) {
+    if (layer instanceof Layer) {
+        const items = layer.children;
+        if (!items) {
             return selection; // it will be an empty array
         }
-        if (!(layer instanceof Layer)) {
-            throw new Error('getSelection requires a layer to be given');
-        }
-        // Other Layer instances that do not support selection
-        return selection; // it will be an empty array
-    }
-    for (const item of items) {
-        const bbox = item.getBounds();
-        if (rect.contains(bbox.left, bbox.top) && rect.contains(bbox.right, bbox.bottom)) {
-            const ind = selection.indexOf(item);
-            if (ind === -1) {
-                selection.push(item);
+        for (const item of items) {
+            const bbox = item.getLocalBounds();
+            bbox.x += item.x;
+            bbox.y += item.y;
+            if (rect.contains(bbox.left, bbox.top) && rect.contains(bbox.right, bbox.bottom)) {
+                const ind = selection.indexOf(item);
+                if (ind === -1) {
+                    selection.push(item);
+                }
             }
         }
+        return selection;
+        // Other Layer instances that do not support selection
     }
-    return selection;
+    // BGs are not instances of Layer, so they require a separate check
+    if (layer instanceof Background) {
+        return selection; // it will be an empty array
+    }
+    throw new Error('getSelection requires a layer to be given');
 };
 
 class Room extends PIXI.Container {
@@ -236,6 +233,7 @@ class Room extends PIXI.Container {
             if (selection && selection.length) {
                 const transformer = new Transformer(selection);
                 this.addChild(transformer);
+                transformer.state = this.editor.state;
                 this.activeTransformer = transformer;
             }
         }
@@ -261,13 +259,15 @@ class Room extends PIXI.Container {
      * @returns {void}
      */
     redrawSelectBox() {
+        const x = Math.min(this.select.fromX, this.select.toX) - 0.5,
+              y = Math.min(this.select.fromY, this.select.toY) - 0.5;
         this.selectBox.clear();
         this.selectBox
         .lineStyle(3, 0x446adb)
-        .drawRect(this.select.fromX - 0.5, this.select.fromY - 0.5, this.select.toX - this.select.fromX + 1, this.select.toY - this.select.fromY + 1);
+        .drawRoundedRect(x, y, Math.abs(this.select.toX - this.select.fromX) + 1, Math.abs(this.select.toY - this.select.fromY + 1), 0.1);
         this.selectBox
         .lineStyle(1, 0xffffff)
-        .drawRect(this.select.fromX - 0.5, this.select.fromY - 0.5, this.select.toX - this.select.fromX + 1, this.select.toY - this.select.fromY + 1);
+        .drawRoundedRect(x, y, Math.abs(this.select.toX - this.select.fromX) + 1, Math.abs(this.select.toY - this.select.fromY + 1), 0.1);
     }
 
     /**

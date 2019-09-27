@@ -11,7 +11,6 @@ class Viewport extends Layer {
         this.template = data;
         this.graphic = new PIXI.Graphics();
         this.depth = Infinity;
-        this.redrawFrame();
         this.addChild(this.graphic);
         this.startingIcon = new PIXI.Graphics();
         this.startingIcon
@@ -25,6 +24,7 @@ class Viewport extends Layer {
         this.startingIcon.x = this.displayWidth - 16 - 17;
         this.startingIcon.visible = this.template.default;
         this.addChild(this.startingIcon);
+        this.redrawFrame();
     }
     redrawFrame() {
         this.graphic.clear();

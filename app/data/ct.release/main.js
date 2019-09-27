@@ -179,7 +179,7 @@ ct.u = {
         }, time));
     }
 };
-ct.u.ext(ct.u, { // make aliases
+ct.u.ext(ct.u, {// make aliases
     lengthDirX: ct.u.ldx,
     lengthDirY: ct.u.ldy,
     pointDirection: ct.u.pdn,
