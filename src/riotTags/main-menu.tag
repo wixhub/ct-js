@@ -315,6 +315,66 @@ main-menu.flexcol
         };
         localStorage.UItheme = localStorage.UItheme || 'Day';
 
+        var fontSubmenu = new nw.Menu();
+        fontSubmenu.append(new gui.MenuItem({
+            label: window.languageJSON.menu.codeFontDefault,
+            click: () => {
+                localStorage.fontFamily = '';
+                window.signals.trigger('codeFontUpdated');
+            }
+        }));
+        fontSubmenu.append(new gui.MenuItem({
+            label: window.languageJSON.menu.codeFontOldSchool,
+            click: () => {
+                localStorage.fontFamily = 'Monaco, Menlo, "Ubuntu Mono", Consolas, source-code-pro, monospace';
+                window.signals.trigger('codeFontUpdated');
+            }
+        }));
+        fontSubmenu.append(new gui.MenuItem({
+            label: window.languageJSON.menu.codeFontSystem,
+            click: () => {
+                localStorage.fontFamily = 'monospace';
+                window.signals.trigger('codeFontUpdated');
+            }
+        }));
+        fontSubmenu.append(new gui.MenuItem({
+            label: window.languageJSON.menu.codeFontCustom,
+            click: () => {
+                alertify
+                .defaultValue(localStorage.fontFamily || '')
+                .prompt(window.languageJSON.menu.newFont)
+                .then(e => {
+                    if (e.inputValue && e.buttonClicked !== 'cancel') {
+                        localStorage.fontFamily = `"${e.inputValue}", monospace`;
+                    }
+                    window.signals.trigger('codeFontUpdated');
+                });
+            }
+        }));
+        fontSubmenu.append(new gui.MenuItem({type: 'separator'}));
+        fontSubmenu.append(new gui.MenuItem({
+            label: window.languageJSON.menu.codeLigatures,
+            type: 'checkbox',
+            checked: localStorage.codeLigatures !== 'off',
+            click: () => {
+                localStorage.codeLigatures = localStorage.codeLigatures === 'off'? 'on' : 'off';
+                window.signals.trigger('codeFontUpdated');
+            }
+        }));
+        fontSubmenu.append(new gui.MenuItem({
+            label: window.languageJSON.menu.codeDense,
+            type: 'checkbox',
+            checked: localStorage.codeDense === 'on',
+            click: () => {
+                localStorage.codeDense = localStorage.codeDense === 'off'? 'on' : 'off';
+                window.signals.trigger('codeFontUpdated');
+            }
+        }));
+
+        catMenu.append(new gui.MenuItem({
+            label: window.languageJSON.menu.codeFont,
+            submenu: fontSubmenu
+        }));
 
         catMenu.append(new gui.MenuItem({type: 'separator'}));
 
@@ -337,6 +397,7 @@ main-menu.flexcol
                 this.update();
             }
         }));
+
         catMenu.append(new gui.MenuItem({
             label: window.languageJSON.common.donate,
             click: function () {
@@ -375,7 +436,13 @@ main-menu.flexcol
         fs.readdir('./data/i18n/')
         .then(files => {
             files.forEach(filename => {
+                if (path.extname(filename) !== '.json') {
+                    return;
+                }
                 var file = filename.slice(0, -5);
+                if (file === 'Comments') {
+                    return;
+                }
                 languageSubmenu.append(new nw.MenuItem({
                     label: file,
                     click: function() {
@@ -389,7 +456,7 @@ main-menu.flexcol
             languageSubmenu.append(new nw.MenuItem({
                 label: window.languageJSON.common.translateToYourLanguage,
                 click: function() {
-                    gui.Shell.openExternal('https://translate.zanata.org/iteration/view/ct-js/v1/documents?docId=English.json&dswid=8629');
+                    gui.Shell.openExternal('https://github.com/ct-js/ct-js/tree/develop/app/data/i18n');
                 }
             }));
         })
