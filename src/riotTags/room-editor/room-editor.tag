@@ -23,7 +23,7 @@ room-editor.panel.view
         .flexfix-body
             label.aLayerName
                 b {voc.name}
-                input(type="text" onchange="{wire('this.activeLayer.name')}")
+                input.wide(type="text" value="{activeLayer.name}" onchange="{wire('this.activeLayer.name')}")
             room-background-editor(if="{activeLayer.type === 'background'}" layer="{activeLayer}")
             room-viewport-editor(if="{activeLayer.type === 'viewport'}" layer="{activeLayer}" room="{pixiRoom}")
         room-generic-actions.flexfix-footer(layer="{activeLayer}" layers="{room.layers}" room="{pixiRoom}")
@@ -51,6 +51,7 @@ room-editor.panel.view
                 each="{layer in room.layers}"
                 class="{active: activeLayer === layer}"
                 onclick="{selectLayer}"
+                ondblclick="{focusLayer}"
             )
                 i(class="icon-{layerIconMap[layer.type]}")
                 span   {layer.name}
@@ -150,12 +151,40 @@ room-editor.panel.view
             e.stopPropagation();
             const layer = e.item.layer;
             this.activeLayer = layer;
-        }
+        };
+        this.focusLayer = e => {
+            const layer = e.item.layer;
+            const bbox = this.pixiRoom.templateToLayer(layer).getBoundingBox();
+            console.log(bbox, this.pixiRoom.getEditorWidth(), this.pixiRoom.getEditorHeight());
+            if (bbox && bbox.width && bbox.height) {
+                const k = Math.max(
+                    bbox.width / this.pixiRoom.getEditorWidth(),
+                    bbox.height / this.pixiRoom.getEditorHeight()
+                ) * window.devicePixelRatio * 1.1; // 1.1 for little padding
+                Ease.ease.add(this.roomEditor.camera, {
+                    x: bbox.x + bbox.width / 2,
+                    y: bbox.y + bbox.height / 2,
+                }, {
+                    duration: animDuration
+                });
+                Ease.ease.add(this.roomEditor.camera.scale, {
+                    x: k,
+                    y: k
+                }, {
+                    duration: animDuration
+                });
+                Ease.ease.add(this, {
+                    zoomFactor: 1/k
+                }, {
+                    duration: animDuration
+                }).on('complete', () => this.update());
+            }
+        };
         this.toggleLayer = e => {
             e.stopPropagation();
             const layer = e.item.layer;
             layer.hidden = !layer.hidden;
-        }
+        };
         this.removeLayer = e => {
             e.stopPropagation();
             const layer = e.item.layer;
@@ -165,7 +194,7 @@ room-editor.panel.view
             } else {
                 throw new Error('Tried to remove a non-existing layer');
             }
-        }
+        };
 
         this.on('update', () => {
             if (window.currentProject.rooms.find(room =>
@@ -245,7 +274,7 @@ room-editor.panel.view
             this.updateCameraZoom();
         };
         this.roomToCenter = e => {
-            Ease.ease.add(this.roomEditor, {
+            Ease.ease.add(this.roomEditor.camera, {
                 x: 0,
                 y: 0
             }, {
@@ -296,34 +325,38 @@ room-editor.panel.view
             this.currentType = -1;
         };
 
-        /** При прокрутке колёсиком меняем фактор зума */
+        /** Changes the camera's zoom on mouse wheel roll */
         this.onCanvasWheel = e => {
             const oldZoomFactor = this.zoomFactor;
-            if (e.wheelDelta > 0) {
+            if (e.wheelDelta < 0) {
                 // in
-                if (this.zoomFactor === 2) {
+                if (this.zoomFactor > 4) {
                     this.zoomFactor = 4;
-                } else if (this.zoomFactor === 1) {
+                } else if (this.zoomFactor > 2) {
                     this.zoomFactor = 2;
-                } else if (this.zoomFactor === 0.5) {
+                } else if (this.zoomFactor > 1) {
                     this.zoomFactor = 1;
-                } else if (this.zoomFactor === 0.25) {
+                } else if (this.zoomFactor > 0.5) {
                     this.zoomFactor = 0.5;
-                } else if (this.zoomFactor === 0.125) {
+                } else if (this.zoomFactor > 0.25) {
                     this.zoomFactor = 0.25;
+                } else {
+                    this.zoomFactor = 0.125;
                 }
             } else {
                 // out
-                if (this.zoomFactor === 4) {
-                    this.zoomFactor = 2;
-                } else if (this.zoomFactor === 2) {
-                    this.zoomFactor = 1;
-                } else if (this.zoomFactor === 1) {
-                    this.zoomFactor = 0.5;
-                } else if (this.zoomFactor === 0.5) {
-                    this.zoomFactor = 0.25;
-                } else if (this.zoomFactor === 0.25) {
+                if (this.zoomFactor < 0.125) {
                     this.zoomFactor = 0.125;
+                } else if (this.zoomFactor < 0.25) {
+                    this.zoomFactor = 0.25;
+                } else if (this.zoomFactor < 0.5) {
+                    this.zoomFactor = 0.5;
+                } else if (this.zoomFactor < 1) {
+                    this.zoomFactor = 1;
+                } else if (this.zoomFactor < 2) {
+                    this.zoomFactor = 2;
+                } else {
+                    this.zoomFactor = 4;
                 }
             }
             if (oldZoomFactor !== this.zoomFactor) {
@@ -332,7 +365,7 @@ room-editor.panel.view
                     x: e.offsetX,
                     y: e.offsetY
                 });
-                k = 1/this.zoomFactor / this.roomEditor.camera.scale.x;
+                const k = 1/this.zoomFactor / this.roomEditor.camera.scale.x;
                 Ease.ease.add(this.roomEditor.camera, {
                     x: this.roomEditor.camera.x*k + local.x*(1-k),
                     y: this.roomEditor.camera.y*k + local.y*(1-k)

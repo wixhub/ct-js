@@ -65,6 +65,10 @@ class Transformer extends PIXI.Container {
         this.applyingTransform.updateLocalTransform();
         const t = this.applyingTransform.localTransform;
 
+        const c = t.apply({
+            x: 0,
+            y: 0
+        });
         const tl = t.apply({
             x: -hw,
             y: -hh
@@ -100,7 +104,8 @@ class Transformer extends PIXI.Container {
         .closePath();
 
         // Position the handles relative to the target transform matrix
-        this.moveHandle.x = this.moveHandle.y = 0;
+        this.moveHandle.x = c.x;
+        this.moveHandle.y = c.y;
         t.apply({
             x: hw,
             y: hh
@@ -125,7 +130,9 @@ class Transformer extends PIXI.Container {
         this.parent.removeChild(this);
     }
     captureMouseDown(e) {
+        // Previous local transform that will be applied to entities
         this.previousTransformL = this.applyingTransform.localTransform.clone();
+
         this.selfPreviousGlobalTransform = this.worldTransform.clone();
         this.previousRotation = this.applyingTransform.rotation;
         this.drag = {
@@ -151,6 +158,7 @@ class Transformer extends PIXI.Container {
             const from = trigo.pdnRad(globPos.x, globPos.y, this.drag.fromX, this.drag.fromY),
                   to = trigo.pdnRad(globPos.x, globPos.y, this.drag.toX, this.drag.toY);
             let delta = trigo.deltaDirRad(from, to);
+            // Snap rotation to 15° when shift is pressed
             if (this.state.shift) {
                 delta = trigo.degToRad(Math.round(trigo.radToDeg(delta) / 15) * 15);
             }
@@ -160,10 +168,13 @@ class Transformer extends PIXI.Container {
             const toDist = this.drag.toX - this.selfPreviousGlobalTransform.tx;
 
             let k = toDist / fromDist;
+            if (this.state.shift) {
+                k = Math.round(k / 0.1) * 0.1;
+            }
             if (!this.state.alt) {
                 k = (k - 1) / 2 + 1;
-                t.position.x = this.previousTransformL.tx + Math.cos(t.rotation) * hw * ((k-1)* 2 - 1);
-                t.position.y = this.previousTransformL.ty + Math.sin(t.rotation) * hh * ((k-1)* 2 - 1);
+                t.position.x = this.previousTransformL.tx + Math.cos(t.rotation) * hw * (k - 1);
+                t.position.y = this.previousTransformL.ty + Math.sin(t.rotation) * hh * (k - 1);
             } else {
                 t.position.x = this.previousTransformL.tx;
                 t.position.y = this.previousTransformL.ty;

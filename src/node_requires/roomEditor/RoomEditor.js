@@ -45,6 +45,7 @@ class RoomEditor extends PIXI.Application {
     constructor(opts, editor) {
         const data = extend(extend({}, roomEditorDefaults), opts);
         super(data);
+        PIXI.settings.MIPMAP_TEXTURES = PIXI.MIPMAP_MODES.ON;
 
         this.room = new Room(editor.room);
         this.room.bindLoop(this.ticker);

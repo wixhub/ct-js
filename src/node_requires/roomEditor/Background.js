@@ -9,6 +9,7 @@ class Background extends PIXI.TilingSprite {
         this.frame = data.frame || 0;
         this.tex = data.texture;
         this.simulatedX = this.simulatedY = 0;
+        this.getBoundingBox = Background.getBoundingBox;
     }
     onDraw() {
         this.simulatedX += (this.extends.movementX || 0) * PIXI.Ticker.shared.deltaTime;
@@ -65,6 +66,9 @@ class Background extends PIXI.TilingSprite {
         if (this.template) {
             this.template.hidden = !val;
         }
+    }
+    static getBoundingBox() {
+        return null;
     }
 }
 

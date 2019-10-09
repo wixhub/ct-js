@@ -1,8 +1,8 @@
 room-viewport-editor
     b {voc.width}
-    input(type="number" value="{opts.layer.width}" onchange="{setWidth}")
+    input.wide(type="number" value="{opts.layer.width}" onchange="{setWidth}")
     b {voc.height}
-    input(type="number" value="{opts.layer.height}" onchange="{setHeight}")
+    input.wide(type="number" value="{opts.layer.height}" onchange="{setHeight}")
     button.wide(onclick="{setAsDefault}")
         i.icon-play
         |   {voc.setAsDefault}

@@ -298,6 +298,7 @@
     },
     "roombackgrounds": {
         "add": "Add a Background",
+        "changeTexture": "Change texture",
         "depth": "Depth:",
         "movement": "Movement speed (X, Y):",
         "parallax": "Parallax (X, Y):",
@@ -310,6 +311,11 @@
         "show": "Show the layer",
         "hide": "Hide the layer",
         "findTileset": "Find a Tileset"
+    },
+    "roomviews": {
+        "width": "Viewport's width:",
+        "height": "Viewport's height:",
+        "setAsDefault": "Set as the starting view"
     },
     "roomview": {
         "name": "Name:",
