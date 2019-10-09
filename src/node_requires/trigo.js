@@ -44,6 +44,10 @@ const trigo = {
             cos * y + sin * x
         ];
     },
+    // From https://stackoverflow.com/a/52847244
+    rotationFromMatrix(matrix) {
+        return -Math.atan2(matrix.b, matrix.a);
+    },
     deltaDir(dir1, dir2) {
         dir1 = ((dir1 % 360) + 360) % 360;
         dir2 = ((dir2 % 360) + 360) % 360;

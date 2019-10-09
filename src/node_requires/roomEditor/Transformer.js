@@ -5,14 +5,20 @@ const everywhere = {
         return true;
     }
 };
-
+/*
+Transformer has no local transform changes from Identity matrix.
+It uses `this.applyingMatrix` matrix to position its UI elements and, in the end, to change edited items' transforms.
+`this.applyingMatrix` always has its x and y set to 0.
+Its values are determined by values `appliedScaleX`, `appliedScaleY` and `appliedRotation`
+Item displacement is achieved by Transformer's coordinates.
+*/
 class Transformer extends PIXI.Container {
     constructor(items) {
         if (!items || !items.length) {
             throw new Error('Cannot create a Tramsformer with no items.');
         }
         super();
-        this.x = this.y = 1;
+        this.x = this.y = 0;
         this.items = items;
         this.drag = false;
         this.interactive = true;
@@ -25,7 +31,12 @@ class Transformer extends PIXI.Container {
             t.copyFrom(item.localTransform);
             return t;
         });
-        this.applyingTransform = new PIXI.Transform();
+
+        this.applyingMatrix = new PIXI.Matrix();
+        this.appliedScaleX = this.appliedScaleY = 1;
+        this.appliedX = this.appliedY = 0;
+        this.appliedRotation = 0;
+
         this.outline = new PIXI.Graphics();
         this.rotHandle = new TransformHandle('grab');
         this.moveHandle = new TransformHandle('move');
@@ -62,8 +73,7 @@ class Transformer extends PIXI.Container {
 
         const hw = bbox.width / 2; // half-width, half height
         const hh = bbox.height / 2;
-        this.applyingTransform.updateLocalTransform();
-        const t = this.applyingTransform.localTransform;
+        const t = this.applyingMatrix;
 
         const c = t.apply({
             x: 0,
@@ -131,16 +141,23 @@ class Transformer extends PIXI.Container {
     }
     captureMouseDown(e) {
         // Previous local transform that will be applied to entities
-        this.previousTransformL = this.applyingTransform.localTransform.clone();
-
-        this.selfPreviousGlobalTransform = this.worldTransform.clone();
-        this.previousRotation = this.applyingTransform.rotation;
+        this.previousScaleX = this.appliedScaleX;
+        this.previousScaleY = this.appliedScaleY;
+        this.previousRotation = this.appliedRotation;
+        this.xprev = this.appliedX;
+        this.yprev = this.appliedY;
         this.drag = {
             fromX: e.data.global.x,
             fromY: e.data.global.y,
             target: e.currentTarget
         };
         e.stopPropagation();
+    }
+    updateMatrix() {
+        this.applyingMatrix.identity();
+        this.applyingMatrix.scale(this.appliedScaleX, this.appliedScaleY);
+        this.applyingMatrix.rotate(this.appliedRotation);
+        this.applyingMatrix.translate(this.appliedX, this.appliedY);
     }
     updateState(e) {
         //console.log(this.drag, e);
@@ -152,7 +169,6 @@ class Transformer extends PIXI.Container {
         const globPos = this.getGlobalPosition();
         const hw = this.selectionBounds.width / 2; // half-width, half height
         const hh = this.selectionBounds.height / 2;
-        const t = this.applyingTransform;
 
         if (this.drag.target === this.rotHandle) {
             const from = trigo.pdnRad(globPos.x, globPos.y, this.drag.fromX, this.drag.fromY),
@@ -162,10 +178,11 @@ class Transformer extends PIXI.Container {
             if (this.state.shift) {
                 delta = trigo.degToRad(Math.round(trigo.radToDeg(delta) / 15) * 15);
             }
-            t.rotation = this.previousRotation + delta;
+            this.appliedRotation = this.previousRotation + delta;
+            this.updateMatrix();
         } else if (this.drag.target === this.scaleXHandle) {
-            const fromDist = this.drag.fromX - this.selfPreviousGlobalTransform.tx; // k === 1;
-            const toDist = this.drag.toX - this.selfPreviousGlobalTransform.tx;
+            const fromDist = trigo.pdc(this.drag.fromX, this.drag.fromY, this.xprev, this.yprev); // k === 1;
+            const toDist = trigo.pdc(this.drag.toX, this.drag.toY, this.xprev, this.yprev);
 
             let k = toDist / fromDist;
             if (this.state.shift) {
@@ -173,13 +190,14 @@ class Transformer extends PIXI.Container {
             }
             if (!this.state.alt) {
                 k = (k - 1) / 2 + 1;
-                t.position.x = this.previousTransformL.tx + Math.cos(t.rotation) * hw * (k - 1);
-                t.position.y = this.previousTransformL.ty + Math.sin(t.rotation) * hh * (k - 1);
+                this.appliedX = this.xprev + Math.cos(this.appliedRotation) * hw * (k - 1);
+                this.appliedY = this.yprev + Math.sin(this.appliedRotation) * hh * (k - 1);
             } else {
-                t.position.x = this.previousTransformL.tx;
-                t.position.y = this.previousTransformL.ty;
+                this.appliedX = this.xprev;
+                this.appliedY = this.yprev;
             }
-            t.scale.x = this.previousTransformL.a * k;
+            this.appliedScaleX = this.previousScaleX * k;
+            this.updateMatrix();
         }
         this.realign();
     }
