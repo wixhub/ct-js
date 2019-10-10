@@ -41,9 +41,10 @@ class Transformer extends PIXI.Container {
         this.rotHandle = new TransformHandle('grab');
         this.moveHandle = new TransformHandle('move');
         this.scaleXHandle = new TransformHandle('ew-resize');
+        this.scaleXHandleAlt = new TransformHandle('ew-resize');
         this.scaleYHandle = new TransformHandle('ns-resize');
         this.scaleXYHandle = new TransformHandle('nwse-resize');
-        this.handles = [this.rotHandle, this.scaleXHandle, this.scaleYHandle, this.scaleXYHandle, this.moveHandle];
+        this.handles = [this.rotHandle, this.scaleXHandle, this.scaleXHandleAlt, this.scaleYHandle, this.scaleXYHandle, this.moveHandle];
         this.addChild(this.outline, ...this.handles);
         this.realign();
 
@@ -125,11 +126,15 @@ class Transformer extends PIXI.Container {
             y: 0
         }, this.scaleXHandle.position);
         t.apply({
+            x: -hw,
+            y: 0
+        }, this.scaleXHandleAlt.position);
+        t.apply({
             x: 0,
             y: hh
         }, this.scaleYHandle.position);
         t.apply({
-            x: hw + 32,
+            x: hw + 32 / this.appliedScaleX,
             y: 0
         }, this.rotHandle.position);
 
@@ -180,13 +185,14 @@ class Transformer extends PIXI.Container {
             }
             this.appliedRotation = this.previousRotation + delta;
             this.updateMatrix();
-        } else if (this.drag.target === this.scaleXHandle) {
+        } else if (this.drag.target === this.scaleXHandle || this.drag.target === this.scaleXHandleAlt) {
             // straighten mouse coordinates back to unrotated XY axes
             const normalizedFrom = trigo.rotateRad(this.drag.fromX, this.drag.fromY, -this.appliedRotation),
                   normalizedTo = trigo.rotateRad(this.drag.toX, this.drag.toY, -this.appliedRotation);
             // the first component is `x` — that's what we need to get the desired x scale
             const [fromDist] = normalizedFrom; // k === 1;
             const [toDist] = normalizedTo;
+            const flip = this.drag.target === this.scaleXHandleAlt? -1 : 1;
 
             let k = toDist / fromDist;
             if (this.state.shift) {
@@ -194,9 +200,9 @@ class Transformer extends PIXI.Container {
             }
             if (!this.state.alt) {
                 k = (k - 1) / 2 + 1;
-                // Advance the center of the selection so the left border stays in place
-                this.appliedX = this.xprev + Math.cos(this.appliedRotation) * hw * (k - 1);
-                this.appliedY = this.yprev + Math.sin(this.appliedRotation) * hh * (k - 1);
+                // Advance the center of the selection so the left/right border stays in place
+                this.appliedX = this.xprev + Math.cos(this.appliedRotation) * hw * (k - 1) * flip;
+                this.appliedY = this.yprev + Math.sin(this.appliedRotation) * hh * (k - 1) * flip;
             } else {
                 this.appliedX = this.xprev;
                 this.appliedY = this.yprev;
