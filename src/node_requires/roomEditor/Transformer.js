@@ -146,9 +146,10 @@ class Transformer extends PIXI.Container {
         this.previousRotation = this.appliedRotation;
         this.xprev = this.appliedX;
         this.yprev = this.appliedY;
+        const globPos = this.getGlobalPosition();
         this.drag = {
-            fromX: e.data.global.x,
-            fromY: e.data.global.y,
+            fromX: e.data.global.x - globPos.x,
+            fromY: e.data.global.y - globPos.y,
             target: e.currentTarget
         };
         e.stopPropagation();
@@ -160,19 +161,18 @@ class Transformer extends PIXI.Container {
         this.applyingMatrix.translate(this.appliedX, this.appliedY);
     }
     updateState(e) {
-        //console.log(this.drag, e);
         if (!this.drag) {
             return;
         }
-        this.drag.toX = e.data.global.x;
-        this.drag.toY = e.data.global.y;
         const globPos = this.getGlobalPosition();
+        this.drag.toX = e.data.global.x - globPos.x;
+        this.drag.toY = e.data.global.y - globPos.y;
         const hw = this.selectionBounds.width / 2; // half-width, half height
         const hh = this.selectionBounds.height / 2;
 
         if (this.drag.target === this.rotHandle) {
-            const from = trigo.pdnRad(globPos.x, globPos.y, this.drag.fromX, this.drag.fromY),
-                  to = trigo.pdnRad(globPos.x, globPos.y, this.drag.toX, this.drag.toY);
+            const from = trigo.pdnRad(0, 0, this.drag.fromX, this.drag.fromY),
+                  to = trigo.pdnRad(0, 0, this.drag.toX, this.drag.toY);
             let delta = trigo.deltaDirRad(from, to);
             // Snap rotation to 15° when shift is pressed
             if (this.state.shift) {
@@ -181,8 +181,12 @@ class Transformer extends PIXI.Container {
             this.appliedRotation = this.previousRotation + delta;
             this.updateMatrix();
         } else if (this.drag.target === this.scaleXHandle) {
-            const fromDist = trigo.pdc(this.drag.fromX, this.drag.fromY, this.xprev, this.yprev); // k === 1;
-            const toDist = trigo.pdc(this.drag.toX, this.drag.toY, this.xprev, this.yprev);
+            // straighten mouse coordinates back to unrotated XY axes
+            const normalizedFrom = trigo.rotateRad(this.drag.fromX, this.drag.fromY, -this.appliedRotation),
+                  normalizedTo = trigo.rotateRad(this.drag.toX, this.drag.toY, -this.appliedRotation);
+            // the first component is `x` — that's what we need to get the desired x scale
+            const [fromDist] = normalizedFrom; // k === 1;
+            const [toDist] = normalizedTo;
 
             let k = toDist / fromDist;
             if (this.state.shift) {
@@ -190,6 +194,7 @@ class Transformer extends PIXI.Container {
             }
             if (!this.state.alt) {
                 k = (k - 1) / 2 + 1;
+                // Advance the center of the selection so the left border stays in place
                 this.appliedX = this.xprev + Math.cos(this.appliedRotation) * hw * (k - 1);
                 this.appliedY = this.yprev + Math.sin(this.appliedRotation) * hh * (k - 1);
             } else {

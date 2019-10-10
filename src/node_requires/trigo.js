@@ -36,6 +36,13 @@ const trigo = {
     rotate(x, y, deg) {
         return trigo.rotateRad(x, y, trigo.degToRad(deg));
     },
+    /**
+     * Rotates a vector (x; y) by rad around (0; 0)
+     * @param {Number} x The x component
+     * @param {Number} y The y component
+     * @param {Number} rad The radian value to rotate by
+     * @returns {Array<Number>} A pair of new `x` and `y` parameters.
+     */
     rotateRad(x, y, rad) {
         const sin = Math.sin(rad),
               cos = Math.cos(rad);
