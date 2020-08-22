@@ -17,7 +17,8 @@ this.validol = new Validol({
     'nested.property': {
         type: 'string',
         minLength: 1,
-        optional: true
+        optional: true,
+        regex: /^\w+ \w+$/
     },
     'nested.uncertainProperty': {
         oneOf: [{
@@ -69,11 +70,13 @@ this.validol.heal(obj);
 class ValidolError extends Error {
     constructor(reason, path, ruleset) {
         super(`Path ${path} has failed its checks. Reason: ${reason}`);
-        // eslint-disable-next-line no-console
-        console.log(`Ruleset: ${JSON.stringify(ruleset, null, 2)}`);
         this.reason = reason;
         this.path = path;
         this.ruleset = ruleset;
+    }
+    showRuleset() {
+        // eslint-disable-next-line no-console
+        console.log('Ruleset: ', JSON.stringify(this.ruleset, null, 2));
     }
 }
 const typePredicateMap = {
@@ -87,8 +90,47 @@ const typePredicateMap = {
     boolean: value => typeof value === 'boolean'
 };
 
+const applyArrayLikeRules = function applyArrayLikeRules(value, ruleset) {
+    const minLength = ruleset.minLength || ruleset.length,
+          maxLength = ruleset.maxLength || ruleset.length;
+    if (minLength !== false && value.length < minLength) {
+        throw new ValidolError(`The value's length is ${value.length}, should be at least ${minLength}.`);
+    }
+    if (maxLength !== false && value.length > maxLength) {
+        throw new ValidolError(`The value's length is ${value.length}, should be at max ${maxLength}.`);
+    }
+};
+const applyNumberRules = function applyNumberRules(value, ruleset) {
+    if (ruleset.finite && !Number.isFinite(value)) {
+        throw new ValidolError(`Value ${value} is not finite.`);
+    }
+    if (ruleset.notNan && !Number.isNaN(value)) {
+        throw new ValidolError(`Value ${value} is not a number.`);
+    }
+};
+
 const applyRuleset = function (value, ruleset) {
     /* Basic checks */
+    if (ruleset.oneOf) {
+        const errors = [];
+        for (const subset of ruleset.oneOf) {
+            try {
+                applyRuleset(value, subset);
+            } catch (e) {
+                if (e instanceof ValidolError) {
+                    errors.push(e);
+                } else {
+                    throw e;
+                }
+            }
+        }
+        if (errors.length === ruleset.oneOf.length) {
+            for (const e of errors) {
+                console.error(e);
+            }
+            throw new ValidolError(`Value ${value} failed all the validation rules.`);
+        }
+    }
     if (ruleset.value) {
         if (ruleset.value instanceof Function && value !== ruleset.value()) {
             throw new ValidolError(`Value ${value} is not equal to ${ruleset.value}.`);
@@ -103,23 +145,8 @@ const applyRuleset = function (value, ruleset) {
         throw new ValidolError(`Value ${value} did not pass the custom validator.`);
     }
 
-    /* Array-like checks. Valid for strings as well */
-    const minLength = ruleset.minLength || ruleset.length,
-          maxLength = ruleset.maxLength || ruleset.length;
-    if (minLength !== false && value.length < minLength) {
-        throw new ValidolError(`The value's length is ${value.length}, should be at least ${minLength}.`);
-    }
-    if (maxLength !== false && value.length > maxLength) {
-        throw new ValidolError(`The value's length is ${value.length}, should be at max ${maxLength}.`);
-    }
-
-    /* Number-related checks */
-    if (ruleset.finite && !Number.isFinite(value)) {
-        throw new ValidolError(`Value ${value} is not finite.`);
-    }
-    if (ruleset.notNan && !Number.isNaN(value)) {
-        throw new ValidolError(`Value ${value} is not a number.`);
-    }
+    applyArrayLikeRules(value, ruleset);
+    applyNumberRules(value, ruleset);
 };
 const applyRulesetAndHeal = function applyRulesetAndHeal(context, key, ruleset) {
     const value = context[key];
