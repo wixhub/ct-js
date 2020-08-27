@@ -308,7 +308,7 @@ texture-editor.panel.view
             }
             const imageBase64 = png.replace(/^data:image\/\w+;base64,/, '');
             const imageBuffer = new Buffer(imageBase64, 'base64');
-            this.loadImg(
+            await this.loadImg(
                 imageBuffer,
                 global.projdir + '/img/i' + this.texture.uid + '.png'
             );
@@ -360,7 +360,6 @@ texture-editor.panel.view
                     alertify.error(e);
                 };
                 image.src = 'file://' + dest + '?' + Math.random();
-
             } catch (e) {
                 alertify.error(e);
                 throw e;

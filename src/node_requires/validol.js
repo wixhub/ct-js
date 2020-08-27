@@ -50,7 +50,8 @@ this.validol = new Validol({
         notNan: true
     },
     'nested.longArray': {
-        type: 'array'
+        type: 'array',
+        healWith: () => []
     },
     'nested.longArray[*]': {
         type: 'object'
@@ -148,19 +149,28 @@ const applyRuleset = function (value, ruleset) {
     applyArrayLikeRules(value, ruleset);
     applyNumberRules(value, ruleset);
 };
+const applyHealing = function applyHealing(context, key, ruleset) {
+    const value = context[key];
+    // eslint-disable-next-line no-use-before-define
+    if (ruleset.healWith === Validol.REMOVE) {
+        delete context[key];
+        return true;
+    }
+    if (ruleset.healWith instanceof Function) {
+        const newValue = ruleset.healWith(value);
+        context[key] = newValue;
+    } else {
+        context[key] = ruleset.healWith;
+    }
+    return true;
+};
 const applyRulesetAndHeal = function applyRulesetAndHeal(context, key, ruleset) {
     const value = context[key];
     try {
         applyRuleset(value, ruleset);
     } catch (err) {
         if (err instanceof ValidolError && ruleset.healWith) {
-            if (ruleset.healWith instanceof Function) {
-                const newValue = ruleset.healWith(value);
-                context[key] = newValue;
-            } else {
-                context[key] = ruleset.healWith;
-            }
-            return true;
+            return applyHealing(context, key, ruleset);
         }
         throw err;
     }
@@ -200,7 +210,10 @@ class Validol {
         for (const path in this.scheme) {
             const ruleset = this.scheme[path];
             const targets = this.scanners[path](entity);
-            if (!targets.length && !ruleset.optional) {
+            if (targets.length && ruleset.absent) {
+                throw new ValidolError(`Path ${path} must be absent.`, path, ruleset);
+            }
+            if (!targets.length && !ruleset.optional && !ruleset.absent) {
                 throw new ValidolError(`Path ${path} does not exist.`, path, ruleset);
             }
             for (const target of targets) {
@@ -211,6 +224,9 @@ class Validol {
                 applyRuleset(context, ruleset);
             }
         }
+    }
+    static REMOVE() {
+        void 0;
     }
 }
 

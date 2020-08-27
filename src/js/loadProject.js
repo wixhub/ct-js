@@ -1,4 +1,139 @@
+const Validol = require('../node_requires/validol');
+
 (function addLoadProjectMethod(window) {
+    const guidRegex = /^\S{8}-(\S{4}-){3}\S{12}$/;
+    const projectSchema = {
+        ctjsVersion: {
+            type: 'string'
+        },
+        actions: {
+            type: 'array',
+            healWith: () => []
+        },
+        'actions[*]': {
+            type: 'object'
+        },
+        'actions[*].name': {
+            type: 'string'
+        },
+        'actions[*].methods': {
+            type: 'array',
+            healWith: () => []
+        },
+        'actions[*].methods[*]': {
+            type: 'object'
+        },
+        'actions[*].methods[*].code': {
+            type: 'string',
+            minLength: 1,
+            healWith: 'invalid.Invalid'
+        },
+        palette: {
+            type: 'array',
+            healWith: () => []
+        },
+        'palette[*]': {
+            type: 'string'
+        },
+        fonts: {
+            type: 'array',
+            healWith: () => []
+        },
+        libs: {
+            type: 'object',
+            healWith: () => ({})
+        },
+        notes: {
+            type: 'string',
+            healWith: ''
+        },
+        scripts: {
+            type: 'array',
+            healWith: () => []
+        },
+        'scripts[*]': {
+            type: 'object'
+        },
+        'scripts[*].code': {
+            type: 'string'
+        },
+        'scripts[*].name': {
+            type: 'string'
+        },
+        settings: {
+            type: 'object'
+        },
+        'settings.export': {
+            type: 'string'
+        },
+        'settings.export.debug': {
+            type: 'boolean',
+            healWith: false
+        },
+        'settings.export.{linux,windows,mac64}': {
+            type: 'boolean',
+            healWith: true
+        },
+        'settings.export.{linux32,linux64,windows32,windows64}': {
+            absent: true,
+            healWith: Validol.REMOVE
+        },
+        'settings.authoring': {
+            type: 'object'
+        },
+        'settings.authoring.{author,site,title,versionPostfix}': {
+            type: 'string',
+            healWith: ''
+        },
+        'settings.authoring.version': {
+            type: 'array',
+            length: 3,
+            healWith: () => [0, 0, 0]
+        },
+        'settings.branding': {
+            type: 'object'
+        },
+        'settings.branding.icon': {
+            oneOf: [{
+                type: 'string',
+                regex: guidRegex
+            }, {
+                value: -1
+            }],
+            healWith: -1
+        },
+        'settings.branding.invertPreloaderScheme': {
+            type: 'boolean',
+            healWith: false
+        },
+        'settings.branding.accent': {
+            type: 'string',
+            healWith: '#446adb'
+        },
+        'settings.rendering': {
+            type: 'object'
+        },
+        'settings.rendering.{highDensity,pixelatedrender,usePixiLegacy}': {
+            type: 'boolean',
+            healWith: false
+        },
+        'settings.rendering.maxFPS': {
+            type: 'number',
+            healWith: 60
+        },
+        'settings.rendering.desktopMode': {
+            type: 'string',
+            oneOf: [{
+                value: 'maximized'
+            }, {
+                value: 'fullscreen'
+            }, {
+                value: 'windowed'
+            }],
+            healWith: 'maximized'
+        }
+    };
+    console.log(projectSchema);
     window.migrationProcess = window.migrationProcess || [];
     window.applyMigrationCode = function applyMigrationCode(version) {
         const process = window.migrationProcess.find(process => process.version === version);
