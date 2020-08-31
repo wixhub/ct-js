@@ -1,7 +1,8 @@
 /* Made with ct.js http://ctjs.rocks/ */
+
 const deadPool = []; // a pool of `kill`-ed copies for delaying frequent garbage collection
 const copyTypeSymbol = Symbol('I am a ct.js copy');
-setInterval(function () {
+setInterval(function cleanDeadPool() {
     deadPool.length = 0;
 }, 1000 * 60);
 
@@ -27,7 +28,8 @@ const ct = {
      * Use ct.delta to balance your movement and other calculations on different framerates by
      * multiplying it with your reference value.
      *
-     * Note that `this.move()` already uses it, so there is no need to premultiply `this.speed` with it.
+     * Note that `this.move()` already uses it, so there is no need to premultiply
+     * `this.speed` with it.
      *
      * **A minimal example:**
      * ```js
@@ -45,9 +47,9 @@ const ct = {
      * This is a version for UI elements, as it is not affected by time scaling, and thus works well
      * both with slow-mo effects and game pause.
      *
-    * @type {number}
-    */
-   deltaUi: 1,
+     * @type {number}
+     */
+    deltaUi: 1,
     /**
      * The camera that outputs its view to the renderer.
      * @type {Camera}
@@ -125,7 +127,7 @@ console.log(
     'background: #446adb; color: #fff; padding: 0.5em 0;',
     'background: #5144db; color: #fff; padding: 0.5em 0;',
     'background: #446adb; color: #fff; padding: 0.5em 0;',
-    'background: #5144db; color: #fff; padding: 0.5em 0;',
+    'background: #5144db; color: #fff; padding: 0.5em 0;'
 );
 
 ct.highDensity = [/*@highDensity@*/][0];
@@ -147,7 +149,7 @@ try {
     console.error(e);
     // eslint-disable-next-line no-console
     console.warn('[ct.js] Something bad has just happened. This is usually due to hardware problems. I\'ll try to fix them now, but if the game still doesn\'t run, try including a legacy renderer in the project\'s settings.');
-    PIXI.settings.SPRITE_MAX_TEXTURES = Math.min(PIXI.settings.SPRITE_MAX_TEXTURES , 16);
+    PIXI.settings.SPRITE_MAX_TEXTURES = Math.min(PIXI.settings.SPRITE_MAX_TEXTURES, 16);
     ct.pixiApp = new PIXI.Application(pixiAppSettings);
 }
 
@@ -289,14 +291,15 @@ ct.u = {
      * @returns {number} The result of the interpolation
      */
     lerp(a, b, alpha) {
-        return a + (b-a)*alpha;
+        return a + (b - a) * alpha;
     },
     /**
      * Returns the position of a given value in a given range. Opposite to linear interpolation.
      * @param  {number} a The first value to interpolate from
      * @param  {number} b The second value to interpolate top
      * @param  {number} val The interpolated values
-     * @return {number} The position of the value in the specified range. When a <= val <= b, the result will be inside the [0;1] range.
+     * @return {number} The position of the value in the specified range.
+     * When a <= val <= b, the result will be inside the [0;1] range.
      */
     unlerp(a, b, val) {
         return (val - a) / (b - a);
@@ -320,11 +323,14 @@ ct.u = {
         return ct.camera.gameToUiCoord(x, y);
     },
     /**
-     * Tests whether a given point is inside the given rectangle (it can be either a copy or an array)
-     * @param {number} x The x coordinate of the point
-     * @param {number} y The y coordinate of the point
-     * @param {(Copy|Array<Number>)} arg Either a copy (it must have a rectangular shape) or an array in a form of [x1, y1, x2, y2], where (x1;y1) and (x2;y2) specify the two opposite corners of the rectangle
-     * @returns {boolean} `true` if the point is inside the rectangle, `false` otherwise
+     * Tests whether a given point is inside the given rectangle
+     * (it can be either a copy or an array).
+     * @param {number} x The x coordinate of the point.
+     * @param {number} y The y coordinate of the point.
+     * @param {(Copy|Array<Number>)} arg Either a copy (it must have a rectangular shape)
+     * or an array in a form of [x1, y1, x2, y2], where (x1;y1) and (x2;y2) specify
+     * the two opposite corners of the rectangle.
+     * @returns {boolean} `true` if the point is inside the rectangle, `false` otherwise.
      */
     prect(x, y, arg) {
         var xmin, xmax, ymin, ymax;
@@ -345,7 +351,9 @@ ct.u = {
      * Tests whether a given point is inside the given circle (it can be either a copy or an array)
      * @param {number} x The x coordinate of the point
      * @param {number} y The y coordinate of the point
-     * @param {(Copy|Array<Number>)} arg Either a copy (it must have a circular shape) or an array in a form of [x1, y1, r], where (x1;y1) define the center of the circle and `r` defines the radius of it
+     * @param {(Copy|Array<Number>)} arg Either a copy (it must have a circular shape)
+     * or an array in a form of [x1, y1, r], where (x1;y1) define the center of the circle
+     * and `r` defines the radius of it.
      * @returns {boolean} `true` if the point is inside the circle, `false` otherwise
      */
     pcircle(x, y, arg) {
@@ -355,13 +363,16 @@ ct.u = {
         return ct.u.pdc(0, 0, (arg.x - x) / arg.scale.x, (arg.y - y) / arg.scale.y) < arg.shape.r;
     },
     /**
-     * Copies all the properties of the source object to the destination object. This is **not** a deep copy. Useful for extending some settings with default values, or for combining data.
+     * Copies all the properties of the source object to the destination object.
+     * This is **not** a deep copy. Useful for extending some settings with default values,
+     * or for combining data.
      * @param {object} o1 The destination object
      * @param {object} o2 The source object
-     * @param {any} [arr] An optional array of properties to copy. If not specified, all the properties will be copied.
+     * @param {any} [arr] An optional array of properties to copy. If not specified,
+     * all the properties will be copied.
      * @returns {object} The modified destination object
      */
-    ext (o1, o2, arr) {
+    ext(o1, o2, arr) {
         if (arr) {
             for (const i in arr) {
                 if (o2[arr[i]]) {
@@ -377,7 +388,8 @@ ct.u = {
     },
     /**
      * Loads and executes a script by its URL, optionally with a callback
-     * @param {string} url The URL of the script file, with its extension. Can be relative or absolute
+     * @param {string} url The URL of the script file, with its extension.
+     * Can be relative or absolute.
      * @param {Function} callback An optional callback that fires when the script is loaded
      * @returns {void}
      */
@@ -390,22 +402,22 @@ ct.u = {
         document.getElementsByTagName('head')[0].appendChild(script);
     },
     /**
-     * Returns a Promise that resolves after the given time
+     * Returns a Promise that resolves after the given time.
+     * This timer is run in gameplay time scale, meaning that it is affected by time stretching.
      * @param {number} time Time to wait, in milliseconds
-     * @returns {Promise<void>} The promise with no data
+     * @returns {CtTimer} The timer, which you can call `.then()` to
      */
     wait(time) {
-        var room = ct.room.name;
-        return new Promise((resolve, reject) => setTimeout(() => {
-            if (ct.room.name === room) {
-                resolve();
-            } else {
-                reject({
-                    info: 'Room switch',
-                    from: 'ct.u.wait'
-                });
-            }
-        }, time));
+        return ct.timer.add(time);
+    },
+    /**
+     * Returns a Promise that resolves after the given time.
+     * This timer runs in UI time scale and is not sensitive to time stretching.
+     * @param {number} time Time to wait, in milliseconds
+     * @returns {CtTimer} The timer, which you can call `.then()` to
+     */
+    waitUi(time) {
+        return ct.timer.addUi(time);
     }
 };
 ct.u.ext(ct.u, {// make aliases
@@ -418,6 +430,7 @@ ct.u.ext(ct.u, {// make aliases
     extend: ct.u.ext
 });
 
+// eslint-disable-next-line max-lines-per-function
 (() => {
     const killRecursive = copy => {
         copy.kill = true;
@@ -449,10 +462,11 @@ ct.u.ext(ct.u, {// make aliases
         }
     };
 
-    ct.loop = function(delta) {
+    ct.loop = function loop(delta) {
         ct.delta = delta;
         ct.deltaUi = PIXI.Ticker.shared.elapsedMS / (1000 / (PIXI.Ticker.shared.maxFPS || 60));
         ct.inputs.updateActions();
+        ct.timer.updateTimers();
         for (let i = 0, li = ct.stack.length; i < li; i++) {
             ct.types.beforeStep.apply(ct.stack[i]);
             ct.stack[i].onStep.apply(ct.stack[i]);
@@ -472,15 +486,17 @@ ct.u.ext(ct.u, {// make aliases
         for (const copy of ct.stack) {
             // eslint-disable-next-line no-underscore-dangle
             if (copy.kill && !copy._destroyed) {
-                killRecursive(copy); // This will also allow a parent to eject children to a new container before they are destroyed as well
-                copy.destroy({children: true});
+                killRecursive(copy); // This will also allow a parent to eject children
+                                     // to a new container before they are destroyed as well
+                copy.destroy({
+                    children: true
+                });
             }
         }
 
         for (const cont of ct.stage.children) {
             cont.children.sort((a, b) =>
-                ((a.depth || 0) - (b.depth || 0)) || ((a.uid || 0) - (b.uid || 0)) || 0
-            );
+                ((a.depth || 0) - (b.depth || 0)) || ((a.uid || 0) - (b.uid || 0)) || 0);
         }
 
         manageCamera();

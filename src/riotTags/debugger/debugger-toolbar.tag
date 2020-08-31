@@ -1,3 +1,4 @@
+// Not used due to bugs in nw.js
 debugger-toolbar
     .debugger-toolbar-aDragger.feather
         svg.feather
@@ -48,7 +49,10 @@ debugger-toolbar
         setTimeout(() => {
             const win = nw.Window.get();
             // Make sure the window does not distort due to inconsistencies in title size on different OS
-            win.resizeTo(Math.round(480 * (1 + win.zoomLevel * 0.2)), Math.round(40 * (1 + win.zoomLevel * 0.2)));
+            win.resizeTo(
+                Math.round(480 * (1 + win.zoomLevel * 0.2)),
+                Math.round(40 * (1 + win.zoomLevel * 0.2))
+            );
         }, 0);
 
         const menu = new nw.Menu();
@@ -60,13 +64,15 @@ debugger-toolbar
         })).forEach(entry => menu.append(new nw.MenuItem(entry)));
 
         // Get displays to position everything nicely
-        // Firstly aim for the built-in monitor (usually a keyboard is near it), then try the second one, then try the first one
+        // Firstly aim for the built-in monitor (usually a keyboard is near it),
+        // then try the second one, then try the first one
+
         // eslint-disable-next-line new-cap
         nw.Screen.Init();
         const {screens} = nw.Screen;
         const builtIn = screens.find(screen => screen.isBuiltIn);
         const targetScreen = builtIn || screens[1] || screens[0];
-         nw.Window.open(window.gameLink, {
+        nw.Window.open(window.gameLink, {
             title: 'ct.js',
             icon: 'ct_ide.png',
             x: targetScreen.work_area.x,
@@ -79,16 +85,17 @@ debugger-toolbar
             // eslint-disable-next-line camelcase
             // new_instance: true
         }, newWindow => {
-            this.previewWindow = newWindow;
+            this.previewWindow = window.previewWindow = newWindow;
             this.previewWindow.on('close', this.closeItself);
             this.previewWindow.maximize();
             this.previewWindow.focus();
             this.previewWindow.showDevTools();
             this.previewWindow.on('devtools-closed', () => {
                 isDevToolsOpen = false;
-            })
+            });
         });
 
+        /* Helper methods for buttons */
         this.switchRoom = room => {
             this.previewWindow.eval(null, `ct.rooms.switch('${room}')`);
         };
@@ -96,7 +103,8 @@ debugger-toolbar
             menu.popup(e.clientX, e.clientY);
         };
 
-        this.togglePause = e => {
+        /* Buttons' event listeners */
+        this.togglePause = () => {
             // hidden negation is semantically hidden here
             this.gamePaused = this.previewWindow.window.PIXI.Ticker.shared.started;
             if (this.gamePaused) {
@@ -105,13 +113,13 @@ debugger-toolbar
                 this.previewWindow.window.PIXI.Ticker.shared.start();
             }
         };
-        this.restartGame = e => {
+        this.restartGame = () => {
             this.previewWindow.eval(null, 'window.location.reload();');
         };
-        this.restartRoom = e => {
+        this.restartRoom = () => {
             this.previewWindow.eval(null, 'ct.rooms.switch(ct.room.name);');
         };
-        this.toggleDevTools = e => {
+        this.toggleDevTools = () => {
             if (isDevToolsOpen) {
                 this.previewWindow.eval(null, 'nw.Window.get().closeDevTools()');
             } else {
@@ -119,7 +127,7 @@ debugger-toolbar
                 isDevToolsOpen = true;
             }
         };
-        this.makeScreenshot = e => {
+        this.makeScreenshot = () => {
             // Ask for game canvas geometry
             const rect = this.previewWindow.window.document.querySelector('#ct canvas').getBoundingClientRect();
             this.previewWindow.captureScreenshot({
@@ -138,14 +146,23 @@ debugger-toolbar
                 const fs = require('fs-extra'),
                       path = require('path');
                 const now = new Date(),
-                      timestring = `${now.getFullYear()}-${('0'+(now.getMonth()+1)).slice(-2)}-${('0'+now.getDate()).slice(-2)} ${(new Date()).getHours()}-${('0'+now.getMinutes()).slice(-2)}-${('0'+now.getSeconds()).slice(-2)}`,
+                      year = now.getFullYear(),
+                      month = ('0' + (now.getMonth() + 1)).slice(-2),
+                      day = ('0' + now.getDate()).slice(-2),
+                      hours = now.getHours(),
+                      minutes = ('0' + now.getMinutes()).slice(-2),
+                      seconds = ('0' + now.getSeconds()).slice(-2),
+                      timestring = `${year}-${month}-${day} ${hours}-${minutes}-${seconds}`,
                       name = `Screenshot of ${window.gameName || 'ct.js game'} at ${timestring}.png`,
                       fullPath = path.join(__dirname, name);
-                const data = base64.replace(/^data:image\/\w+;base64,/, '');
-                const buff = new Buffer(data, 'base64');
+                const shotBase64 = base64.replace(/^data:image\/\w+;base64,/, '');
+                const buff = new Buffer(shotBase64, 'base64');
                 const stream = fs.createWriteStream(fullPath);
                 stream.on('finish', () => {
-                    soundbox.play('Success');
+                    if (localStorage.disableSounds !== 'on') {
+                        window.soundbox.play('Success');
+                    }
+                    // eslint-disable-next-line no-new
                     new Notification('Done!', {
                         body: `Saved to ${fullPath} 👌`,
                         icon: 'ct_ide.png'
@@ -158,15 +175,15 @@ debugger-toolbar
                 stream.end(buff);
             });
         };
-        this.toggleFullscreen = e => {
+        this.toggleFullscreen = () => {
             this.gameFullscreen = !this.gameFullscreen;
             if (this.gameFullscreen) {
-                this.previewWindow.enterFullscreen()
+                this.previewWindow.enterFullscreen();
             } else {
                 this.previewWindow.leaveFullscreen();
             }
         };
-        this.openQrCodes = e => {
+        this.openQrCodes = () => {
             if (this.qrCodesWindow) {
                 this.qrCodesWindow.focus();
             } else {
@@ -185,11 +202,11 @@ debugger-toolbar
                 });
             }
         };
-        this.openExternal = e => {
+        this.openExternal = () => {
             nw.Shell.openExternal(window.gameLink);
         };
 
-        this.closeItself = e => {
+        this.closeItself = () => {
             this.previewWindow.close(true);
             nw.Window.get().close();
         };

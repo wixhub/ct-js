@@ -44,20 +44,16 @@
         "sort": "",
         "tilelayer": "",
         "wrongFormat": "",
-        "yes": ""
-    },
-    "actionsEditor": {
-        "actions": "",
-        "actionsEditor": "",
-        "addAction": "",
-        "addMethod": "",
-        "deleteAction": "",
-        "deleteMethod": "",
-        "inputActionNamePlaceholder": "",
-        "methodModuleMissing": "",
-        "methods": "",
-        "multiplier": "",
-        "noActionsYet": ""
+        "yes": "",
+        "loading": "",
+        "select": "",
+        "zoom": "",
+        "zoomIn": "",
+        "zoomOut": "",
+        "clear": "",
+        "filter": "A verb",
+        "selectDialogue": "A verb",
+        "search": "Shown next to a search field"
     },
     "colorPicker": {
         "current": "",
@@ -75,10 +71,9 @@
         "export": "A verb",
         "exportPanel": "",
         "firstrunnotice": "",
-        "log": ""
-    },
-    "inputMethodSelector": {
-        "select": ""
+        "log": "",
+        "windowsCrossBuildWarning": "",
+        "cannotBuildForMacOnWin": ""
     },
     "intro": {
         "loading": "",
@@ -86,7 +81,9 @@
             "button": "",
             "input": "",
             "text": "",
-            "nameerr": ""
+            "nameerr": "",
+            "saveProjectHere": "",
+            "selectProjectFolder": ""
         },
         "recovery": {
             "message": "",
@@ -116,12 +113,10 @@
         "launch": "",
         "license": "",
         "min": "",
-        "modules": "",
         "recentProjects": "",
         "rooms": "",
         "save": "",
         "startScreen": "",
-        "settings": "",
         "sounds": "",
         "successZipExport": "",
         "successZipProject": "",
@@ -139,55 +134,64 @@
         "newFont": "",
         "codeFont": "",
         "codeLigatures": "",
-        "codeDense": ""
-    },
-    "settings": {
-        "actions": "",
-        "author": "",
-        "authoring": "",
-        "cover": "",
-        "editActions": "",
-        "exportparams": "",
-        "framerate": "",
-        "getfile": "",
-        "highDensity": "",
-        "maxFPS": "",
-        "minifyhtmlcss": "",
-        "minifyjs": "",
-        "pixelatedrender": "",
-        "renderoptions": "",
+        "codeDense": "",
+        "launchHotkeys": "",
+        "patrons": "",
+        "fx": "",
+        "openIncludeFolder": "",
+        "troubleshooting": "",
+        "toggleDevTools": "",
+        "copySystemInfo": "",
+        "systemInfoWait": "",
+        "systemInfoDone": "",
+        "disableAcceleration": "",
+        "disableBuiltInDebugger": "",
+        "visitDiscordForGamedevSupport": "",
+        "postAnIssue": "",
+        "restart": "",
+        "project": "",
         "settings": "",
-        "site": "",
-        "title": "",
-        "version": "",
-        "versionpostfix": "",
-        "scripts": {
-            "addNew": "",
-            "deleteScript": "",
-            "header": "",
-            "newScriptComment": "",
-            "moveUp": "",
-            "moveDown": ""
-        }
+        "themeSpringSream": "",
+        "themeLucasDracula": "",
+        "openProject": "",
+        "openExample": ""
     },
     "modules": {
         "author": "",
-        "hasfields": "",
-        "hasinjects": "",
-        "hasinputmethods": "",
-        "help": "",
+        "help": "As a documentation page that has all the methods and properties described",
         "info": "",
         "license": "",
         "logs": "A title of a tab that shows a changelof of a module, when clicked. It can be shorter than modules.log2",
         "methods": "",
         "parameters": "",
         "logs2": "A title for a changelog of a module.",
-        "settings": ""
+        "settings": "",
+        "dependencies": "",
+        "optionalDependencies": "",
+        "importModules": "",
+        "enabledModules": "",
+        "availableModules": "",
+        "filter": "A noun; a title of the collapsible section with a filtering form inside it",
+        "categories": {
+            "customization": "",
+            "utilities": "",
+            "media": "",
+            "misc": "As \"miscellaneous\"; a noun",
+            "desktop": "",
+            "motionPlanning": "",
+            "inputs": "",
+            "fx": "",
+            "mobile": "",
+            "integrations": "",
+            "tweaks": "",
+            "networking": ""
+        }
     },
     "texture": {
         "create": "",
         "import": "A verb",
-        "skeletons": ""
+        "skeletons": "",
+        "createType": ""
     },
     "textureview": {
         "bgcolor": "",
@@ -222,7 +226,9 @@
         "addPoint": "",
         "moveCenter": "",
         "movePoint": "",
-        "symmetryTool": ""
+        "symmetryTool": "",
+        "padding": "",
+        "paddingNotice": ""
     },
     "sounds": {
         "create": ""
@@ -267,7 +273,8 @@
         "strokeweight": "",
         "testtext": "It is recommended that you include both a string in your language and in English, as it will help with picking fonts that have multilingual support.",
         "textWrap": "",
-        "textWrapWidth": ""
+        "textWrapWidth": "",
+        "useCustomFont": "Can be worded differently to become shorter; this is a label of a button that opens a dialog with imported TTF fonts."
     },
     "fonts": {
         "fonts": "",
@@ -278,7 +285,23 @@
         "typefacename": "",
         "fontweight": "",
         "italic": "",
-        "reimport": ""
+        "reimport": "",
+        "generateBitmapFont": "",
+        "bitmapFont": "",
+        "bitmapFontSize": "",
+        "bitmapFontLineHeight": "",
+        "resultingBitmapFontName": "",
+        "charset": "",
+        "charsets": {
+            "punctuation": "",
+            "basicLatin": "",
+            "latinExtended": "",
+            "cyrillic": "",
+            "greekCoptic": "",
+            "custom": "Describing a custom set of symbols",
+            "allInFont": ""
+        },
+        "customCharsetHint": ""
     },
     "types": {
         "create": ""
@@ -324,7 +347,6 @@
         "add": "",
         "none": "",
         "done": "",
-        "zoom": "",
         "grid": "",
         "gridoff": "",
         "gridsize": "",
@@ -349,18 +371,211 @@
         "deletetiles": "",
         "movetilestolayer": "",
         "shifttiles": "",
-        "findTileset": ""
+        "findTileset": "",
+        "changecopyrotation": "",
+        "properties": ""
     },
     "notepad": {
         "local": "",
         "global": "",
         "helppages": "",
-        "backToHome": ""
+        "backToHome": "",
+        "modulespages": ""
     },
-    "preview": {
-        "reload": "",
-        "roomRestart": "",
+    "preview": {},
+    "curveEditor": {
+        "curveLineHint": "",
+        "dragPointHint": "",
+        "pointTime": "",
+        "pointValue": ""
+    },
+    "debuggerToolbar": {
+        "pause": "",
+        "resume": "",
+        "restartGame": "",
+        "restartRoom": "",
+        "switchRoom": "",
+        "toggleDevTools": "",
+        "screenshot": "",
+        "enterFullscreen": "",
+        "exitFullscreen": "",
+        "links": "",
         "openExternal": "",
-        "getQR": ""
+        "close": ""
+    },
+    "onboarding": {
+        "hoorayHeader": "",
+        "nowWhatParagraph": "",
+        "openSpaceShooterTutorial": "",
+        "openPlatformerTutorial": "",
+        "openJettyCatTutorial": "",
+        "doNothing": "",
+        "showOnboardingCheckbox": ""
+    },
+    "particleEmitters": {
+        "emittersHeading": "",
+        "emitterHeading": "",
+        "from": "",
+        "to": "",
+        "textureHeading": "",
+        "selectTexture": "",
+        "importBuiltin": "",
+        "colorAndOpacityHeading": "",
+        "stepped": "",
+        "steppedColor": "",
+        "steppedAlpha": "",
+        "blendMode": "",
+        "regular": "",
+        "darken": "",
+        "lighten": "",
+        "burn": "",
+        "scalingHeading": "",
+        "scale": "",
+        "minimumSize": "",
+        "minimumSizeHint": "",
+        "velocityHeading": "",
+        "velocity": "",
+        "minimumSpeed": "",
+        "minimumSpeedHint": "",
+        "maxSpeed": "",
+        "gravityHeading": "",
+        "gravityNotice": "",
+        "directionHeading": "",
+        "startingDirection": "",
+        "preserveTextureDirection": "",
+        "rotationHeading": "",
+        "rotationSpeed": "",
+        "rotationAcceleration": "",
+        "spawningHeading": "",
+        "timeBetweenBursts": "",
+        "spawnAtOnce": "",
+        "chanceToSpawn": "",
+        "maxParticles": "",
+        "lifetime": "",
+        "emitterLifetime": "",
+        "prewarmDelay": "",
+        "prewarmDelayNotice": "",
+        "shapeAndPositioningHeading": "",
+        "spawnType": "",
+        "spawnShapes": {
+            "point": "",
+            "rectangle": "",
+            "circle": "",
+            "ring": "",
+            "star": ""
+        },
+        "width": "",
+        "height": "",
+        "radius": "",
+        "starPoints": "",
+        "startAngle": "",
+        "showShapeVisualizer": "",
+        "relativeEmitterPosition": "",
+        "addEmitter": "",
+        "reset": "",
+        "changeBg": "",
+        "inspectorComplete": "",
+        "alreadyHasAnImportingTexture": "",
+        "changeGrid": "",
+        "newGridSize": "",
+        "setPreviewTexture": ""
+    },
+    "patreon": {
+        "aboutPatrons": "",
+        "patronsHeader": "",
+        "businessShuttles": "",
+        "noShuttlesYet": "",
+        "shuttlesDescription": "",
+        "spacePirates": "",
+        "noPiratesYet": "",
+        "piratesDescription": "",
+        "spaceProgrammers": "",
+        "programmersDescription": "",
+        "aspiringAstronauts": "",
+        "noAstronautsYet": "",
+        "astronautsDescription": "",
+        "thankAllPatrons": "",
+        "becomeAPatron": "",
+        "aboutFillers": [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+        ]
+    },
+    "docsPanel": {
+        "documentation": "",
+        "reference": "A document with all the properties and methods described in it"
+    },
+    "settings": {
+        "actions": {
+            "heading": "",
+            "actions": "",
+            "addAction": "",
+            "addMethod": "",
+            "deleteAction": "",
+            "deleteMethod": "",
+            "inputActionNamePlaceholder": "",
+            "methodModuleMissing": "",
+            "methods": "",
+            "multiplier": "",
+            "noActionsYet": ""
+        },
+        "authoring": {
+            "heading": "",
+            "author": "",
+            "site": "",
+            "title": "",
+            "version": "",
+            "versionpostfix": ""
+        },
+        "branding": {
+            "heading": "",
+            "accent": "",
+            "accentNotice": "",
+            "icon": "",
+            "iconNotice": "",
+            "invertPreloaderScheme": ""
+        },
+        "modules": {
+            "heading": ""
+        },
+        "rendering": {
+            "heading": "",
+            "framerate": "",
+            "highDensity": "",
+            "maxFPS": "",
+            "pixelatedrender": "",
+            "usePixiLegacy": "",
+            "desktopBuilds": "",
+            "launchMode": "",
+            "launchModes": {
+                "maximized": "",
+                "fullscreen": "",
+                "windowed": ""
+            }
+        },
+        "scripts": {
+            "heading": "",
+            "addNew": "",
+            "deleteScript": "",
+            "moveDown": "",
+            "moveUp": "",
+            "newScriptComment": ""
+        },
+        "catmodsSettings": ""
     }
 }

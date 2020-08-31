@@ -1,13 +1,29 @@
 const defaultProject = require('./defaultProject');
 const gitignore = require('./gitignore');
 
+/**
+ * @returns {Promise<string>} A promise that resolves into the absolute path
+ * to the projects' directory
+ */
 const getDefaultProjectDir = function () {
+    const {getProjectsDir} = require('./../../platformUtils');
+    return getProjectsDir();
+};
+
+const getExamplesDir = function () {
     const path = require('path');
-    return path.join(nw.App.startPath, 'projects');
+    try {
+        require('gulp');
+        // Most likely, we are in a dev environment
+        return path.join(nw.App.startPath, 'src/examples');
+    } catch (e) {
+        return path.join(nw.App.startPath, 'examples');
+    }
 };
 
 module.exports = {
     defaultProject,
-    gitignore,
-    getDefaultProjectDir
+    getDefaultProjectDir,
+    getExamplesDir,
+    gitignore
 };

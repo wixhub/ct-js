@@ -1,6 +1,6 @@
-(function (window) {
+(function addLoadProjectMethod(window) {
     window.migrationProcess = window.migrationProcess || [];
-    window.applyMigrationCode = function (version) {
+    window.applyMigrationCode = function applyMigrationCode(version) {
         const process = window.migrationProcess.find(process => process.version === version);
         if (!process) {
             throw new Error(`Cannot find migration code for version ${version}`);
@@ -21,7 +21,7 @@
             raw[3],
             // -next- versions and other postfixes will count as a fourth component.
             // They all will apply before regular versions
-            raw[4]? raw[5] || 1 : null
+            raw[4] ? raw[5] || 1 : null
         ];
     };
 
@@ -89,7 +89,7 @@
         // @see https://github.com/eslint/eslint/issues/11900
         // @see https://github.com/eslint/eslint/issues/11899
         // eslint-disable-next-line require-atomic-updates
-        project.ctjsVersion = require('package.json').version;
+        project.ctjsVersion = process.versions.ctjs;
     };
 
     /**
@@ -110,8 +110,9 @@
             fs.ensureDir(global.projdir + '/img');
             fs.ensureDir(global.projdir + '/snd');
 
-            const lastProjects = localStorage.lastProjects? localStorage.lastProjects.split(';') : [];
-            if (lastProjects.indexOf(path.normalize(global.projdir + path.sep + sessionStorage.projname)) !== -1) {
+            const lastProjects = localStorage.lastProjects ? localStorage.lastProjects.split(';') : [];
+            const normalizedPath = path.normalize(global.projdir + path.sep + sessionStorage.projname);
+            if (lastProjects.indexOf(normalizedPath) !== -1) {
                 lastProjects.splice(lastProjects.indexOf(path.normalize(global.projdir + path.sep + sessionStorage.projname)), 1);
             }
             lastProjects.unshift(path.normalize(global.projdir + path.sep + sessionStorage.projname));
@@ -119,13 +120,24 @@
                 lastProjects.pop();
             }
             localStorage.lastProjects = lastProjects.join(';');
-            window.signals.trigger('hideProjectSelector');
-            window.signals.trigger('projectLoaded');
 
             if (global.currentProject.settings.title) {
                 document.title = global.currentProject.settings.title + ' — ct.js';
             }
 
+            glob.scriptTypings = {};
+            for (const script of global.currentProject.scripts) {
+                glob.scriptTypings[script.name] = [
+                    monaco.languages.typescript.javascriptDefaults.addExtraLib(script.code),
+                    monaco.languages.typescript.typescriptDefaults.addExtraLib(script.code)
+                ];
+            }
+
+            const {loadAllTypedefs, resetTypedefs} = require('./data/node_requires/resources/modules/typedefs');
+            resetTypedefs();
+            loadAllTypedefs();
+
+            window.signals.trigger('projectLoaded');
             setTimeout(() => {
                 window.riot.update();
             }, 0);
@@ -144,50 +156,49 @@
         for (const key of [
             'actions',
             'emitterTandems',
-            //'fonts',
+            // 'fonts',
             'rooms',
             'scripts',
             'skeletons',
             'sounds',
             'styles',
             'textures',
-            'types',
+            'types'
         ]) {
-            let dirPath = path.join(global.projdir, "contents", key);
-            if (key === "scripts") {
+            let dirPath = path.join(global.projdir, 'contents', key);
+            if (key === 'scripts') {
                 dirPath = path.join(global.projdir, key);
             }
-            if (key !== "actions") {
+            if (key !== 'actions') {
                 fs.ensureDirSync(dirPath);
             }
             switch (key) {
-                case 'actions': {
-                    const ext = '.yaml';
-                    const fileName = 'Actions';
-                    dirPath = path.join(global.projdir, "contents");
-                    projectData[key] = YAML.safeLoad(fs.readFileSync(
-                        path.join(dirPath, fileName + ext),
-                        'utf8'
-                    ));
-                    break;
-                }
+            case 'actions': {
+                const ext = '.yaml';
+                const fileName = 'Actions';
+                dirPath = path.join(global.projdir, 'contents');
+                projectData[key] = YAML.safeLoad(fs.readFileSync(
+                    path.join(dirPath, fileName + ext),
+                    'utf8'
+                ));
+                break;
+            }
 
-                case 'emitterTandems': {
-                    const ext = '.cttandem';
-                    const tmp = [];
-                    if (fs.readdirSync(dirPath).length > 0)
-                        for (const file of fs.readdirSync(dirPath)) {
-                            const filePath = path.join(dirPath, file);
-                            const fileData = YAML.safeLoad(
-                                fs.readFileSync(filePath)
-                            );
-                            const tmp2 = file.includes(ext) ? tmp.push(fileData) : null;
-                        }
-                    projectData[key] = tmp;
-                    break;
+            case 'emitterTandems': {
+                const ext = '.cttandem';
+                const tmp = [];
+                if (fs.readdirSync(dirPath).length > 0) {
+                    for (const file of fs.readdirSync(dirPath)) {
+                        const filePath = path.join(dirPath, file);
+                        const fileData = YAML.safeLoad(fs.readFileSync(filePath));
+                        const tmp2 = file.includes(ext) ? tmp.push(fileData) : null;
+                    }
                 }
+                projectData[key] = tmp;
+                break;
+            }
 
-                /*case 'fonts': {
+                /* case 'fonts': {
                     fs.emptyDirSync(dirPath);
                     const ext = '.ctfont';
                     for (const font of global.currentProject.fonts) {
@@ -199,160 +210,155 @@
                     break;
                 }*/
 
-                case 'rooms': {
-                    const ext = '.ctroom';
-                    const tmp = [];
-                    if (fs.readdirSync(dirPath).length > 0)
-                        for (const file of fs.readdirSync(dirPath)) {
-                            const filePath = path.join(dirPath, file);
-                            let fileData = null;
-                            let tmp2 = null;
+            case 'rooms': {
+                const ext = '.ctroom';
+                const tmp = [];
+                if (fs.readdirSync(dirPath).length > 0) {
+                    for (const file of fs.readdirSync(dirPath)) {
+                        const filePath = path.join(dirPath, file);
+                        let fileData = null;
+                        let tmp2 = null;
                             // eslint-disable-next-line max-depth
-                            try {
-                                fileData = YAML.safeLoad(
-                                    fs.readFileSync(filePath)
-                                );
-                                tmp2 = Object.assign(
-                                    {},
-                                    Object.assign(
-                                        YAML.safeLoad(fs.readFileSync(path.join(filePath + ".data", "contents.yaml"))),
-                                        fileData,
-                                    ),
-                                );
-                                tmp2.oncreate = fs.readFileSync(path.join(filePath + '.data', 'oncreate.js'), 'utf8');
-                                tmp2.onstep = fs.readFileSync(path.join(filePath + '.data', 'onstep.js'), 'utf8');
-                                tmp2.ondraw = fs.readFileSync(path.join(filePath + '.data', 'ondraw.js'), 'utf8');
-                                tmp2.onleave = fs.readFileSync(path.join(filePath + '.data', 'onleave.js'), 'utf8');
-                                const tmp3 = file.includes(ext)
-                                    ? tmp.push(tmp2)
-                                    : null;
-                            } catch (e) {
-                                void 0;
-                            }
-                        }
-                    projectData[key] = tmp;
-                    break;
-                }
-
-                case 'scripts': {
-                    const ext = '.js';
-                    if (fs.readdirSync(dirPath).length > 0)
-                        for (const file of fs.readdirSync(dirPath)) {
-                            const filePath = path.join(dirPath, file);
-                            const fileData = fs.readFileSync(filePath);
-                            // eslint-disable-next-line max-depth
-                            if (file === 'scriptOrder.yaml') {
-                                scriptOrder = YAML.safeLoad(fileData);
-                            } else {
-                                scripts[file.replace(".js", "")] = fs.readFileSync(filePath, 'utf8');
-                            }
-                        }
-                    break;
-                }
-
-                case 'skeletons': {
-                    const ext = '.yaml';
-                    const tmp = [];
-                    if (fs.readdirSync(dirPath).length > 0)
-                        for (const file of fs.readdirSync(dirPath)) {
-                            const filePath = path.join(dirPath, file);
-                            const fileData = YAML.safeLoad(
-                                fs.readFileSync(filePath)
+                        try {
+                            fileData = YAML.safeLoad(fs.readFileSync(filePath));
+                            tmp2 = Object.assign(
+                                {},
+                                Object.assign(
+                                    YAML.safeLoad(fs.readFileSync(path.join(filePath + '.data', 'contents.yaml'))),
+                                    fileData
+                                )
                             );
-                            const tmp2 = file.includes(ext)
-                                ? tmp.push(fileData)
-                                : null;
+                            tmp2.oncreate = fs.readFileSync(path.join(filePath + '.data', 'oncreate.js'), 'utf8');
+                            tmp2.onstep = fs.readFileSync(path.join(filePath + '.data', 'onstep.js'), 'utf8');
+                            tmp2.ondraw = fs.readFileSync(path.join(filePath + '.data', 'ondraw.js'), 'utf8');
+                            tmp2.onleave = fs.readFileSync(path.join(filePath + '.data', 'onleave.js'), 'utf8');
+                            const tmp3 = file.includes(ext) ?
+                                tmp.push(tmp2) :
+                                null;
+                        } catch (e) {
+                            void 0;
                         }
-                    projectData[key] = tmp;
-                    break;
+                    }
                 }
-
-                case 'sounds': {
-                    const ext = '.ctsound';
-                    const tmp = [];
-                    if (fs.readdirSync(dirPath).length > 0)
-                        for (const file of fs.readdirSync(dirPath)) {
-                            const filePath = path.join(dirPath, file);
-                            const fileData = YAML.safeLoad(
-                                fs.readFileSync(filePath)
-                            );
-                            const tmp2 = file.includes(ext)
-                                ? tmp.push(fileData)
-                                : null;
-                        }
-                    projectData[key] = tmp;
-                    break;
-                }
-
-                case 'styles': {
-                    const ext = '.ctfont';
-                    const tmp = [];
-                    if (fs.readdirSync(dirPath).length > 0)
-                        for (const file of fs.readdirSync(dirPath)) {
-                            const filePath = path.join(dirPath, file);
-                            const fileData = YAML.safeLoad(
-                                fs.readFileSync(filePath)
-                            );
-                            const tmp2 = file.includes(ext)
-                                ? tmp.push(fileData)
-                                : null;
-                        }
-                    projectData[key] = tmp;
-                    break;
-                }
-
-                case 'textures': {
-                    const ext = '.cttexture';
-                    const tmp = [];
-                    if (fs.readdirSync(dirPath).length > 0)
-                        for (const file of fs.readdirSync(dirPath)) {
-                            const filePath = path.join(dirPath, file);
-                            const fileData = YAML.safeLoad(
-                                fs.readFileSync(filePath)
-                            );
-                            const tmp2 = file.includes(ext)
-                                ? tmp.push(fileData)
-                                : null;
-                        }
-                    projectData[key] = tmp;
-                    break;
-                }
-
-                case 'types': {
-                    const ext = '.cttype';
-                    const tmp = [];
-                    if (fs.readdirSync(dirPath).length > 0)
-                        for (const file of fs.readdirSync(dirPath)) {
-                            const filePath = path.join(dirPath, file);
-                            let fileData = null;
-                            let tmp2 = null;
-                            // eslint-disable-next-line max-depth
-                            try {
-                                fileData = YAML.safeLoad(
-                                    fs.readFileSync(filePath)
-                                );
-                                tmp2 = Object.assign({}, fileData);
-                                tmp2.oncreate = fs.readFileSync(path.join(filePath + '.data', 'oncreate.js'), 'utf8');
-                                tmp2.onstep = fs.readFileSync(path.join(filePath + '.data', 'onstep.js'), 'utf8');
-                                tmp2.ondraw = fs.readFileSync(path.join(filePath + '.data', 'ondraw.js'), 'utf8');
-                                tmp2.ondestroy = fs.readFileSync(path.join(filePath + '.data', 'ondestroy.js'), 'utf8');
-                                const tmp3 = file.includes(ext)
-                                    ? tmp.push(tmp2)
-                                    : null;
-                            } catch (e) {
-                                void 0;
-                            }
-                        }
-                    projectData[key] = tmp;
-                    break;
-                }
-
-                default: {
-                    console.error(key + ' was not loaded! Maybe a new feature?');
-                    break;
-                }
+                projectData[key] = tmp;
+                break;
             }
-            console.debug(key + " loaded successfully.");
+
+            case 'scripts': {
+                const ext = '.js';
+                if (fs.readdirSync(dirPath).length > 0) {
+                    for (const file of fs.readdirSync(dirPath)) {
+                        const filePath = path.join(dirPath, file);
+                        const fileData = fs.readFileSync(filePath);
+                            // eslint-disable-next-line max-depth
+                        if (file === 'scriptOrder.yaml') {
+                            scriptOrder = YAML.safeLoad(fileData);
+                        } else {
+                            scripts[file.replace('.js', '')] = fs.readFileSync(filePath, 'utf8');
+                        }
+                    }
+                }
+                break;
+            }
+
+            case 'skeletons': {
+                const ext = '.yaml';
+                const tmp = [];
+                if (fs.readdirSync(dirPath).length > 0) {
+                    for (const file of fs.readdirSync(dirPath)) {
+                        const filePath = path.join(dirPath, file);
+                        const fileData = YAML.safeLoad(fs.readFileSync(filePath));
+                        const tmp2 = file.includes(ext) ?
+                            tmp.push(fileData) :
+                            null;
+                    }
+                }
+                projectData[key] = tmp;
+                break;
+            }
+
+            case 'sounds': {
+                const ext = '.ctsound';
+                const tmp = [];
+                if (fs.readdirSync(dirPath).length > 0) {
+                    for (const file of fs.readdirSync(dirPath)) {
+                        const filePath = path.join(dirPath, file);
+                        const fileData = YAML.safeLoad(fs.readFileSync(filePath));
+                        const tmp2 = file.includes(ext) ?
+                            tmp.push(fileData) :
+                            null;
+                    }
+                }
+                projectData[key] = tmp;
+                break;
+            }
+
+            case 'styles': {
+                const ext = '.ctfont';
+                const tmp = [];
+                if (fs.readdirSync(dirPath).length > 0) {
+                    for (const file of fs.readdirSync(dirPath)) {
+                        const filePath = path.join(dirPath, file);
+                        const fileData = YAML.safeLoad(fs.readFileSync(filePath));
+                        const tmp2 = file.includes(ext) ?
+                            tmp.push(fileData) :
+                            null;
+                    }
+                }
+                projectData[key] = tmp;
+                break;
+            }
+
+            case 'textures': {
+                const ext = '.cttexture';
+                const tmp = [];
+                if (fs.readdirSync(dirPath).length > 0) {
+                    for (const file of fs.readdirSync(dirPath)) {
+                        const filePath = path.join(dirPath, file);
+                        const fileData = YAML.safeLoad(fs.readFileSync(filePath));
+                        const tmp2 = file.includes(ext) ?
+                            tmp.push(fileData) :
+                            null;
+                    }
+                }
+                projectData[key] = tmp;
+                break;
+            }
+
+            case 'types': {
+                const ext = '.cttype';
+                const tmp = [];
+                if (fs.readdirSync(dirPath).length > 0) {
+                    for (const file of fs.readdirSync(dirPath)) {
+                        const filePath = path.join(dirPath, file);
+                        let fileData = null;
+                        let tmp2 = null;
+                            // eslint-disable-next-line max-depth
+                        try {
+                            fileData = YAML.safeLoad(fs.readFileSync(filePath));
+                            tmp2 = Object.assign({}, fileData);
+                            tmp2.oncreate = fs.readFileSync(path.join(filePath + '.data', 'oncreate.js'), 'utf8');
+                            tmp2.onstep = fs.readFileSync(path.join(filePath + '.data', 'onstep.js'), 'utf8');
+                            tmp2.ondraw = fs.readFileSync(path.join(filePath + '.data', 'ondraw.js'), 'utf8');
+                            tmp2.ondestroy = fs.readFileSync(path.join(filePath + '.data', 'ondestroy.js'), 'utf8');
+                            const tmp3 = file.includes(ext) ?
+                                tmp.push(tmp2) :
+                                null;
+                        } catch (e) {
+                            void 0;
+                        }
+                    }
+                }
+                projectData[key] = tmp;
+                break;
+            }
+
+            default: {
+                console.error(key + ' was not loaded! Maybe a new feature?');
+                break;
+            }
+            }
+            console.debug(key + ' loaded successfully.');
         }
         projectData.scripts = [];
         for (const scriptName of scriptOrder) {
@@ -379,16 +385,16 @@
      */
     var loadProjectFile = async proj => {
         global.projdir = path.dirname(proj);
-        const data = await fs.readFile(proj, 'utf8');
+        const textProjData = await fs.readFile(proj, 'utf8');
         let projectData;
         // Before v1.3, projects were stored in JSON format
         try {
-            if (data.indexOf('{') === 0) { // First, make a silly check for JSON files
-                projectData = JSON.parse(data);
+            if (textProjData.indexOf('{') === 0) { // First, make a silly check for JSON files
+                projectData = JSON.parse(textProjData);
             } else {
                 try {
                     const YAML = require('js-yaml');
-                    projectData = YAML.safeLoad(data);
+                    projectData = YAML.load(textProjData);
                     if (!projectData.textures) {
                         loadProjectFiles(projectData, proj);
                     }
@@ -397,7 +403,7 @@
                     // eslint-disable-next-line no-console
                     console.warn(`Tried to load a file ${proj} as a YAML, but got an error (see below). Falling back to JSON.`);
                     console.error(e);
-                    projectData = JSON.parse(data);
+                    projectData = JSON.parse(textProjData);
                 }
             }
         } catch (e) {
@@ -416,41 +422,46 @@
         }
     };
 
-    window.loadProject = proj => {
+    window.loadProject = async proj => {
+        if (!proj) {
+            const baseMessage = 'An attempt to open a project with an empty path.';
+            alertify.error(baseMessage + ' See the console for the call stack.');
+            const err = new Error(baseMessage);
+            throw err;
+        }
         sessionStorage.projname = path.basename(proj);
-        global.projdir = path.dirname(proj);
 
-        fs.stat(proj + '.recovery', (err, stat) => {
-            if (!err && stat.isFile()) {
-                var targetStat = fs.statSync(proj),
-                    voc = window.languageJSON.intro.recovery;
-                window.alertify
-                .okBtn(voc.loadRecovery)
-                .cancelBtn(voc.loadTarget)
-                /* {0} — target file date
-                   {1} — target file state (newer/older)
-                   {2} — recovery file date
-                   {3} — recovery file state (newer/older)
-                */
-                .confirm(voc.message
-                    .replace('{0}', targetStat.mtime.toLocaleString())
-                    .replace('{1}', targetStat.mtime < stat.mtime? voc.older : voc.newer)
-                    .replace('{2}', stat.mtime.toLocaleString())
-                    .replace('{3}', stat.mtime < targetStat.mtime? voc.older : voc.newer)
-                )
-                .then(e => {
-                    if (e.buttonClicked === 'ok') {
-                        loadProjectFile(proj + '.recovery');
-                    } else {
-                        loadProjectFile(proj);
-                    }
-                    window.alertify
-                    .okBtn(window.languageJSON.common.ok)
-                    .cancelBtn(window.languageJSON.common.cancel);
-                });
-            } else {
-                loadProjectFile(proj);
+        let recoveryStat;
+        try {
+            recoveryStat = await fs.stat(proj + '.recovery');
+        } catch (err) {
+            // no recovery file found
+            void 0;
+        }
+        if (recoveryStat && recoveryStat.isFile()) {
+            const targetStat = await fs.stat(proj);
+            const voc = window.languageJSON.intro.recovery;
+            const userResponse = await window.alertify
+            .okBtn(voc.loadRecovery)
+            .cancelBtn(voc.loadTarget)
+            /* {0} — target file date
+                {1} — target file state (newer/older)
+                {2} — recovery file date
+                {3} — recovery file state (newer/older)
+            */
+            .confirm(voc.message
+                .replace('{0}', targetStat.mtime.toLocaleString())
+                .replace('{1}', targetStat.mtime < recoveryStat.mtime ? voc.older : voc.newer)
+                .replace('{2}', recoveryStat.mtime.toLocaleString())
+                .replace('{3}', recoveryStat.mtime < targetStat.mtime ? voc.older : voc.newer));
+            window.alertify
+            .okBtn(window.languageJSON.common.ok)
+            .cancelBtn(window.languageJSON.common.cancel);
+            if (userResponse.buttonClicked === 'ok') {
+                return loadProjectFile(proj + '.recovery');
             }
-        });
+            return loadProjectFile(proj);
+        }
+        return loadProjectFile(proj);
     };
 })(this);

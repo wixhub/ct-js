@@ -68,6 +68,7 @@ error_screenshots/
 reports/
 
 # ct specific
+/projects
 /export
 app/zipexport
 app/*.ict.zip
@@ -89,3 +90,5 @@ app/pleaseCtJSLoadWithoutGPUAccelerationMmkay
 app/debugger.html
 
 sketch.js
+
+**/**/*.orig

@@ -5,7 +5,8 @@
         Expects a following structure:
         {
             opened: boolean, // mutable by a context-menu instance
-            items: Array<IMenuItem>
+            items: Array<IMenuItem>,
+            columns: number
         }
         IMenuItem is:
         {
@@ -27,7 +28,7 @@
     @method open
     @method close
 
-context-menu(class="{opened: opts.menu.opened}" ref="root")
+context-menu(class="{opened: opts.menu.opened}" ref="root" style="{opts.menu.columns? 'columns: '+opts.menu.columns+';' : ''}")
     a(
         each="{item in opts.menu.items}"
         href="javascript: void 0;"
@@ -52,7 +53,9 @@ context-menu(class="{opened: opts.menu.opened}" ref="root")
             if (e.item.item.submenu && e.target.closest('context-menu') === this.root) { // prevent closing if a label with a submenu was clicked *directly*
                 e.stopPropagation();
             }
-            if (e.item.item.click) { // first `item` is a riot's reference to all looped vars, second is var's name in markup
+            // first `item` is a riot's reference to all looped vars,
+            // second is var's name in markup
+            if (e.item.item.click) {
                 e.item.item.click();
                 e.stopPropagation();
             }
@@ -66,10 +69,19 @@ context-menu(class="{opened: opts.menu.opened}" ref="root")
             setTimeout(() => {
                 noFakeClicks = false;
             }, 100);
-            y -= this.root.parentNode.getBoundingClientRect().y;
+            this.root.style.left = this.root.style.top = this.root.style.right = this.root.style.bottom = 'unset';
+            this.root.style.position = 'fixed';
             if (x !== void 0 && y !== void 0) {
-                this.root.style.left = x + 'px';
-                this.root.style.top = y + 'px';
+                if (x < window.innerWidth / 2) {
+                    this.root.style.left = x + 'px';
+                } else {
+                    this.root.style.right = (window.innerWidth - x) + 'px';
+                }
+                if (y < window.innerHeight / 2) {
+                    this.root.style.top = y + 'px';
+                } else {
+                    this.root.style.bottom = (window.innerHeight - y) + 'px';
+                }
             }
             this.opts.menu.opened = true;
             this.update();
@@ -108,7 +120,7 @@ context-menu(class="{opened: opts.menu.opened}" ref="root")
             } else {
                 e.stopPropagation();
             }
-        }
+        };
         this.on('mount', () => {
             document.addEventListener('click', clickListener);
         });

@@ -1,13 +1,20 @@
 room-backgrounds-editor.room-editor-Backgrounds.tabbed.tall
     ul
         li.bg(each="{background, ind in opts.room.backgrounds}" oncontextmenu="{onContextMenu}")
-            img(src="{background.texture === -1? 'data/img/notexture.png' : (glob.texturemap[background.texture].src.split('?')[0] + '_prev.png?' + glob.texturemap[background.texture].g.lastmod)}" onclick="{onChangeBgTexture}")
+            img(src="{getTexturePreview(background.texture)}" onclick="{onChangeBgTexture}")
             span
                 span(class="{active: detailedBackground === background}" onclick="{editBackground}")
                     svg.feather
                         use(xlink:href="data/icons.svg#settings")
-                | {glob.texturemap[background.texture].g.name} ({background.depth})
+                | {getTextureFromId(background.texture).name} ({background.depth})
             .clear
+            .anErrorNotice(if="{background.texture && background.texture !== -1 && !getTextureFromId(background.texture).tiled && !getTextureFromId(background.texture).ignoreTiledUse}")
+                | {voc.notBackgroundTextureWarning}
+                |
+                span.a(onclick="{fixTexture(background)}") {voc.fixBackground}
+                |
+                |
+                span.a(onclick="{dismissWarning(background)}") {voc.dismissWarning}
             div(if="{detailedBackground === background}")
                 .clear
                 label
@@ -59,6 +66,11 @@ room-backgrounds-editor.room-editor-Backgrounds.tabbed.tall
     script.
         const glob = require('./data/node_requires/glob');
         this.glob = glob;
+
+        const {getTextureFromId, getTexturePreview} = require('./data/node_requires/resources/textures');
+        this.getTextureFromId = getTextureFromId;
+        this.getTexturePreview = getTexturePreview;
+
         this.pickingBackground = false;
         this.namespace = 'roombackgrounds';
         this.mixin(window.riotVoc);
@@ -68,23 +80,23 @@ room-backgrounds-editor.room-editor-Backgrounds.tabbed.tall
                 this.parent.refreshRoomCanvas();
             }
         });
-        this.onTextureSelected = texture => e => {
+        this.onTextureSelected = texture => () => {
             this.editingBackground.texture = texture.uid;
             this.pickingBackground = false;
             this.creatingBackground = false;
             this.update();
         };
-        this.onTextureCancel = e => {
+        this.onTextureCancel = () => {
             this.pickingBackground = false;
             if (this.creatingBackground) {
-                let bgs = this.opts.room.backgrounds;
+                const bgs = this.opts.room.backgrounds;
                 bgs.splice(bgs.indexOf(this.editingBackground), 1);
                 this.parent.resortRoom();
                 this.creatingBackground = false;
             }
             this.update();
         };
-        this.addBg = function () {
+        this.addBg = () => {
             var newBg = {
                 depth: 0,
                 texture: -1,
@@ -94,9 +106,7 @@ room-backgrounds-editor.room-editor-Backgrounds.tabbed.tall
             this.editingBackground = newBg;
             this.pickingBackground = true;
             this.creatingBackground = true;
-            this.opts.room.backgrounds.sort(function (a, b) {
-                return a.depth - b.depth;
-            });
+            this.opts.room.backgrounds.sort((a, b) => a.depth - b.depth);
             this.parent.resortRoom();
             this.update();
         };
@@ -123,9 +133,7 @@ room-backgrounds-editor.room-editor-Backgrounds.tabbed.tall
         };
         this.onChangeBgDepth = e => {
             e.item.background.depth = Number(e.target.value);
-            this.opts.room.backgrounds.sort(function (a, b) {
-                return a.depth - b.depth;
-            });
+            this.opts.room.backgrounds.sort((a, b) => a.depth - b.depth);
             this.parent.resortRoom();
         };
 
@@ -138,4 +146,13 @@ room-backgrounds-editor.room-editor-Backgrounds.tabbed.tall
                     this.detailedBackground.extends = {};
                 }
             }
+        };
+
+        this.fixTexture = background => () => {
+            const tex = getTextureFromId(background.texture);
+            tex.tiled = true;
+        };
+        this.dismissWarning = background => () => {
+            const tex = getTextureFromId(background.texture);
+            tex.ignoreTiledUse = true;
         };
