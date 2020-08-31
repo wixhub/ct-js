@@ -24,5 +24,5 @@ desktop\\.ini
 module.exports = {
     get() {
         return defaultGitignore;
-    },
+    }
 };
