@@ -51,6 +51,7 @@ main-menu.flexcol
     div.flexitem.relative(if="{global.currentProject}")
         debugger-screen-embedded(if="{tab === 'debug'}" params="{debugParams}" data-hotkey-scope="play" ref="debugger")
         project-settings(show="{tab === 'project'}" data-hotkey-scope="project")
+        icon-panel(if="{tab === 'icons'}" data-hotkey-scope="icons")
         textures-panel(show="{tab === 'texture'}" data-hotkey-scope="texture")
         ui-panel(show="{tab === 'ui'}" data-hotkey-scope="ui")
         fx-panel(show="{tab === 'fx'}" data-hotkey-scope="fx")
@@ -488,12 +489,11 @@ main-menu.flexcol
             runCtExport(global.currentProject, global.projdir)
             .then(() => {
                 nw.Shell.openExternal(`http://localhost:${fileServer.address().port}/`);
-
             });
         };
-        hotkey.on('Alt+F5', this.runProjectAlt);
+        window.hotkeys.on('Alt+F5', this.runProjectAlt);
 
-        this.zipProject = async (=) => {
+        this.zipProject = async () => {
             try {
                 const os = require('os');
                 const path = require('path');
@@ -590,6 +590,14 @@ main-menu.flexcol
                     } else {
                         localStorage.disableBuiltInDebugger = 'yes';
                     }
+                }
+            }, {
+                type: 'separator'
+            }, {
+                label: window.languageJSON.menu.openIconList,
+                click: () => {
+                    this.tab = 'icons';
+                    this.update();
                 }
             }, {
                 type: 'separator'
