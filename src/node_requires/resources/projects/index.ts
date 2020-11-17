@@ -55,11 +55,19 @@ const getProjectIct = function (projPath: string): string {
     return projPath;
 };
 
+let projectPath: string | void = void 0;
+const getProjectPath = () => projectPath;
+const setProjectPath = (newPath: string) => {
+    projectPath = newPath;
+};
+
 module.exports = {
     defaultProject,
     getDefaultProjectDir,
     getProjectThumbnail,
     getProjectIct,
     getProjectDir,
-    getExamplesDir
+    getExamplesDir,
+    getProjectPath,
+    setProjectPath
 };
