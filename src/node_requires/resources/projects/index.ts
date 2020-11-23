@@ -34,7 +34,7 @@ const getProjectDir = function (projPath: string): string {
  * @param {string} projPath
  * @param {boolean} [fs] Whether to return a filesystem path (true) or a URL (false; default).
  */
-const getProjectThumbnail = function (projPath: string, fs?: boolean) {
+const getProjectThumbnail = function (projPath: string, fs?: boolean): string {
     const path = require('path');
     projPath = getProjectDir(projPath);
     if (fs) {
@@ -56,8 +56,8 @@ const getProjectIct = function (projPath: string): string {
 };
 
 let projectPath: string | void = void 0;
-const getProjectPath = () => projectPath;
-const setProjectPath = (newPath: string) => {
+const getProjectPath = (): string|void => projectPath;
+const setProjectPath = (newPath: string): void => {
     projectPath = newPath;
 };
 

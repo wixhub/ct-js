@@ -1,34 +1,29 @@
-const textures = require('./textures');
-const particles = require('./particles');
-
 const fs = require('fs-extra'),
       path = require('path');
 
-const {getProjectPath} = require('./projects');
+import {getProjectPath} from './projects';
 
-const getAbsolutePath = (subpath: string) => {
+const getAbsolutePath = (subpath: string): string => {
     const pp = getProjectPath();
     if (!pp) {
         throw new Error('Project path must be set');
     }
-    path.join(pp, subpath);
+    return path.join(pp, subpath);
 };
 
 /**
  * @async
  */
-const saveResource = (resource: IResource, path: string) =>
+const saveResource = (resource: IResource, path: string): Promise<void> =>
     fs.outputJSON(getAbsolutePath(path), resource);
 
 /**
  * @async
  */
-const loadResource = (path: string) =>
+const loadResource = (path: string): Promise<IResource> =>
     fs.readJSON(getAbsolutePath(path));
 
-module.exports = {
-    ...textures,
-    ...particles,
+export {
     getAbsolutePath,
     saveResource,
     loadResource
