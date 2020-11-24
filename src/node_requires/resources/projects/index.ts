@@ -1,5 +1,14 @@
 const defaultProject = require('./defaultProject');
 
+// These must return a path to a directory
+let projectPath: string | void = void 0;
+let currentProject: IProject | void = void 0;
+const getProjectPath = (): string|void => projectPath;
+const setProjectPath = (newPath: string): void => {
+    projectPath = newPath;
+};
+const getProject = (): IProject|void => currentProject;
+
 /**
  * @returns {Promise<string>} A promise that resolves into the absolute path
  * to the projects' directory
@@ -21,53 +30,49 @@ const getExamplesDir = function (): string {
 };
 
 /**
- * Returns a path that does not end with `.ict`
- * @param  {string} projPath
- * @returns {string}
- */
-const getProjectDir = function (projPath: string): string {
-    return projPath.replace(/\.ict$/, '');
-};
-
-/**
  * Returns a path to the project's thumbnail.
  * @param {string} projPath
  * @param {boolean} [fs] Whether to return a filesystem path (true) or a URL (false; default).
  */
 const getProjectThumbnail = function (projPath: string, fs?: boolean): string {
     const path = require('path');
-    projPath = getProjectDir(projPath);
     if (fs) {
         return path.join(projPath, 'img', 'splash.png');
     }
-    return `file://${projPath.replace(/\\/g, '/')}/img/splash.png`;
+    return `file://${projPath.replace(/\\/g, '/')}/splash.png`;
 };
 
-/**
- * Returns a path that ends with `.ict` file
- * @param  {string} projPath
- * @returns {string}
- */
-const getProjectIct = function (projPath: string): string {
-    if (!(/\.ict$/.test(projPath))) {
-        return projPath + '.ict';
-    }
-    return projPath;
+const loadProject = async (projectPath: string): Promise<IProject> => {
+    const path = require('path'),
+          fs = require('fs-extra');
+    await Promise.all(['actions', 'assets', 'includes', 'scripts'].map(subpath =>
+        fs.ensureDir(path.join(projectPath, subpath))));
+    await fs.pathExists(path.join(projectPath, '.gitignore'))
+        .then(async (exists: boolean) => {
+            if (!exists) {
+                const gitignore = await fs.readFile('./data/defaultGitignore.txt');
+                return fs.writeFile(path.join(projectPath, '.gitignore'), gitignore);
+            }
+            return void 0;
+        });
+    currentProject = fs.readYaml(path.join(projectPath, 'project.yaml')) as IProject;
+    setProjectPath(projectPath);
+    return currentProject;
 };
 
-let projectPath: string | void = void 0;
-const getProjectPath = (): string|void => projectPath;
-const setProjectPath = (newPath: string): void => {
-    projectPath = newPath;
+const saveProject = async (): Promise<void> => {
+    const fs = require('fs-extra');
+    await fs.outputYaml(getProjectPath());
 };
 
 module.exports = {
     defaultProject,
     getDefaultProjectDir,
     getProjectThumbnail,
-    getProjectIct,
-    getProjectDir,
     getExamplesDir,
     getProjectPath,
-    setProjectPath
+    setProjectPath,
+    loadProject,
+    getProject,
+    saveProject
 };

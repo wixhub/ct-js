@@ -1,8 +1,12 @@
 {
+    "include": [
+        "./src/node_requires/**/*"
+    ],
     "compilerOptions": {
         "target": "es2020",
         "module": "umd",
         "noImplicitAny": true,
-        "moduleResolution": "node"
+        "moduleResolution": "node",
+        "baseUrl": "./src"
     }
 }
