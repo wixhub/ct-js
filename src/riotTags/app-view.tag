@@ -1,5 +1,6 @@
 app-view.flexcol
     nav.nogrow.flexrow(if="{global.currentProject}")
+        // Smaller control buttons
         ul#app.nav.tabs
             li.it30#ctlogo(onclick="{changeTab('menu')}" title="{voc.ctIDE}" class="{active: tab === 'menu'}")
                 svg.feather.nmr
@@ -10,8 +11,6 @@ app-view.flexcol
             li.it30.nbr(onclick="{saveProject}" title="{vocGlob.save} (Control+S)" data-hotkey="Control+s")
                 svg.feather
                     use(xlink:href="data/icons.svg#save")
-
-        ul#mainnav.nav.tabs
             li.nbl.it30(onclick="{runProject}" class="{active: tab === 'debug'}" title="{voc.launch} {voc.launchHotkeys}" data-hotkey="F5")
                 svg.feather.rotateccw(show="{exportingProject}")
                     use(xlink:href="data/icons.svg#refresh-ccw")
@@ -19,14 +18,23 @@ app-view.flexcol
                     use(xlink:href="data/icons.svg#play")
                 span(if="{tab !== 'debug'}") {voc.launch}
                 span(if="{tab === 'debug'}") {voc.restart}
+        // Persistent tabs for project settings and assets
+        ul.nav.tabs.nogrow
             li(onclick="{changeTab('project')}" class="{active: tab === 'project'}" data-hotkey="Control+1" title="Control+1")
                 svg.feather
                     use(xlink:href="data/icons.svg#sliders")
                 span {voc.project}
-            li(onclick="{changeTab('textures')}" class="{active: tab === 'textures'}" data-hotkey="Control+2" title="Control+2")
+            li(onclick="{changeTab('assets')}" class="{active: tab === 'assets'}" data-hotkey="Control+2" title="Control+2")
                 svg.feather
-                    use(xlink:href="data/icons.svg#texture")
-                span {voc.texture}
+                    use(xlink:href="data/icons.svg#sliders")
+                span {voc.assets}
+        // Opened assets
+        ul.nav.tabs.scrollable
+            virtual(each="{asset, i in openedAssets}")
+                li(onclick="{openAsset(asset)}" class="{active: tab === asset}" data-hotkey="Control+{i + 3}" title="{i + 3 < 10 ? 'Control+' + (i+3) : ''}")
+                    svg.feather
+                        use(xlink:href="data/icons.svg#texture")
+                    span {voc.texture}
             li(onclick="{changeTab('ui')}" class="{active: tab === 'ui'}" data-hotkey="Control+3" title="Control+3")
                 svg.feather
                     use(xlink:href="data/icons.svg#ui")
