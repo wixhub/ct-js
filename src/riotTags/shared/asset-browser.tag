@@ -27,9 +27,9 @@ asset-browser.flexfix
         ul.cards(class="{list: localStorage[opts.namespace? (opts.namespace+'Layout') : 'defaultAssetLayout'] === 'list'}")
             li(
                 each="{asset in (searchResults? searchResults : collection)}"
-                oncontextmenu="{parent.opts.contextmenu && parent.opts.contextmenu(asset)}"
-                onlong-press="{parent.opts.contextmenu && parent.opts.contextmenu(asset)}"
-                onclick="{parent.opts.click && parent.opts.click(asset)}"
+                onclick="{clickHandler}"
+                ondoubleclick="{doubleClickHandler}"
+                class="{selected: selection.contains(item)}"
                 no-reorder
             )
                 span {parent.opts.names? parent.opts.names(asset) : asset.name}
@@ -59,19 +59,34 @@ asset-browser.flexfix
                     use(xlink:href="data/icons.svg#{localStorage[opts.namespace? (opts.namespace+'Layout') : 'defaultAssetLayout'] === 'list'? 'grid' : 'list'}")
             .spacer
             // Sort options
+            // by date
             button.inline.square(
                 onclick="{switchSort('date')}"
-                class="{selected: sort === 'date' && !searchResults}"
+                class="{selected: sorting === 'date' && !searchResults}"
+                title="{voc.sortByDate}"
             )
                 svg.feather
                     use(xlink:href="data/icons.svg#clock")
+            // by name
             button.inline.square(
                 onclick="{switchSort('name')}"
-                class="{selected: sort === 'name' && !searchResults}"
+                class="{selected: sorting === 'name' && !searchResults}"
+                title="{voc.sortByName}"
             )
                 svg.feather
                     use(xlink:href="data/icons.svg#sort-alphabetically")
-    script
+            // by type
+            button.inline.square(
+                onclick="{switchSort('type')}"
+                class="{selected: sorting === 'type' && !searchResults}"
+                title="{voc.sortByType}"
+            )
+                svg.feather
+                    use(xlink:href="data/icons.svg#x")
+    script.
+        this.namespace = 'assetViewer';
+        this.mixin(window.riotVoc);
+
         this.filter = ['all'];
         this.toggleFilter = type => () => {
             if (type === 'all') {
@@ -86,3 +101,190 @@ asset-browser.flexfix
                 }
             }
         };
+
+        const resetSelection = () => {
+            this.selection = [];
+            this.prevItem = void 0;
+        };
+
+        const path = required('path'),
+              fs = require('fs-extra');
+        const projects = require('./data/node_requires/resources/projects');
+
+        // Navigation stuff
+        this.path = './';
+        this.navigateTo = p => () => {
+            if (path.isAbsolute(p)) {
+                throw new Error(`[asset-viewer] Cannot navigate by absolute path. Got ${p}`);
+            }
+            if (path.normalize(p).startsWith('..')) {
+                throw new Error(`[asset-viewer] Cannot navigate to ${p}`);
+            }
+        };
+        this.navigateUp = () => () => {
+            if (path.normalize(this.path) !== '.') {
+                this.path = path.join(this.path, '..');
+            }
+            resetSelection();
+            rescan();
+        };
+        this.navigateDown = subfolder => () => {
+            this.navigateTo(path.join(this.path, subfolder));
+        };
+
+        const getAbsolute = relative => path.join();
+        const ctAssetPattern = /^([^\n]+)\.ct([a-z]+)$/; // filename should be at least one symbol
+        const ctDataPattern = /^[^\n]+\.ct[a-z]+\.data$/;
+        this.rescan = async () => {
+            let entries = await fs.readdir(path.join(projects.getProjectPath(), this.path), {
+                withFIleTypes: true
+            });
+            entries = entries.filter(entry =>
+                (entry.isDirectory() && !ctDataPattern.test(entry.name)) || // skip data folders
+                (entry.isFile() && ctAssetPattern.test(entry.name)) // skip non-ct.js files
+            );
+            const statPromises = [];
+            this.collection = entries.map(entry => {
+                let obj;
+                // Lazily fetch modification date
+                statPromises.push(
+                    fs.stat(path.join(this.path, entry.name))
+                    .then(result => {
+                        obj.lastModified = result.mtime;
+                    })
+                );
+                // Compute primary metadata
+                if (entry.isFile()) {
+                    const exec = ctAssetPattern.exec(entry.name);
+                    obj = {
+                        name: exec[1],
+                        type: exec[2],
+                        path: path.join(this.path, entry.name)
+                    };
+                } else {
+                    return {
+                        name: entry.name,
+                        type: 'directory',
+                        path: path.join(this.path, entry.name)
+                    };
+                }
+                return obj;
+            });
+            if (this.sorting === 'date') {
+                await Promise.all(statPromises);
+            }
+            this.sort();
+            this.update();
+        };
+
+        // Sorting logic
+        this.sorting = 'name';
+        this.sortingFlipped = false;
+        const directoriesFirst = (a, b) => {
+            if (a.type === 'directory' && b.type !== 'directory') {
+                return -1;
+            }
+            if (b.type === 'directory' && a.type !== 'directory') {
+                return 1;
+            }
+            return 0;
+        };
+        this.switchSort = type => () => {
+            if (type === this.sorting) {
+                this.sortingFlipped = !this.sortingFlipped;
+            } else {
+                this.sortingFlipped = false;
+            }
+            this.sorting = type;
+            this.sort();
+        };
+        this.sort = () => {
+            if (this.sorting === 'name') {
+                this.sortByName();
+            } else if (this.sorting === 'date') {
+                this.sortByDate();
+            } else {
+                this.sortByType();
+            }
+        };
+        this.sortByName = () => {
+            this.collection.sort((a, b) => {
+                let d = directoriesFirst(a, b);
+                if (d !== 0) {
+                    return d;
+                }
+                if (!this.sortingFlipped) {
+                    return a.name.localeCompare(b.name, undefined, {
+                        numeric: true
+                    });
+                }
+                return b.name.localeCompare(a.name, undefined, {
+                    numeric: true
+                });
+            });
+        };
+        this.sortByDate = () => {
+            this.collection.sort((a, b) => {
+                let d = directoriesFirst(a, b);
+                if (d !== 0) {
+                    return d;
+                }
+                if (!this.sortingFlipped) {
+                    return a.date - b.date;
+                }
+                return b.date - a.date;
+            });
+        };
+        this.sortByType = () => {
+            this.collection.sort((a, b) => {
+                let d = directoriesFirst(a, b);
+                if (d !== 0) {
+                    return d;
+                }
+                if (!this.sortingFlipped) {
+                    return a.type.localeCompare(b.type);
+                }
+                return b.type.localeCompare(a.type);
+            });
+        };
+
+        this.getAssets = () => this.searchResults || this.collection
+
+        this.selection = [];
+        this.clickHandler = e => {
+            const {asset} = e.item;
+            // This part is only for selecting assets. Actions are triggered on double-click
+            if (e.shiftKey) {
+                // Multiple selection
+                const prevIndex = this.getAssets().indexOf(this.prevItem);
+                const currentIndex = this.getAssets().indexOf(item);
+                if (prevIndex > currentIndex) {
+                    [prevIndex, currentIndex] = [currentIndex, prevIndex];
+                }
+                for (let i = prevIndex + 1; i < currentIndex; i++) {
+                    if (!this.selection.contains(asset)) {
+                        this.selection.push(asset);
+                    }
+                }
+            } else if (e.ctrlKey) {
+                // Select/deselect an additional item
+                if (this.selection.contains(asset)) {
+                    this.selection.push(asset);
+                } else {
+                    this.selection.splice(this.selection.indexOf(asset), 1);
+                }
+            } else {
+                // Singular selection
+                this.selection = [asset];
+            }
+            this.prevItem = e.item.asset;
+        };
+        this.doubleClickHandler = e => {
+            if (e.shiftKey || e.ctrlKey) {
+                for (const item in this.selection) {
+                    // TODO:
+                }
+            }
+        };
+
+        this.rescan();
