@@ -8,6 +8,16 @@ app-view
         flex-flow row wrap
     li
         position relative
+    .horizontalscroll
+        position absolute
+        height calc(100% - 20rem)
+        width 2rem
+        transform rotate(-90deg) translateY(-80px)
+        transform-origin right top
+        & > *
+            transform rotate(90deg)
+            transform-origin right top
+
 #theCatMenu
     top 100%
     left 0

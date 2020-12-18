@@ -1,10 +1,13 @@
-const defaultProject = require('./defaultProject');
+import {defaultProject} from './defaultProject';
 
-// These must return a path to a directory
+// These must return a path to a **DIRECTORY**
 let projectPath: string | void = void 0;
 let currentProject: IProject | void = void 0;
 const getProjectPath = (): string|void => projectPath;
 const setProjectPath = (newPath: string): void => {
+    if (newPath.endsWith('project.yaml')) {
+        throw new Error('[resources/projects/index] The path to a project must not point to the project.yaml file, but to its directory.');
+    }
     projectPath = newPath;
 };
 const getProject = (): IProject|void => currentProject;
@@ -42,11 +45,8 @@ const getProjectThumbnail = function (projPath: string, fs?: boolean): string {
     return `file://${projPath.replace(/\\/g, '/')}/splash.png`;
 };
 
-const loadProject = async (projectPath: string): Promise<IProject> => {
-    const path = require('path'),
-          fs = require('fs-extra');
-    await Promise.all(['actions', 'assets', 'includes', 'scripts'].map(subpath =>
-        fs.ensureDir(path.join(projectPath, subpath))));
+const putGitignore = async (projectPath: string) => {
+    const fs = require('fs-extra');
     await fs.pathExists(path.join(projectPath, '.gitignore'))
         .then(async (exists: boolean) => {
             if (!exists) {
@@ -55,6 +55,14 @@ const loadProject = async (projectPath: string): Promise<IProject> => {
             }
             return void 0;
         });
+};
+
+const loadProject = async (projectPath: string): Promise<IProject> => {
+    const path = require('path'),
+          fs = require('fs-extra');
+    await Promise.all(['actions', 'assets', 'includes', 'scripts'].map(subpath =>
+        fs.ensureDir(path.join(projectPath, subpath))));
+    await putGitignore(projectPath);
     currentProject = fs.readYaml(path.join(projectPath, 'project.yaml')) as IProject;
     setProjectPath(projectPath);
     return currentProject;
@@ -62,7 +70,19 @@ const loadProject = async (projectPath: string): Promise<IProject> => {
 
 const saveProject = async (): Promise<void> => {
     const fs = require('fs-extra');
-    await fs.outputYaml(getProjectPath());
+    await fs.outputYaml(path.json(getProjectPath(), 'project.yaml'));
+};
+
+const createProject = async (projectPath: string, name: string): Promise<void> => {
+    const path = require('path'),
+          fs = require('fs-extra');
+    await Promise.all(['actions', 'assets', 'includes', 'scripts'].map(subpath =>
+        fs.ensureDir(path.join(projectPath, subpath))));
+    await putGitignore(projectPath);
+    currentProject = defaultProject.get();
+    currentProject.settings.authoring.title = name;
+    setProjectPath(projectPath);
+    saveProject();
 };
 
 module.exports = {
@@ -73,6 +93,9 @@ module.exports = {
     getProjectPath,
     setProjectPath,
     loadProject,
+    createProject,
     getProject,
     saveProject
 };
+
+export default module.exports;

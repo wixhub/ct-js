@@ -1,3 +1,12 @@
+//
+    Displays an asset manager for picking, creating, and/or managing assets in the project
+
+    @attribute (atomic) nocreation
+        Hides buttons for asset and folder creation
+    @attribute (riot array) forcefilter
+        Sets the filter's value on startup (e.g. forcefilter="{['texture', 'skeleton']}" will show
+        only textures and skeletons) and removes filter controls from UI
+
 asset-browser.flexfix
     .flexfix-header
         .nogrow
@@ -13,15 +22,18 @@ asset-browser.flexfix
                     svg.feather.dim(onclick="{navigateUp}")
                         use(xlink:href="data/icons.svg#chevron-up")
         .filler
-        .nogrow
+        .nogrow(if="{!opts.nocreation}")
             button
-                svg.feather.dim(onclick="{navigateUp}")
+                svg.feather.dim(onclick="{promptNewFolder}")
                     use(xlink:href="data/icons.svg#folder-plus")
                 span {voc.newFolder}
-            button
-                svg.feather.dim(onclick="{navigateUp}")
-                    use(xlink:href="data/icons.svg#plus")
-                span {voc.newAsset}
+            .relative
+                button
+                    // Targets the context-menu tag at the bottom of this tag
+                    svg.feather.dim(onclick="{() => refs.newAssetMenu.toggle())}")
+                        use(xlink:href="data/icons.svg#plus")
+                    span {voc.newAsset}
+                context-menu(menu="{newAssetMenu}" ref="newAssetMenu")
     .flexfix-body
         // Asset cards
         ul.cards(class="{list: localStorage[opts.namespace? (opts.namespace+'Layout') : 'defaultAssetLayout'] === 'list'}")
@@ -30,6 +42,7 @@ asset-browser.flexfix
                 onclick="{clickHandler}"
                 ondoubleclick="{doubleClickHandler}"
                 class="{selected: selection.contains(item)}"
+                if="{filter[0] === 'all' || filter.contains(asset.type)}"
                 no-reorder
             )
                 span {parent.opts.names? parent.opts.names(asset) : asset.name}
@@ -37,7 +50,7 @@ asset-browser.flexfix
                 img(if="{parent.opts.thumbnails}" src="{parent.opts.thumbnails(asset)}")
     // Bottom row
     .flexfix-footer.flexrow
-        .nogrow
+        .nogrow(if="{!opts.forcefilter}")
             // Filter settings
             h3 {voc.filterHeader}
             - var assetTypes = ['all', 'textures', 'styles', 'tandems', 'sounds', 'types', 'rooms']
@@ -87,7 +100,7 @@ asset-browser.flexfix
         this.namespace = 'assetViewer';
         this.mixin(window.riotVoc);
 
-        this.filter = ['all'];
+        this.filter = this.opts.forcefilter ? this.opts.forcefilter : ['all'];
         this.toggleFilter = type => () => {
             if (type === 'all') {
                 this.filter = ['all'];
@@ -281,10 +294,49 @@ asset-browser.flexfix
         };
         this.doubleClickHandler = e => {
             if (e.shiftKey || e.ctrlKey) {
+                // Open all the selected assets in separate tabs
                 for (const item in this.selection) {
                     // TODO:
                 }
             }
+        };
+
+        const names = this.vocGlob.common.resourceNames;
+        const hints = this.vocGlob.common.resourceHints;
+        this.newAssetMenu = {
+            opened: false
+            items: []
+        };
+        // Create items from bare strings, for brewity
+        const bakeMenuEntry = type => ({
+            label: names[type],
+            icon: type,
+            title: hints[type],
+            onclick: () => {
+                this.promptNewAsset(type);
+            }
+        });
+        this.newAssetMenu.items.push(...['texture', 'type', 'room'].map(bakeMenuEntry));
+        this.newAssetMenu.items.push({
+            type: 'separator'
+        });
+        this.newAssetMenu.items.push(...['sound', 'tandem', 'skeleton', 'style', 'font'].map(bakeMenuEntry));
+
+        this.promptNewAsset = type => {
+            alertify
+            .defaultValue('')
+            .prompt(window.languageJSON.common.newname)
+            .then(e => {
+                if (e.inputValue && e.buttonClicked !== 'cancel') {
+                    this.editedSound.name = e.inputValue;
+                    this.update();
+                }
+            });
+            // TODO:
+        };
+
+        this.promptNewFolder = () => {
+            // TODO:
         };
 
         this.rescan();

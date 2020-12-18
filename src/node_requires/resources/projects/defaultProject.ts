@@ -1,6 +1,9 @@
-const defaultProjectTemplate = {
+const defaultProjectTemplate: IProject = {
     ctjsVersion: process.versions.ctjs,
     notes: '/* empty */',
+    // Ct.js' themeDay colors
+    palette: ['#446adb', '#5144db', '#44dbb5', '#4ab660', '#ff9748', '#d44f57'],
+    startroom: -1,
     libs: {
         place: {
             gridX: 1024,
@@ -11,19 +14,8 @@ const defaultProjectTemplate = {
         },
         mouse: {},
         keyboard: {},
-        'keyboard.polyfill': {},
         'sound.howler': {}
     },
-    textures: [],
-    skeletons: [],
-    types: [],
-    sounds: [],
-    styles: [],
-    rooms: [],
-    actions: [],
-    emitterTandems: [],
-    scripts: [],
-    starting: 0,
     settings: {
         authoring: {
             author: '',
@@ -37,7 +29,8 @@ const defaultProjectTemplate = {
             maxFPS: 60,
             pixelatedrender: false,
             highDensity: true,
-            desktopMode: 'maximized'
+            desktopMode: 'maximized',
+            hideCursor: false
         },
         export: {
             windows: true,
@@ -54,8 +47,8 @@ const defaultProjectTemplate = {
     }
 };
 
-module.exports = {
-    get() {
+export class defaultProject {
+    static get(): IProject {
         return JSON.parse(JSON.stringify(defaultProjectTemplate));
     }
-};
+}

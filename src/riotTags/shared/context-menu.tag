@@ -11,7 +11,8 @@
         IMenuItem is:
         {
             label: string,
-            icon?: string, // a name of an svg icon, e.g. 'check'
+            icon?: string, // a name of an svg icon, e.g. 'check',
+            title?: string, // a helpful notice shown on hover
 
             type?: 'checkbox'|'separator'|any,
             click?: function,
@@ -37,6 +38,7 @@ context-menu(class="{opened: opts.menu.opened}" ref="root" style="{opts.menu.col
         onclick="{onItemClick}"
         tabindex="{'-1': item.type === 'separator'}"
         data-hotkey="{item.hotkey}"
+        title="{item.title}"
     )
         svg.context-menu-anIcon(if="{item.icon && item.type !== 'separator' && item.type !== 'checkbox'}" class="{item.iconClass || 'feather'}")
             use(xlink:href="data/icons.svg#{item.icon instanceof Function? item.icon() : item.icon}")

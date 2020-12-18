@@ -28,44 +28,26 @@ app-view.flexcol
                 svg.feather
                     use(xlink:href="data/icons.svg#sliders")
                 span {voc.assets}
-        // Opened assets
-        ul.nav.tabs.scrollable
+        // Dynamic assets' tabs
+        ul.nav.tabs.horizontalscroll
+            // @see https://css-tricks.com/pure-css-horizontal-scrolling/
+            // But as we call it in Russia, this implementation is a polniy pizdets.
             virtual(each="{asset, i in openedAssets}")
                 li(onclick="{openAsset(asset)}" class="{active: tab === asset}" data-hotkey="Control+{i + 3}" title="{i + 3 < 10 ? 'Control+' + (i+3) : ''}")
                     svg.feather
                         use(xlink:href="data/icons.svg#texture")
                     span {voc.texture}
-            li(onclick="{changeTab('ui')}" class="{active: tab === 'ui'}" data-hotkey="Control+3" title="Control+3")
-                svg.feather
-                    use(xlink:href="data/icons.svg#ui")
-                span {voc.ui}
-            li(onclick="{changeTab('fx')}" class="{active: tab === 'fx'}" data-hotkey="Control+4" title="Control+4")
-                svg.feather
-                    use(xlink:href="data/icons.svg#sparkles")
-                span {voc.fx}
-            li(onclick="{changeTab('sounds')}" class="{active: tab === 'sounds'}" data-hotkey="Control+5" title="Control+5")
-                svg.feather
-                    use(xlink:href="data/icons.svg#headphones")
-                span {voc.sounds}
-            li(onclick="{changeTab('types')}" class="{active: tab === 'types'}" data-hotkey="Control+6" title="Control+6")
-                svg.feather
-                    use(xlink:href="data/icons.svg#type")
-                span {voc.types}
-            li(onclick="{changeTab('rooms')}" class="{active: tab === 'rooms'}" data-hotkey="Control+7" title="Control+7")
-                svg.feather
-                    use(xlink:href="data/icons.svg#room")
-                span {voc.rooms}
+        .nogrow
+            // TODO: implement long-press animation and deletion event
+            svg.feather(onclick="{closeTabs}")
+                use(xlink:href="data/icons.svg#texture")
     div.flexitem.relative(if="{global.currentProject}")
+        // Persistent views
         main-menu(show="{tab === 'menu'}")
         debugger-screen-embedded(if="{tab === 'debug'}" params="{debugParams}" data-hotkey-scope="play" ref="debugger")
         project-settings(show="{tab === 'project'}" data-hotkey-scope="project")
-        textures-panel(show="{tab === 'textures'}" data-hotkey-scope="textures")
-        ui-panel(show="{tab === 'ui'}" data-hotkey-scope="ui")
-        fx-panel(show="{tab === 'fx'}" data-hotkey-scope="fx")
-        sounds-panel(show="{tab === 'sounds'}" data-hotkey-scope="sounds")
-        types-panel(show="{tab === 'types'}" data-hotkey-scope="types")
-        rooms-panel(show="{tab === 'rooms'}" data-hotkey-scope="rooms")
         patreon-screen(if="{tab === 'patrons'}" data-hotkey-scope="patrons")
+        // Dynamic tabs' editors
     new-project-onboarding(if="{sessionStorage.showOnboarding && localStorage.showOnboarding !== 'off'}")
     script.
         const fs = require('fs-extra');
