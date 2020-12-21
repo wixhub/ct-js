@@ -13,7 +13,7 @@ const builtInThemes = [
 interface ITheme {
     name: string;
     translated: string;
-    monacoTheme: object;
+    monacoTheme: Record<string, unknown>;
     css: string;
 }
 
