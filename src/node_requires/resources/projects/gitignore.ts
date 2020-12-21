@@ -21,8 +21,4 @@ node_modules
 desktop\\.ini
 `;
 
-module.exports = {
-    get() {
-        return defaultGitignore;
-    }
-};
+export default defaultGitignore;

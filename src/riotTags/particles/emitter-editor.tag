@@ -232,7 +232,7 @@ emitter-editor.panel.pad.nb
         heading="{voc.spawningHeading}"
         ontoggle="{saveSectionState}"
         key="spawning"
-        defaultstate="{opts.emitter.openedTabs.includes('spawningHeading')? 'opened' : 'closed'}"
+        defaultstate="{opts.emitter.openedTabs.includes('spawning')? 'opened' : 'closed'}"
     )
         fieldset
             label(if="{parent.opts.emitter.settings.spawnType !== 'burst'}")

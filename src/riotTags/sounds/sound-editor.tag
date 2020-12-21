@@ -5,6 +5,7 @@ sound-editor.panel.view
         input.wide(type="text" value="{sound.name}" onchange="{wire('this.sound.name')}")
         .anErrorNotice(if="{nameTaken}") {vocGlob.nametaken}
         br
+        // TODO: drop it and make it as modules' extends
         p
             label
                 b {voc.poolSize}

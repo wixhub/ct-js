@@ -31,6 +31,7 @@ style-editor.panel.view
                             b {voc.fontweight}
                             br
                             select.wide(value="{styleobj.font.weight}" onchange="{wire('this.styleobj.font.weight')}")
+                                // actually end up being strings
                                 each val in [100, 200, 300, 400, 500, 600, 700, 800, 900]
                                     option(value=val)= val
                         .clear

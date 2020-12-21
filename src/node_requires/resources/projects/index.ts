@@ -1,4 +1,5 @@
 import {defaultProject} from './defaultProject';
+import gitignore from './gitignore';
 
 // These must return a path to a **DIRECTORY**
 let projectPath: string | void = void 0;
@@ -47,14 +48,9 @@ const getProjectThumbnail = function (projPath: string, fs?: boolean): string {
 
 const putGitignore = async (projectPath: string) => {
     const fs = require('fs-extra');
-    await fs.pathExists(path.join(projectPath, '.gitignore'))
-        .then(async (exists: boolean) => {
-            if (!exists) {
-                const gitignore = await fs.readFile('./data/defaultGitignore.txt');
-                return fs.writeFile(path.join(projectPath, '.gitignore'), gitignore);
-            }
-            return void 0;
-        });
+    if (!(await fs.pathExists(path.join(projectPath, '.gitignore')))) {
+        await fs.writeFile(path.join(projectPath, '.gitignore'), gitignore);
+    }
 };
 
 const loadProject = async (projectPath: string): Promise<IProject> => {
@@ -85,7 +81,7 @@ const createProject = async (projectPath: string, name: string): Promise<void> =
     saveProject();
 };
 
-module.exports = {
+export {
     defaultProject,
     getDefaultProjectDir,
     getProjectThumbnail,
@@ -97,5 +93,3 @@ module.exports = {
     getProject,
     saveProject
 };
-
-export default module.exports;

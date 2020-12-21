@@ -1,4 +1,4 @@
-const emitter = {
+const emitter: ITandemEmitter = {
     texture: -1,
     openedTabs: ['texture'],
     settings: {
@@ -87,12 +87,11 @@ const emitter = {
         delay: 0
     }
 };
-
-module.exports = {
-    get() {
-        const generateGUID = require('./../../generateGUID');
-        const newEmitter = JSON.parse(JSON.stringify(emitter));
-        newEmitter.uid = generateGUID();
-        return newEmitter;
-    }
+const get = function (): ITandemEmitter {
+    const generateGUID = require('../../generateGUID');
+    const newEmitter = JSON.parse(JSON.stringify(emitter));
+    newEmitter.uid = generateGUID();
+    return newEmitter;
 };
+
+export {get};

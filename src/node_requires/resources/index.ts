@@ -2,7 +2,6 @@ const fs = require('fs-extra'),
       path = require('path');
 
 import {getProjectPath} from './projects';
-
 const getAbsolutePath = (subpath: string): string => {
     const pp = getProjectPath();
     if (!pp) {
@@ -14,13 +13,13 @@ const getAbsolutePath = (subpath: string): string => {
 /**
  * @async
  */
-const saveResource = (resource: IResource, path: string): Promise<void> =>
+const saveResource = (resource: IAsset, path: string): Promise<void> =>
     fs.outputJSON(getAbsolutePath(path), resource);
 
 /**
  * @async
  */
-const loadResource = (path: string): Promise<IResource> =>
+const loadResource = (path: string): Promise<IAsset> =>
     fs.readJSON(getAbsolutePath(path));
 
 export {

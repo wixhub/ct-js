@@ -1,19 +1,22 @@
 const path = require('path');
 
-const getSkeletonData = function getSkeletonData(skeleton, fs) {
+const getSkeletonData = function getSkeletonData(skeleton: ISkeleton, fs?: boolean): string {
     if (fs) {
         return path.join(global.projdir, 'img', skeleton.origname);
     }
     return `file://${global.projdir}/img/${skeleton.origname}`;
 };
-const getSkeletonTextureData = function getSkeletonTextureData(skeleton, fs) {
+const getSkeletonTextureData = function getSkeletonTextureData(
+    skeleton: ISkeleton,
+    fs?: boolean
+): string {
     const slice = skeleton.origname.replace('_ske.json', '');
     if (fs) {
         return path.join(global.projdir, 'img', `${slice}_tex.json`);
     }
     return `file://${global.projdir}/img/${slice}_tex.json`;
 };
-const getSkeletonTexture = function getSkeletonTexture(skeleton, fs) {
+const getSkeletonTexture = function getSkeletonTexture(skeleton: ISkeleton, fs?: boolean): string {
     const slice = skeleton.origname.replace('_ske.json', '');
     if (fs) {
         return path.join(global.projdir, 'img', `${slice}_tex.png`);
@@ -21,7 +24,7 @@ const getSkeletonTexture = function getSkeletonTexture(skeleton, fs) {
     return `file://${global.projdir}/img/${slice}_tex.png`;
 };
 
-const getSkeletonPreview = function getSkeletonPreview(skeleton, fs) {
+const getSkeletonPreview = function getSkeletonPreview(skeleton: ISkeleton, fs?: boolean): string {
     if (fs) {
         return path.join(global.projdir, 'img', `${skeleton.origname}_prev.png`);
     }
@@ -33,7 +36,7 @@ const getSkeletonPreview = function getSkeletonPreview(skeleton, fs) {
  * @param {String} skeleton The skeleton object to generate a preview for.
  * @returns {Promise<void>} Resolves after creating a thumbnail.
  */
-const skeletonGenPreview = function (skeleton) {
+const skeletonGenPreview = function (skeleton: ISkeleton) {
     const loader = new PIXI.loaders.Loader(),
           dbf = dragonBones.PixiFactory.factory;
     const fs = require('fs-extra');
@@ -73,7 +76,7 @@ const skeletonGenPreview = function (skeleton) {
     });
 };
 
-const importSkeleton = async function importSkeleton(source) {
+const importSkeleton = async function importSkeleton(source: string): Promise<void> {
     const generateGUID = require('./../generateGUID');
     const fs = require('fs-extra');
 
@@ -96,7 +99,7 @@ const importSkeleton = async function importSkeleton(source) {
     window.signals.trigger('skeletonImported', skel);
 };
 
-module.exports = {
+export {
     getSkeletonData,
     getSkeletonTextureData,
     getSkeletonTexture,

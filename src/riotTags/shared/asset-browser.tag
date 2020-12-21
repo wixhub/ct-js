@@ -100,6 +100,9 @@ asset-browser.flexfix
         this.namespace = 'assetViewer';
         this.mixin(window.riotVoc);
 
+        const path = required('path'),
+              fs = require('fs-extra');
+
         this.filter = this.opts.forcefilter ? this.opts.forcefilter : ['all'];
         this.toggleFilter = type => () => {
             if (type === 'all') {
@@ -120,8 +123,6 @@ asset-browser.flexfix
             this.prevItem = void 0;
         };
 
-        const path = required('path'),
-              fs = require('fs-extra');
         const projects = require('./data/node_requires/resources/projects');
 
         // Navigation stuff
@@ -326,10 +327,13 @@ asset-browser.flexfix
             alertify
             .defaultValue('')
             .prompt(window.languageJSON.common.newname)
-            .then(e => {
-                if (e.inputValue && e.buttonClicked !== 'cancel') {
-                    this.editedSound.name = e.inputValue;
-                    this.update();
+            .then(async e => {
+                if (e.inputValue.trim() && e.buttonClicked !== 'cancel') {
+                    const name = e.inputValue.trim() + `.ct${type}`;
+                    if (await fs.pathExists(path.join(this.path, name))) {
+                        const resources = require(`./data/node_requires/resources/${type}s`);
+                        resources. // TODO:
+                    }
                 }
             });
             // TODO:
