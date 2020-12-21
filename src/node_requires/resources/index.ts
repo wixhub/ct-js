@@ -13,17 +13,17 @@ const getAbsolutePath = (subpath: string): string => {
 /**
  * @async
  */
-const saveResource = (resource: IAsset, path: string): Promise<void> =>
-    fs.outputJSON(getAbsolutePath(path), resource);
+const saveAsset = (asset: IAsset, path: string): Promise<void> =>
+    fs.outputJSON(getAbsolutePath(path), asset);
 
 /**
  * @async
  */
-const loadResource = (path: string): Promise<IAsset> =>
+const loadAsset = (path: string): Promise<IAsset> =>
     fs.readJSON(getAbsolutePath(path));
 
 export {
     getAbsolutePath,
-    saveResource,
-    loadResource
+    saveAsset,
+    loadAsset
 };
