@@ -15,7 +15,6 @@ const getAbsolutePath = (subpath: string): string => {
  */
 const saveAsset = (asset: IAsset, path: string): Promise<void> =>
     fs.outputJSON(getAbsolutePath(path), asset);
-
 /**
  * @async
  */

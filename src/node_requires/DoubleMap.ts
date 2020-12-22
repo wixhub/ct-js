@@ -43,6 +43,8 @@ export default class DoubleMap<forward, backward> {
         if (this.hasValue(value)) {
             throw new Error(`The value ${value} already exists`);
         }
+        this.forwardMap.set(key, value);
+        this.backwardMap.set(value, key);
     }
 
     updateValueByKey(key: forward, value: backward): void {
