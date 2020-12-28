@@ -54,7 +54,17 @@
         "yes": "Yes",
         "zoom": "Zoom",
         "zoomIn": "Zoom in",
-        "zoomOut": "Zoom out"
+        "zoomOut": "Zoom out",
+        "resourceNames": {
+            "type": "type",
+            "room": "room",
+            "texture": "texture",
+            "tandem": "emitter tandem",
+            "sound": "sound",
+            "skeleton": "skeletal animation",
+            "font": "font",
+            "style": "style"
+        }
     },
     "colorPicker": {
         "current": "New",

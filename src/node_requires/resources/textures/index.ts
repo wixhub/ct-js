@@ -1,15 +1,5 @@
-/**
- * Gets the ct.js texture object by its id.
- * @param {string} id The id of the texture
- * @returns {ITexture} The ct.js texture object
- */
-const getTextureFromId = id => {
-    const texture = global.currentProject.textures.find(tex => tex.uid === id);
-    if (!texture) {
-        throw new Error(`Attempt to get a non-existent texture with ID ${id}`);
-    }
-    return texture;
-};
+import {getAssetPath} from './../registry';
+import {ensureAbsoluteAssetPath} from './../utils';
 
 /**
  * Retrieves the full path to a thumbnail of a given texture.
@@ -18,17 +8,19 @@ const getTextureFromId = id => {
  * @param {boolean} [fs] If set to true, returns a file system path, not a URI.
  * @returns {string} The full path to the thumbnail.
  */
-const getTexturePreview = function (texture, x2, fs) {
+const getTexturePreview = function (
+    texture: assetRef | ITexture,
+    x2?: boolean,
+    fs?: boolean
+): string {
     if (texture === -1) {
         return 'data/img/notexture.png';
     }
-    if (typeof texture === 'string') {
-        texture = getTextureFromId(texture);
-    }
+    const textureMeta = ensureAbsoluteAssetPath(typeof texture === 'string' ? texture : texture.uid);
     if (fs) {
-        return `${global.projdir}/img/${texture.origname}_prev${x2 ? '@2' : ''}.png`;
+        return `${textureMeta}.data/prev${x2 ? '@2' : ''}.png`;
     }
-    return `file://${global.projdir.replace(/\\/g, '/')}/img/${texture.origname}_prev${x2 ? '@2' : ''}.png?cache=${texture.lastmod}`;
+    return `file://${textureMeta.replace(/\\/g, '/')}.data/prev${x2 ? '@2' : ''}.png?cache=${texture.mtime}`;
 };
 
 /**
@@ -37,7 +29,7 @@ const getTexturePreview = function (texture, x2, fs) {
  * @param {boolean} [fs] If set to true, returns a file system path, not a URI.
  * @returns {string} The full path to the source image.
  */
-const getTextureOrig = function (texture, fs) {
+const getTextureOrig = function (texture: string | ITexture, fs?: boolean) {
     if (texture === -1) {
         return 'data/img/notexture.png';
     }
@@ -291,7 +283,7 @@ const importImageToTexture = async (src, name) => {
     return obj;
 };
 
-const getTexturePivot = (texture, inPixels) => {
+const getTexturePivot = (texture: string | ITexture, inPixels: boolean): [number, number] => {
     if (typeof texture === 'string') {
         texture = getTextureFromId(texture);
     }
@@ -301,15 +293,28 @@ const getTexturePivot = (texture, inPixels) => {
     return [texture.axis[0] / texture.width, texture.axis[1] / texture.height];
 };
 
-module.exports = {
+import {registerAssetType} from './../index';
+import { ensureAbsoluteAssetPath } from '../utils';
+const register = function (): void {
+    registerAssetType('texture', {
+        editor: 'texture-editor',
+        format: 'yaml',
+        hasDataFolder: true,
+        icon: 'texture',
+        nounAccessor: 'common.resourceNames.texture',
+        thumbnail: (texture: ITexture) => getTexturePreview(texture, false, true),
+        thumbnailType: 'image'
+    });
+};
+
+export {
     clearPixiTextureCache,
-    getTextureFromId,
-    getTextureFromName,
     getTexturePreview,
     getTexturePivot,
     getTextureOrig,
     getPixiTexture,
     getDOMImage,
     importImageToTexture,
-    textureGenPreview
+    textureGenPreview,
+    register
 };

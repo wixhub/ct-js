@@ -51,6 +51,9 @@ interface IAssetType {
     /**
      * An array of handlers that is called when a dependency is removed from a project.
      * Dependents list is cleaned up automatically.
+     * Note that all these hooks are run in parallel, so if you want to patch the dependent
+     * object, it is needed to make these edits in one go, to avoid race conditions
+     * and loss of data.
      */
     dependencyRemovedHooks?: Array<(asset: Readonly<IAsset>, dependency: IAsset) => Promise<void>>
 }
@@ -108,7 +111,9 @@ const dumpAsset = async (dest: string, fileType: 'json' | 'yaml', asset: IAsset)
  */
 const createAsset = async (asset: IAsset, dest: string): Promise<void> => {
     const typeSpec = assetTypes[asset.type];
-    await dumpAsset(dest, typeSpec.format, asset);
+    await dumpAsset(dest, typeSpec.format, Object.assign(asset, {
+        mtime: Number(new Date())
+    }));
     applySaveHooks(asset, ensureRelativeAssetPath(dest));
     addAsset(asset.uid, dest);
 };
@@ -143,7 +148,9 @@ const patchAsset = async function (
     patch?: Partial<IAsset>
 ): Promise<void> {
     const source = await ensureAsset(assetOrId);
-    const result = patch ? extend(extend({}, source), patch) : source;
+    const result = Object.assign(patch ? extend(extend({}, source), patch) : source, {
+        mtime: Number(new Date())
+    });
     const {format} = assetTypes[source.type];
     await dumpAsset(getAssetPath(assetOrId), format, result);
     await applySaveHooks(source, getAssetPath(assetOrId));
@@ -193,12 +200,30 @@ const deleteAsset = async function (assetOrId: IAsset | string): Promise<void> {
         for (const dependent of dependents) {
             promises.push(loadAsset(dependent)
                 .then(dependentObject => Promise.all(typeSpec.dependencyRemovedHooks.map(hook =>
-                    hook(dependentObject, assetObject)))));
+                    hook(dependentObject, assetObject)))
+                .then(() => {
+                    removeDependent(assetOrId, dependent);
+                })));
         }
     }
     await Promise.all(promises);
     removeAsset(ensureId(assetOrId));
 };
+
+/* * * * * * * * * * * * * * * * * */
+/* * Standard type registration  * */
+/* * * * * * * * * * * * * * * * * */
+
+import {register as registerTypes} from './types';
+registerTypes();
+import {register as registerTextures} from './textures';
+registerTextures();
+import {register as registerTandems} from './tandems';
+registerTandems();
+
+/* * * * * * * * * * * * * * * * * */
+/* * * * * * * Exports * * * * * * */
+/* * * * * * * * * * * * * * * * * */
 
 export {
     assetTypes,

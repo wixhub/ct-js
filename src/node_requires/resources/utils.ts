@@ -72,6 +72,8 @@ const makeAssetPathAbsolute = (subpath: string): string => {
 };
 
 /**
+ * Returns an absolute path to a file when given any path or id.
+ *
  * @param subpathOrId The absolute path, subpath relative to `project/assets`,
  * or the UID of an asset.
  * @returns The UID of the specified asset.
