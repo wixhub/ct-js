@@ -1,6 +1,6 @@
 const fs = require('fs-extra');
 
-import {getAssetPath, pushDependent, removeDependent, getDependents, addAsset, removeAsset, moveAsset as moveAssetInRegistry} from './registry';
+import {getAssetPath, pokeAsset, pushDependent, removeDependent, getDependents, addAsset, removeAsset, moveAsset as moveAssetInRegistry} from './registry';
 import {ensureAsset, throwIfOutsideAssets, ensureAbsoluteAssetPath, ensureId, getTypeFromPath, ensureRelativeAssetPath} from './utils';
 
 
@@ -24,7 +24,7 @@ interface IAssetType {
      * A function that returns the thumbnail of an asset.
      * Actual value depends on `thumbnailType` value, as well as the asset.
      */
-    thumbnail: (asset: IAsset) => string,
+    thumbnail: (asset: IAsset, x2?: boolean) => string,
     /** Informs asset viewers and other entities what type of a thumbnail should be used.
      * `icon` uses an SVG icon from ct.IDE.
      * `image` points to an image file in the filesystem.
@@ -60,6 +60,12 @@ interface IAssetType {
 
 const assetTypes: Record<string, IAssetType> = {};
 
+/**
+ * Adds a description of an asset type to ct.js. The collection of asset types
+ * is then consumed by asset viewers, tabs system, and other tags to form
+ * an integrated experience.
+ * It does not affect the exporter, as it aims to be as standalone as possible.
+ */
 const registerAssetType = function (name: string, type: IAssetType): void {
     if (name in assetTypes) {
         throw new Error(`[resources] Asset type ${type} already exists.`);
@@ -110,10 +116,14 @@ const dumpAsset = async (dest: string, fileType: 'json' | 'yaml', asset: IAsset)
  * @async
  */
 const createAsset = async (asset: IAsset, dest: string): Promise<void> => {
+    throwIfOutsideAssets(dest);
     const typeSpec = assetTypes[asset.type];
     await dumpAsset(dest, typeSpec.format, Object.assign(asset, {
         mtime: Number(new Date())
     }));
+    if (typeSpec.hasDataFolder) {
+        fs.ensureDir(dest + '.data');
+    }
     applySaveHooks(asset, ensureRelativeAssetPath(dest));
     addAsset(asset.uid, dest);
 };
@@ -148,12 +158,11 @@ const patchAsset = async function (
     patch?: Partial<IAsset>
 ): Promise<void> {
     const source = await ensureAsset(assetOrId);
-    const result = Object.assign(patch ? extend(extend({}, source), patch) : source, {
-        mtime: Number(new Date())
-    });
+    const result = patch ? extend(extend({}, source), patch) : source;
     const {format} = assetTypes[source.type];
     await dumpAsset(getAssetPath(assetOrId), format, result);
     await applySaveHooks(source, getAssetPath(assetOrId));
+    pokeAsset(ensureId(assetOrId));
 };
 /**
  * @param asset Either an asset's object or its UID.

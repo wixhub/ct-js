@@ -375,7 +375,9 @@
                             }
                             return array[i];
                         }
-                        results.push(array[i]);
+                        if (!results.includes(array[i])) {
+                            results.push(array[i]);
+                        }
                     }
                 }
             }

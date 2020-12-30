@@ -1,5 +1,7 @@
-import {getAssetPath} from './../registry';
-import {ensureAbsoluteAssetPath} from './../utils';
+const path = require('path');
+import {ensureAbsoluteAssetPath, ensureAsset, ensureId, throwIfOutsideAssets} from './../utils';
+import {getMdate} from './../registry';
+import {get as getDefaultTexture} from './defaultTexture';
 
 /**
  * Retrieves the full path to a thumbnail of a given texture.
@@ -16,11 +18,12 @@ const getTexturePreview = function (
     if (texture === -1) {
         return 'data/img/notexture.png';
     }
-    const textureMeta = ensureAbsoluteAssetPath(typeof texture === 'string' ? texture : texture.uid);
+    const id = ensureId(texture);
+    const textureMetaPath = ensureAbsoluteAssetPath(id);
     if (fs) {
-        return `${textureMeta}.data/prev${x2 ? '@2' : ''}.png`;
+        return `${textureMetaPath}.data/prev${x2 ? '@2' : ''}.png`;
     }
-    return `file://${textureMeta.replace(/\\/g, '/')}.data/prev${x2 ? '@2' : ''}.png?cache=${texture.mtime}`;
+    return `file://${textureMetaPath.replace(/\\/g, '/')}.data/prev${x2 ? '@2' : ''}.png?cache=${Number(getMdate(id))}`;
 };
 
 /**
@@ -29,43 +32,46 @@ const getTexturePreview = function (
  * @param {boolean} [fs] If set to true, returns a file system path, not a URI.
  * @returns {string} The full path to the source image.
  */
-const getTextureOrig = function (texture: string | ITexture, fs?: boolean) {
+const getTextureOrig = function (texture: assetRef | ITexture, fs?: boolean): string {
     if (texture === -1) {
         return 'data/img/notexture.png';
     }
-    if (typeof texture === 'string') {
-        texture = getTextureFromId(texture);
-    }
+    const id = ensureId(texture);
     if (fs) {
-        return `${global.projdir}/img/${texture.origname}`;
+        return path.join(`${ensureAbsoluteAssetPath(id)}.data`, 'source.png');
     }
-    return `file://${global.projdir.replace(/\\/g, '/')}/img/${texture.origname}?cache=${texture.lastmod}`;
+    return `file://${ensureAbsoluteAssetPath(id).replace(/\\/g, '/')}/source.png?cache=${Number(getMdate(id))}`;
 };
 
-const baseTextureFromTexture = texture => new Promise((resolve, reject) => {
-    const textureLoader = new PIXI.Loader();
-    const {resources} = textureLoader;
+const baseTextureFromTexture = (texture: string | ITexture): Promise<PIXI.BaseTexture> =>
+    new Promise((resolve, reject) => {
+        const textureLoader = new PIXI.Loader();
+        const {resources} = textureLoader;
 
-    const path = 'file://' + global.projdir.replace(/\\/g, '/') + '/img/' + texture.origname + '?' + texture.lastmod;
+        texture = ensureId(texture);
+        const path = getTextureOrig(texture, false);
 
-    textureLoader.add(texture.uid, path);
-    textureLoader.onError.add(reject);
-    textureLoader.load(() => {
-        resolve(resources[texture.uid].texture.baseTexture);
+        textureLoader.add(texture, path);
+        textureLoader.onError.add(reject);
+        textureLoader.load(() => {
+            resolve(resources[texture].texture.baseTexture);
+        });
     });
-});
 
-const pixiTextureCache = {};
-const clearPixiTextureCache = function () {
-    for (const i in pixiTextureCache) {
-        delete pixiTextureCache[i];
-    }
+declare interface IPixiTextureCacheEntry {
+    lastmod: number,
+    texture: PIXI.Texture
+}
+const pixiTextureCache: Map<string, IPixiTextureCacheEntry> = new Map();
+const clearPixiTextureCache = function (): void {
+    pixiTextureCache.clear();
 };
 /**
  * @param {any} tex A ct.js texture object
  * @returns {Array<PIXI.Texture>} An array of PIXI.Textures
  */
-const texturesFromCtTexture = async function (tex) {
+const texturesFromCtTexture = async function (tex: ITexture | string) {
+    tex = (await ensureAsset(tex)) as ITexture;
     const frames = [];
     const baseTexture = await baseTextureFromTexture(tex);
     for (let col = 0; col < tex.grid[1]; col++) {
@@ -84,7 +90,7 @@ const texturesFromCtTexture = async function (tex) {
                 tex.axis[1] / tex.height
             );
             frames.push(texture);
-            if (col * tex.grid[0] + row >= tex.grid.untill && tex.grid.untill > 0) {
+            if (col * tex.grid[0] + row >= tex.untill && tex.untill > 0) {
                 break;
             }
         }
@@ -92,18 +98,19 @@ const texturesFromCtTexture = async function (tex) {
     return frames;
 };
 
-let defaultTexture;
+const defaultTexture: PIXI.Texture = PIXI.Texture.from('data/img/unknown.png');
 
-const getDOMImage = function (texture, deflt) {
+const getDOMImage = function (
+    texture: ITexture | assetRef,
+    fallback?: string
+): Promise<HTMLImageElement> {
     let path;
     const img = document.createElement('img');
     if (texture === -1 || !texture) {
-        path = deflt || 'data/img/notexture.png';
+        path = fallback || 'data/img/notexture.png';
     } else {
-        if (typeof texture === 'string') {
-            texture = getTextureFromId(texture);
-        }
-        path = 'file://' + global.projdir.replace(/\\/g, '/') + '/img/' + texture.origname + '?' + texture.lastmod;
+        const id = ensureId(texture);
+        path = getTextureOrig(id, false);
     }
     img.src = path;
     return new Promise((resolve, reject) => {
@@ -118,50 +125,39 @@ const getDOMImage = function (texture, deflt) {
  * @param {boolean} [allowMinusOne] Allows the use of `-1` as a texture uid
  * @returns {Array<PIXI.Texture>|PIXI.Texture} An array of textures, or an individual one.
  */
-const getPixiTexture = async function (texture, frame, allowMinusOne) {
-    if (allowMinusOne && texture === -1) {
-        if (!defaultTexture) {
-            defaultTexture = PIXI.Texture.from('data/img/unknown.png');
+const getPixiTexture = async function (
+    texture: assetRef | ITexture,
+    frame?: number,
+    allowMinusOne?: boolean
+): Promise<PIXI.Texture> {
+    if (texture === -1) {
+        if (allowMinusOne) {
+            if (frame || frame === 0) {
+                return defaultTexture;
+            }
+            return [defaultTexture];
         }
-        if (frame || frame === 0) {
-            return defaultTexture;
-        }
-        return [defaultTexture];
+        throw new Error('[resources/texture/getPixiTexture]');
     }
-    if (typeof texture === 'string') {
-        texture = getTextureFromId(texture);
-    }
-    const {uid} = texture;
-    if (!pixiTextureCache[uid] ||
-        pixiTextureCache[uid].lastmod !== texture.lastmod
+    const uid = ensureId(texture);
+    if (!pixiTextureCache.has(uid) ||
+        pixiTextureCache.get(uid).lastmod !== Number(getMdate(uid))
     ) {
-        const tex = await texturesFromCtTexture(texture);
+        const pixiTextures = await texturesFromCtTexture(texture);
         // Everything is constant, and the key gets overridden.
         // Where's the race condition? False positive??
         // eslint-disable-next-line require-atomic-updates
-        pixiTextureCache[uid] = {
-            lastmod: texture.lastmod,
-            texture: tex
-        };
+        pixiTextureCache.set(uid, {
+            lastmod: Number(getMdate(uid)),
+            texture: pixiTextures
+        });
     }
     if (frame || frame === 0) {
-        return pixiTextureCache[uid].texture[frame];
+        return pixiTextureCache.get(uid).texture[frame];
     }
-    return pixiTextureCache[uid].texture;
+    return pixiTextureCache.get(uid).texture;
 };
 
-/**
- * Returns a texture object by its name.
- * @param {string} name The name of the texture.
- * @return {boolean} True if the texture exists.
- */
-const getTextureFromName = function (name) {
-    const texture = global.currentProject.textures.find(tex => tex.name === name);
-    if (!texture) {
-        throw new Error(`Attempt to get a non-existent texture with name ${name}`);
-    }
-    return texture;
-};
 const textureGenPreview = async function textureGenPreview(texture, destination, size) {
     if (typeof texture === 'string') {
         texture = getTextureFromId(texture);
@@ -190,15 +186,20 @@ const isBgPostfixTester = /@bg$/;
  * @param {string|Buffer} src A path to the source image, or a Buffer of an already read image.
  * @param {string} [name] The name of the texture. Optional, defaults to 'NewTexture'
  * or file's basename.
- * @returns {Promise<object>} A promise that resolves into the resulting texture object.
+ * @returns {Promise<ITexture>} A promise that resolves into the resulting texture object.
  */
 // eslint-disable-next-line max-lines-per-function
-const importImageToTexture = async (src, name) => {
+const importImageToTexture = async (
+    src: string | Buffer,
+    name: string,
+    folder: string
+): Promise<ITexture> => {
+    throwIfOutsideAssets(folder);
     const fs = require('fs-extra'),
           path = require('path'),
           generateGUID = require('./../../generateGUID');
     const id = generateGUID();
-    let dest;
+    let dest: string;
     if (src instanceof Buffer) {
         dest = path.join(global.projdir, 'img', `i${id}.png}`);
         await fs.writeFile(dest, src);
@@ -228,36 +229,27 @@ const importImageToTexture = async (src, name) => {
             .replace(/\.(jpg|gif|png|jpeg)/gi, '')
             .replace(/\s/g, '_');
     }
-    const obj = {
-        name: texName,
-        untill: 0,
-        grid: [1, 1],
-        axis: [0, 0],
-        marginx: 0,
-        marginy: 0,
+    const obj: ITexture = Object.assign(getDefaultTexture(), {
         imgWidth: image.width,
         imgHeight: image.height,
         width: image.width,
         height: image.height,
-        offx: 0,
-        offy: 0,
         origname: path.basename(dest),
         shape: 'rect',
         left: 0,
         right: image.width,
         top: 0,
         bottom: image.height,
-        uid: id,
-        padding: 1
-    };
+        uid: id
+    });
     if (!(src instanceof Buffer)) {
         obj.source = src;
     }
 
     // Test if this has a postfix _NxM@K or _NxM
-    const exec = texturePostfixParser.exec(obj.name);
+    const exec = texturePostfixParser.exec(texName);
     if (exec) {
-        obj.name = obj.name.replace(texturePostfixParser, '');
+        texName = texName.replace(texturePostfixParser, '');
         obj.grid = [Number(exec.groups.cols) || 1, Number(exec.groups.rows) || 1];
         obj.width /= obj.grid[0];
         obj.height /= obj.grid[1];
@@ -266,9 +258,9 @@ const importImageToTexture = async (src, name) => {
         if (exec.groups.until) {
             obj.untill = Number(exec.groups.until);
         }
-    } else if (isBgPostfixTester.test(obj.name)) {
+    } else if (isBgPostfixTester.test(texName)) {
         // Test whether it has a @bg postfix
-        obj.name = obj.name.replace(isBgPostfixTester, '');
+        texName = texName.replace(isBgPostfixTester, '');
         obj.tiled = true;
     }
 
@@ -276,8 +268,6 @@ const importImageToTexture = async (src, name) => {
         textureGenPreview(obj, dest + '_prev.png', 64),
         textureGenPreview(obj, dest + '_prev@2.png', 128)
     ]);
-
-    global.currentProject.textures.push(obj);
 
     window.signals.trigger('textureImported');
     return obj;
@@ -294,7 +284,6 @@ const getTexturePivot = (texture: string | ITexture, inPixels: boolean): [number
 };
 
 import {registerAssetType} from './../index';
-import { ensureAbsoluteAssetPath } from '../utils';
 const register = function (): void {
     registerAssetType('texture', {
         editor: 'texture-editor',
@@ -302,7 +291,7 @@ const register = function (): void {
         hasDataFolder: true,
         icon: 'texture',
         nounAccessor: 'common.resourceNames.texture',
-        thumbnail: (texture: ITexture) => getTexturePreview(texture, false, true),
+        thumbnail: (texture: ITexture, big?: boolean) => getTexturePreview(texture, big, false),
         thumbnailType: 'image'
     });
 };

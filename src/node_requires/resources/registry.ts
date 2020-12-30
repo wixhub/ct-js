@@ -6,9 +6,24 @@ import {assetTypes} from './index';
 const path = require('path');
 
 /** Maps asset UIDs to their metadata file's location relative to the. */
-let registry: DoubleMap<string, string>;
+let fsRegistry: DoubleMap<string, string>;
 /** Maps each asset UID to a list of UIDs of dependent asset, meaning that they reference it. */
-let dependents: Record<string, Array<string>>;
+let dependents: Map<string, Array<string>>;
+/**
+ * Maps recently changed assets' UIDs to the date of their modification.
+ * Used to avoid caching problems on thumbnails and source images.
+ * It is not a full registry contrary to the `registry` and will return
+ * nothing on not yet changed assets.
+ * Changed automatically on each patch operation.
+ */
+let changed: Map<string, Date>;
+
+const purgeRegistries = function () {
+    changed = new Map();
+    dependents = new Map();
+    fsRegistry = new DoubleMap();
+};
+purgeRegistries();
 
 const walkOptions = {
     depthLimit: -1,
@@ -54,27 +69,27 @@ const forceRescan = async function (): Promise<void> {
         }
     }
     await Promise.all(readAndPushPromises);
-    registry = newRegistry;
-    dependents = {};
+    fsRegistry = newRegistry;
+    dependents = new Map();
 };
 const moveAsset = function (uid: string, newPath: string): void {
-    registry.updateValueByKey(uid, newPath);
+    fsRegistry.updateValueByKey(uid, newPath);
 };
 const addAsset = function (uid: string, newPath: string): void {
-    registry.putKeyValue(uid, newPath);
-    dependents[uid] = [];
+    fsRegistry.putKeyValue(uid, newPath);
+    dependents.set(uid, []);
 };
 /**
  * @param {string} uidOrPath Can be either a UID of an asset or its path.
  */
 const removeAsset = function (uidOrPath: string): void {
     const uid = ensureId(uidOrPath);
-    if (registry.hasKey(uidOrPath)) {
-        registry.deleteByKey(uidOrPath);
+    if (fsRegistry.hasKey(uidOrPath)) {
+        fsRegistry.deleteByKey(uidOrPath);
     } else {
-        registry.deleteByValue(uidOrPath);
+        fsRegistry.deleteByValue(uidOrPath);
     }
-    delete dependents[uid];
+    dependents.delete(uid);
 };
 
 /**
@@ -82,27 +97,35 @@ const removeAsset = function (uidOrPath: string): void {
  */
 const getAssetPath = function (asset: string | IAsset): string {
     if (typeof asset === 'string') {
-        return registry.getValue(asset);
+        return fsRegistry.getValue(asset);
     }
-    return registry.getValue(asset.uid);
+    return fsRegistry.getValue(asset.uid);
 };
 const getAssetId = function (path: string): string {
-    return registry.getKey(path);
+    return fsRegistry.getKey(path);
 };
 
 const pushDependent = function (asset: string | IAsset, dependent: string | IAsset): void {
     const uid = ensureId(asset);
-    dependents[uid].push(ensureId(dependent));
+    dependents.get(uid).push(ensureId(dependent));
 };
 const removeDependent = function (asset: string | IAsset, dependent: string | IAsset): void {
     const uid = ensureId(asset);
     const dependentId = ensureId(dependent);
-    dependents[uid].splice(dependents[uid].indexOf(dependentId), 1);
+    dependents.get(uid).splice(dependents.get(uid).indexOf(dependentId), 1);
 };
-const getDependents = function (asset: string | IAsset): Array<string> {
+const getDependents = function (asset: string | IAsset): Readonly<Array<string>> {
     const uid = ensureId(asset);
-    return [...dependents[uid]]; // Clone the array to avoid unintentional mutations.
+    return [...dependents.get(uid)]; // Clone the array to avoid unintentional mutations.
 };
+
+/**
+ * Updates date modified for a given asset ID.
+ */
+const pokeAsset = (uid: string): void => {
+    changed.set(uid, new Date());
+};
+const getMdate = (uid: string): Date => changed.get(uid);
 
 export {
     forceRescan,
@@ -113,5 +136,7 @@ export {
     pushDependent,
     removeDependent,
     getDependents,
+    getMdate,
+    pokeAsset,
     removeAsset
 };

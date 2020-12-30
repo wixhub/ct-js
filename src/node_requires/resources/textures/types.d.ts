@@ -2,7 +2,7 @@ type collisionShapeType = 'strip' | 'circle' | 'rect';
 
 interface ITexture extends IAsset {
     grid: [number, number],
-    untill: 0,
+    untill: number,
     frames: number,
 
     axis: [number, number],
@@ -31,6 +31,7 @@ interface ITexture extends IAsset {
     symmetryStrip: boolean,
 
     padding: number,
+    tiled: boolean,
 
     source?: string
 }

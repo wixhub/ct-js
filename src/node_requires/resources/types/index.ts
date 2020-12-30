@@ -10,7 +10,7 @@ const register = function (): void {
         hasDataFolder: true,
         icon: 'type',
         nounAccessor: 'common.resourceNames.type',
-        thumbnail: (type: IType) => getTexturePreview(type.texture),
+        thumbnail: (type: IType, big?: boolean) => getTexturePreview(type.texture, big),
         thumbnailType: 'image',
         dependencyRemovedHooks: [] // TODO:
     });
