@@ -1,34 +1,54 @@
 const path = require('path');
+import {ensureAbsoluteAssetPath, ensureAsset, ensureId, throwIfOutsideAssets} from './../utils';
 
+/**
+ * Returns the path to the file that holds the mesh data, armature, and animations.
+ */
 const getSkeletonData = function getSkeletonData(skeleton: ISkeleton, fs?: boolean): string {
+    const id = ensureId(skeleton);
+    const metaPath = ensureAbsoluteAssetPath(id);
+    const src = path.join(metaPath + '.data', 'ske.json');
     if (fs) {
-        return path.join(global.projdir, 'img', skeleton.origname);
+        return src;
     }
-    return `file://${global.projdir}/img/${skeleton.origname}`;
+    return `file://${src.replace(/\\/g, '/')}`;
 };
+/**
+ * Returns the path to the file that describes a texture atlas.
+ */
 const getSkeletonTextureData = function getSkeletonTextureData(
     skeleton: ISkeleton,
     fs?: boolean
 ): string {
-    const slice = skeleton.origname.replace('_ske.json', '');
+    const id = ensureId(skeleton);
+    const metaPath = ensureAbsoluteAssetPath(id);
+    const src = path.join(metaPath + '.data', 'tex.json');
     if (fs) {
-        return path.join(global.projdir, 'img', `${slice}_tex.json`);
+        return src;
     }
-    return `file://${global.projdir}/img/${slice}_tex.json`;
+    return `file://${src.replace(/\\/g, '/')}`;
 };
+/**
+ * Returns the path to the texture atlas.
+ */
 const getSkeletonTexture = function getSkeletonTexture(skeleton: ISkeleton, fs?: boolean): string {
-    const slice = skeleton.origname.replace('_ske.json', '');
+    const id = ensureId(skeleton);
+    const metaPath = ensureAbsoluteAssetPath(id);
+    const src = path.join(metaPath + '.data', 'tex.png');
     if (fs) {
-        return path.join(global.projdir, 'img', `${slice}_tex.png`);
+        return src;
     }
-    return `file://${global.projdir}/img/${slice}_tex.png`;
+    return `file://${src.replace(/\\/g, '/')}`;
 };
 
 const getSkeletonPreview = function getSkeletonPreview(skeleton: ISkeleton, fs?: boolean): string {
+    const id = ensureId(skeleton);
+    const metaPath = ensureAbsoluteAssetPath(id);
+    const src = path.join(metaPath + '.data', 'preview.png');
     if (fs) {
-        return path.join(global.projdir, 'img', `${skeleton.origname}_prev.png`);
+        return src;
     }
-    return `file://${global.projdir.replace(/\\/g, '/')}/img/${skeleton.origname}_prev.png`;
+    return `file://${src.replace(/\\/g, '/')}`;
 };
 
 /**
@@ -36,7 +56,7 @@ const getSkeletonPreview = function getSkeletonPreview(skeleton: ISkeleton, fs?:
  * @param {String} skeleton The skeleton object to generate a preview for.
  * @returns {Promise<void>} Resolves after creating a thumbnail.
  */
-const skeletonGenPreview = function (skeleton: ISkeleton) {
+const skeletonGenPreview = function (skeleton: ISkeleton): Promise<void> {
     const loader = new PIXI.loaders.Loader(),
           dbf = dragonBones.PixiFactory.factory;
     const fs = require('fs-extra');
@@ -60,7 +80,7 @@ const skeletonGenPreview = function (skeleton: ISkeleton) {
 
             const rawSkelBase64 = app.renderer.plugins.extract.base64(skel);
             const skelBase64 = rawSkelBase64.replace(/^data:image\/\w+;base64,/, '');
-            const buf = new Buffer(skelBase64, 'base64');
+            const buf = Buffer.from(skelBase64, 'base64');
 
             fs.writeFile(getSkeletonPreview(skeleton, true), buf)
             .then(() => {
@@ -76,7 +96,12 @@ const skeletonGenPreview = function (skeleton: ISkeleton) {
     });
 };
 
-const importSkeleton = async function importSkeleton(source: string): Promise<void> {
+const importSkeleton = async function importSkeleton(
+    src: string,
+    name: string,
+    folder: string
+): Promise<void> { // TODO:
+    throwIfOutsideAssets(folder);
     const generateGUID = require('./../generateGUID');
     const fs = require('fs-extra');
 
@@ -84,12 +109,12 @@ const importSkeleton = async function importSkeleton(source: string): Promise<vo
     const partialDest = path.join(global.projdir + '/img/skdb' + uid);
 
     await Promise.all([
-        fs.copy(source, partialDest + '_ske.json'),
-        fs.copy(source.replace('_ske.json', '_tex.json'), partialDest + '_tex.json'),
-        fs.copy(source.replace('_ske.json', '_tex.png'), partialDest + '_tex.png')
+        fs.copy(src, partialDest + '_ske.json'),
+        fs.copy(src.replace('_ske.json', '_tex.json'), partialDest + '_tex.json'),
+        fs.copy(src.replace('_ske.json', '_tex.png'), partialDest + '_tex.png')
     ]);
     const skel = {
-        name: path.basename(source).replace('_ske.json', ''),
+        name: path.basename(src).replace('_ske.json', ''),
         origname: path.basename(partialDest + '_ske.json'),
         from: 'dragonbones',
         uid
@@ -99,11 +124,24 @@ const importSkeleton = async function importSkeleton(source: string): Promise<vo
     window.signals.trigger('skeletonImported', skel);
 };
 
+import {registerAssetType} from './../index';
+const register = function (): void {
+    registerAssetType('skeleton', {
+        format: 'json',
+        hasDataFolder: true,
+        icon: 'texture', // TODO:
+        nounAccessor: 'common.resourceNames.skeleton',
+        thumbnail: (skeleton: ISkeleton) => getSkeletonPreview(skeleton, true),
+        thumbnailType: 'image'
+    });
+};
+
 export {
     getSkeletonData,
     getSkeletonTextureData,
     getSkeletonTexture,
     getSkeletonPreview,
     skeletonGenPreview,
-    importSkeleton
+    importSkeleton,
+    register
 };

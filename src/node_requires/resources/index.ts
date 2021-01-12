@@ -14,8 +14,12 @@ interface IAssetType {
     format: 'json' | 'yaml',
     /** Whether each asset of this type has a supplemental data folder */
     hasDataFolder: boolean,
-    /** Riot tag's name that can edit this asset type. */
-    editor: string,
+    /**
+     * Riot tag's name that can edit this asset type.
+     * If it is not set, ct.js will warn that it cannot edit
+     * this asset type on any attempts to do so.
+     */
+    editor?: string,
     /** The name of an SVG icon from ct.IDE to be used in asset viewers and other situations */
     icon: string,
     /** The path to a translatable key in i18n files that is used to name this asset type. */
@@ -239,6 +243,10 @@ import {register as registerTextures} from './textures';
 registerTextures();
 import {register as registerTandems} from './tandems';
 registerTandems();
+import {register as registerStyles} from './styles';
+registerStyles();
+import {register as registerSounds} from './sounds';
+registerSounds();
 
 /* * * * * * * * * * * * * * * * * */
 /* * * * * * * Exports * * * * * * */

@@ -1,4 +1,5 @@
-import {ensureAbsoluteAssetPath, ensureAsset} from './../utils';
+import {ensureAbsoluteAssetPath, ensureId} from './../utils';
+import {getMdate} from './../registry';
 
 const getPreview = function (
     style: assetRef | IStyle,
@@ -8,12 +9,12 @@ const getPreview = function (
     if (style === -1) {
         return 'data/img/notexture.png';
     }
-    const asset = ensureAsset(style) as IStyle;
+    const id = ensureId(style);
     const styleMetaPath = ensureAbsoluteAssetPath(typeof style === 'string' ? style : style.uid);
     if (fs) {
         return `${styleMetaPath}.data/prev${x2 ? '@2' : ''}.png`;
     }
-    return `file://${styleMetaPath.replace(/\\/g, '/')}.data/prev${x2 ? '@2' : ''}.png?cache=${asset.mtime}`;
+    return `file://${styleMetaPath.replace(/\\/g, '/')}.data/prev${x2 ? '@2' : ''}.png?cache=${Number(getMdate(id))}`;
 };
 
 import {registerAssetType} from './../index';

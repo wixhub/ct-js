@@ -2,6 +2,7 @@ const path = require('path');
 import {ensureAbsoluteAssetPath, ensureAsset, ensureId, throwIfOutsideAssets} from './../utils';
 import {getMdate} from './../registry';
 import {get as getDefaultTexture} from './defaultTexture';
+import {createAsset} from './../';
 
 /**
  * Retrieves the full path to a thumbnail of a given texture.
@@ -158,6 +159,19 @@ const getPixiTexture = async function (
     return pixiTextureCache.get(uid).texture;
 };
 
+const convertToPngBuffer = function convertToPngBuffer(
+    img: HTMLImageElement | HTMLCanvasElement
+): Buffer {
+    const canvas = document.createElement('canvas');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const x = canvas.getContext('2d');
+    x.drawImage(img, 0, 0);
+    const base64 = canvas.toDataURL('png').replace(/^data:image\/\w+;base64,/, '');
+    const buf = Buffer.from(base64, 'base64');
+    return buf;
+};
+
 const textureGenPreview = async function textureGenPreview(texture, destination, size) {
     if (typeof texture === 'string') {
         texture = getTextureFromId(texture);
@@ -189,7 +203,7 @@ const isBgPostfixTester = /@bg$/;
  * @returns {Promise<ITexture>} A promise that resolves into the resulting texture object.
  */
 // eslint-disable-next-line max-lines-per-function
-const importImageToTexture = async (
+const importImageToTexture = async ( // TODO:
     src: string | Buffer,
     name: string,
     folder: string
@@ -199,14 +213,7 @@ const importImageToTexture = async (
           path = require('path'),
           generateGUID = require('./../../generateGUID');
     const id = generateGUID();
-    let dest: string;
-    if (src instanceof Buffer) {
-        dest = path.join(global.projdir, 'img', `i${id}.png}`);
-        await fs.writeFile(dest, src);
-    } else {
-        dest = path.join(global.projdir, 'img', `i${id}${path.extname(src)}`);
-        await fs.copy(src, dest);
-    }
+    const metaFile = path.join(folder, `${name}.cttexture`);
     const image = document.createElement('img');
     // Wait while the image is loading
     await new Promise((resolve, reject) => {
@@ -234,7 +241,6 @@ const importImageToTexture = async (
         imgHeight: image.height,
         width: image.width,
         height: image.height,
-        origname: path.basename(dest),
         shape: 'rect',
         left: 0,
         right: image.width,
@@ -263,19 +269,20 @@ const importImageToTexture = async (
         texName = texName.replace(isBgPostfixTester, '');
         obj.tiled = true;
     }
+    createAsset(obj, metaFile);
+    fs.writeFile(path.join(metaFile + '.data', 'source.png'), convertToPngBuffer(image));
 
     await Promise.all([
         textureGenPreview(obj, dest + '_prev.png', 64),
         textureGenPreview(obj, dest + '_prev@2.png', 128)
     ]);
 
-    window.signals.trigger('textureImported');
     return obj;
 };
 
-const getTexturePivot = (texture: string | ITexture, inPixels: boolean): [number, number] => {
-    if (typeof texture === 'string') {
-        texture = getTextureFromId(texture);
+const getTexturePivot = (texture: -1 | ITexture, inPixels: boolean): [number, number] => {
+    if (texture === -1) {
+        return [16, 16];
     }
     if (inPixels) {
         return [texture.axis[0], texture.axis[1]];
