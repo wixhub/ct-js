@@ -126,6 +126,8 @@ const createAsset = async (asset: IAsset, dest: string): Promise<void> => {
     }
     applySaveHooks(asset, ensureRelativeAssetPath(dest));
     addAsset(asset.uid, dest);
+    window.signals.trigger(asset.type + 'Created', asset, dest);
+    window.signals.trigger('assetCreated', asset, dest);
 };
 
 /**
@@ -160,9 +162,12 @@ const patchAsset = async function (
     const source = await ensureAsset(assetOrId);
     const result = patch ? extend(extend({}, source), patch) : source;
     const {format} = assetTypes[source.type];
-    await dumpAsset(getAssetPath(assetOrId), format, result);
-    await applySaveHooks(source, getAssetPath(assetOrId));
+    const assetPath = getAssetPath(assetOrId);
+    await dumpAsset(assetPath, format, result);
+    await applySaveHooks(source, assetPath);
     pokeAsset(ensureId(assetOrId));
+    window.signals.trigger(source.type + 'Updated', source, assetPath);
+    window.signals.trigger('assetUpdated', source, assetPath);
 };
 /**
  * @param asset Either an asset's object or its UID.
@@ -191,11 +196,14 @@ const moveAsset = async function (assetOrId: IAsset | string, newPath: string): 
     }
     moveAssetInRegistry(id, newRelativePath);
     applySaveHooks(asset, newRelativePath);
+    window.signals.trigger(asset.type + 'Moved', asset, newRelativePath);
+    window.signals.trigger('assetMoved', asset, newRelativePath);
     return newPath;
 };
 
 const deleteAsset = async function (assetOrId: IAsset | string): Promise<void> {
     const dataFile = ensureAbsoluteAssetPath(getAssetPath(assetOrId));
+    const asset = await ensureAsset(assetOrId);
     const type = getTypeFromPath(dataFile),
           typeSpec = assetTypes[type];
     const promises = [];
@@ -217,6 +225,8 @@ const deleteAsset = async function (assetOrId: IAsset | string): Promise<void> {
     }
     await Promise.all(promises);
     removeAsset(ensureId(assetOrId));
+    window.signals.trigger(asset.type + 'Deleted', asset, getAssetPath(assetOrId));
+    window.signals.trigger('assetDeleted', asset, getAssetPath(assetOrId));
 };
 
 /* * * * * * * * * * * * * * * * * */
