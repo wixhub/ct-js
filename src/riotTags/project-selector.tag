@@ -77,6 +77,8 @@ project-selector
         this.namespace = 'intro';
         this.mixin(window.riotVoc);
 
+        const {loadProject} = require('./data/node_requires/resources/projects');
+
         this.tab = 'projects';
         this.changeTab = tab => () => {
             this.tab = tab;
@@ -177,7 +179,7 @@ project-selector
                     }
                 });
             }, 0);
-            window.loadProject(path.join(way, codename + '.ict'));
+            loadProject(path.join(way, codename + '.ict'));
         };
 
         /**
@@ -185,7 +187,7 @@ project-selector
          */
         this.loadRecentProject = e => {
             const projectPath = e.item.project;
-            window.loadProject(projectPath);
+            loadProject(projectPath);
         };
         /**
          * Removes a project from the recents list

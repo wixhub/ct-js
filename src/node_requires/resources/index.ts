@@ -72,7 +72,7 @@ const assetTypes: Record<string, IAssetType> = {};
  */
 const registerAssetType = function (name: string, type: IAssetType): void {
     if (name in assetTypes) {
-        throw new Error(`[resources] Asset type ${type} already exists.`);
+        throw new Error(`[resources] Asset type ${name} already exists.`);
     }
     assetTypes[name] = type;
 };

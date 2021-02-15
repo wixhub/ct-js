@@ -2,7 +2,7 @@ import {get as defaultEmitter} from './defaultEmitter';
 
 import {registerAssetType} from './../index';
 const register = function (): void {
-    registerAssetType('type', {
+    registerAssetType('tandem', {
         editor: 'emitter-tandem-editor',
         format: 'yaml',
         hasDataFolder: false,

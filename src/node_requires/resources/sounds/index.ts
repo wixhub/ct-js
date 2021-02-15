@@ -1,6 +1,6 @@
 import {registerAssetType} from './../index';
 const register = function (): void {
-    registerAssetType('style', {
+    registerAssetType('sound', {
         editor: 'sound-editor',
         format: 'json',
         hasDataFolder: true,

@@ -100,8 +100,9 @@ asset-browser.flexfix
         this.namespace = 'assetViewer';
         this.mixin(window.riotVoc);
 
-        const path = required('path'),
+        const path = require('path'),
               fs = require('fs-extra');
+        const {makeAssetPathAbsolute} = require('./data/node_requires/resources/utils');
 
         this.filter = this.opts.forcefilter ? this.opts.forcefilter : ['all'];
         this.toggleFilter = type => () => {
@@ -146,7 +147,6 @@ asset-browser.flexfix
             this.navigateTo(path.join(this.path, subfolder));
         };
 
-        const getAbsolute = relative => path.join();
         const ctAssetPattern = /^([^\n]+)\.ct([a-z]+)$/; // filename should be at least one symbol
         const ctDataPattern = /^[^\n]+\.ct[a-z]+\.data$/;
         this.rescan = async () => {
@@ -305,7 +305,7 @@ asset-browser.flexfix
         const names = this.vocGlob.common.resourceNames;
         const hints = this.vocGlob.common.resourceHints;
         this.newAssetMenu = {
-            opened: false
+            opened: false,
             items: []
         };
         // Create items from bare strings, for brewity
@@ -329,14 +329,16 @@ asset-browser.flexfix
             .prompt(window.languageJSON.common.newname)
             .then(async e => {
                 if (e.inputValue.trim() && e.buttonClicked !== 'cancel') {
-                    const name = e.inputValue.trim() + `.ct${type}`;
-                    if (await fs.pathExists(path.join(this.path, name))) {
-                        const resources = require(`./data/node_requires/resources/${type}s`);
-                        resources. // TODO:
+                    const fileName = e.inputValue.trim() + `.ct${type}`;
+                    const manifest = makeAssetPathAbsolute(path.join(this.path, fileName));
+                    if (!(await fs.pathExists(manifest))) {
+                        const resources = require(`./data/node_requires/resources`);
+                        resources.createAsset({}, manifest)
+                    } else {
+                        alertify.error('Such asset already exists, or its name matches the name of a folder');
                     }
                 }
             });
-            // TODO:
         };
 
         this.promptNewFolder = () => {
