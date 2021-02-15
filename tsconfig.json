@@ -1,12 +1,18 @@
 {
     "include": [
-        "./src/node_requires/**/*"
+        "./src/node_requires/**/*",
+        "./src/node_requires/**/*",
+        "./src/sharedTypedefs",
+        "./app/node_modules/pixi.js/**/*"
     ],
     "compilerOptions": {
         "target": "es2020",
         "module": "umd",
         "noImplicitAny": true,
         "moduleResolution": "node",
-        "baseUrl": "./src"
+        "baseUrl": "./src",
+        "paths": {
+            "pixi.js": ["./../app/node_modules/pixi.js"]
+        }
     }
 }

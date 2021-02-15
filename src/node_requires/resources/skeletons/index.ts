@@ -1,5 +1,5 @@
 const path = require('path');
-import {ensureAbsoluteAssetPath, ensureAsset, ensureId, throwIfOutsideAssets} from './../utils';
+import {ensureAbsoluteAssetPath, ensureId, throwIfOutsideAssets} from './../utils';
 
 /**
  * Returns the path to the file that holds the mesh data, armature, and animations.
@@ -57,7 +57,7 @@ const getSkeletonPreview = function getSkeletonPreview(skeleton: ISkeleton, fs?:
  * @returns {Promise<void>} Resolves after creating a thumbnail.
  */
 const skeletonGenPreview = function (skeleton: ISkeleton): Promise<void> {
-    const loader = new PIXI.loaders.Loader(),
+    const loader = new PIXI.Loader(),
           dbf = dragonBones.PixiFactory.factory;
     const fs = require('fs-extra');
     return new Promise((resolve, reject) => {
@@ -104,23 +104,27 @@ const importSkeleton = async function importSkeleton(
     throwIfOutsideAssets(folder);
     const generateGUID = require('./../generateGUID');
     const fs = require('fs-extra');
+    if (!name) {
+        name = path.basename(src)
+            .replace(/_ske\.json/gi, '')
+            .replace(/\s/g, '_');
+    }
+    const metaFile = path.join(folder, `${name}.ctskeleton`);
 
     const uid = generateGUID();
-    const partialDest = path.join(global.projdir + '/img/skdb' + uid);
 
     await Promise.all([
-        fs.copy(src, partialDest + '_ske.json'),
-        fs.copy(src.replace('_ske.json', '_tex.json'), partialDest + '_tex.json'),
-        fs.copy(src.replace('_ske.json', '_tex.png'), partialDest + '_tex.png')
+        fs.copy(src, path.join(metaFile, 'ske.json')),
+        fs.copy(src.replace('_ske.json', '_tex.json'), path.join(metaFile, 'tex.json')),
+        fs.copy(src.replace('_ske.json', '_tex.png'), path.join(metaFile, 'tex.png'))
     ]);
     const skel = {
-        name: path.basename(src).replace('_ske.json', ''),
-        origname: path.basename(partialDest + '_ske.json'),
+        name,
         from: 'dragonbones',
+        type: 'skeleton',
         uid
-    };
+    } as const;
     await skeletonGenPreview(skel);
-    global.currentProject.skeletons.push(skel);
     window.signals.trigger('skeletonImported', skel);
 };
 

@@ -3,6 +3,7 @@ import {ensureAbsoluteAssetPath, ensureAsset, ensureId, throwIfOutsideAssets} fr
 import {getMdate} from './../registry';
 import {get as getDefaultTexture} from './defaultTexture';
 import {createAsset} from './../';
+import * as PIXI from 'pixi.js';
 
 /**
  * Retrieves the full path to a thumbnail of a given texture.
@@ -49,19 +50,19 @@ const baseTextureFromTexture = (texture: string | ITexture): Promise<PIXI.BaseTe
         const textureLoader = new PIXI.Loader();
         const {resources} = textureLoader;
 
-        texture = ensureId(texture);
+        const id = ensureId(texture);
         const path = getTextureOrig(texture, false);
 
-        textureLoader.add(texture, path);
+        textureLoader.add(id, path);
         textureLoader.onError.add(reject);
         textureLoader.load(() => {
-            resolve(resources[texture].texture.baseTexture);
+            resolve(resources[id].texture.baseTexture);
         });
     });
 
 declare interface IPixiTextureCacheEntry {
     lastmod: number,
-    texture: PIXI.Texture
+    textures: PIXI.Texture[]
 }
 const pixiTextureCache: Map<string, IPixiTextureCacheEntry> = new Map();
 const clearPixiTextureCache = function (): void {
@@ -130,7 +131,7 @@ const getPixiTexture = async function (
     texture: assetRef | ITexture,
     frame?: number,
     allowMinusOne?: boolean
-): Promise<PIXI.Texture> {
+): Promise<PIXI.Texture|PIXI.Texture[]> {
     if (texture === -1) {
         if (allowMinusOne) {
             if (frame || frame === 0) {
@@ -150,18 +151,17 @@ const getPixiTexture = async function (
         // eslint-disable-next-line require-atomic-updates
         pixiTextureCache.set(uid, {
             lastmod: Number(getMdate(uid)),
-            texture: pixiTextures
+            textures: pixiTextures
         });
     }
     if (frame || frame === 0) {
-        return pixiTextureCache.get(uid).texture[frame];
+        return pixiTextureCache.get(uid).textures[frame];
     }
-    return pixiTextureCache.get(uid).texture;
+    return pixiTextureCache.get(uid).textures;
 };
 
-const convertToPngBuffer = function convertToPngBuffer(
-    img: HTMLImageElement | HTMLCanvasElement
-): Buffer {
+// eslint-disable-next-line max-len
+const convertToPngBuffer = function convertToPngBuffer(img: HTMLImageElement | HTMLCanvasElement): Buffer {
     const canvas = document.createElement('canvas');
     canvas.width = img.width;
     canvas.height = img.height;
@@ -172,9 +172,13 @@ const convertToPngBuffer = function convertToPngBuffer(
     return buf;
 };
 
-const textureGenPreview = async function textureGenPreview(texture, destination, size) {
+const textureGenPreview = async function textureGenPreview(
+    texture: string | ITexture,
+    destination: string,
+    size: number
+): Promise<string> {
     if (typeof texture === 'string') {
-        texture = getTextureFromId(texture);
+        texture = (await ensureAsset(texture)) as ITexture;
     }
     const {imageContain, toBuffer, crop} = require('../../imageUtils');
 
@@ -203,7 +207,7 @@ const isBgPostfixTester = /@bg$/;
  * @returns {Promise<ITexture>} A promise that resolves into the resulting texture object.
  */
 // eslint-disable-next-line max-lines-per-function
-const importImageToTexture = async ( // TODO:
+const importImageToTexture = async (
     src: string | Buffer,
     name: string,
     folder: string
@@ -216,7 +220,7 @@ const importImageToTexture = async ( // TODO:
     const metaFile = path.join(folder, `${name}.cttexture`);
     const image = document.createElement('img');
     // Wait while the image is loading
-    await new Promise((resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
         image.onload = () => {
             resolve();
         };
@@ -224,7 +228,7 @@ const importImageToTexture = async ( // TODO:
             window.alertify.error(e);
             reject(e);
         };
-        image.src = 'file://' + dest + '?' + Math.random();
+        image.src = 'file://' + src + '?' + Math.random();
     });
     let texName;
     if (name) {
@@ -273,8 +277,8 @@ const importImageToTexture = async ( // TODO:
     fs.writeFile(path.join(metaFile + '.data', 'source.png'), convertToPngBuffer(image));
 
     await Promise.all([
-        textureGenPreview(obj, dest + '_prev.png', 64),
-        textureGenPreview(obj, dest + '_prev@2.png', 128)
+        textureGenPreview(obj, path.join(metaFile + '.data', 'preview.png'), 64),
+        textureGenPreview(obj, path.join(metaFile + '.data', 'preview@2.png'), 128)
     ]);
 
     return obj;

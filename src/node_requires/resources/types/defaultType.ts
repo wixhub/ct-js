@@ -7,7 +7,15 @@ const get = function get(): IType {
         type: 'type',
         extends: {}, // should not be copied, but created
         texture: -1,
-        uid: generateGUID()
+        parent: -1,
+        uid: generateGUID(),
+        eventArguments: {
+            'core.create': {},
+            'core.step': {},
+            'core.draw': {},
+            'core.destroy': {}
+        },
+        eventArgumentsID: 0
     });
 };
 

@@ -46,6 +46,7 @@ app-view.flexcol
         main-menu(show="{tab === 'menu'}")
         debugger-screen-embedded(if="{tab === 'debug'}" params="{debugParams}" data-hotkey-scope="play" ref="debugger")
         project-settings(show="{tab === 'project'}" data-hotkey-scope="project")
+        asset-browser(show="{tab === 'assets'}" data-hotkey-scope="assets")
         patreon-screen(if="{tab === 'patrons'}" data-hotkey-scope="patrons")
         // Dynamic tabs' editors
     new-project-onboarding(if="{sessionStorage.showOnboarding && localStorage.showOnboarding !== 'off'}")
