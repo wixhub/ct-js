@@ -1,7 +1,7 @@
 (function firstRunSetup() {// first-launch setup
     const defaults = {
         fontSize: 18,
-        lastProjects: '',
+        latestProjects: '',
         notes: '',
         appLanguage: 'English',
         editorZooming: 0

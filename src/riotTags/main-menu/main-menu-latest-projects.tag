@@ -8,9 +8,9 @@ main-menu-latest-projects
         this.mixin(window.riotVoc);
 
         this.refreshLatestProjects = function refreshLatestProjects() {
-            if (('lastProjects' in localStorage) &&
-                (localStorage.lastProjects !== '')) {
-                this.latestProjects = localStorage.lastProjects.split(';');
+            if (('latestProjects' in localStorage) &&
+                (localStorage.latestProjects !== '')) {
+                this.latestProjects = localStorage.latestProjects.split(';');
                 this.latestProjects.length = Math.min(this.latestProjects.length, 10);
             } else {
                 this.latestProjects = [];

@@ -99,9 +99,9 @@ project-selector
         this.newVersion = false;
 
         // Loads recently opened projects
-        if (('lastProjects' in localStorage) &&
-            (localStorage.lastProjects !== '')) {
-            this.latestProjects = localStorage.lastProjects.split(';');
+        if (('latestProjects' in localStorage) &&
+            (localStorage.latestProjects !== '')) {
+            this.latestProjects = localStorage.latestProjects.split(';');
             let removedNonexistent = false;
             Promise.all(this.latestProjects.map(proj => fs.pathExists(proj)
                 .then(exists => {
@@ -117,7 +117,7 @@ project-selector
             .then(() => {
                 if (removedNonexistent) {
                     alertify.log('Removed some projects from the list, as they no longer exist.');
-                    localStorage.lastProjects = this.latestProjects.join(';');
+                    localStorage.latestProjects = this.latestProjects.join(';');
                 }
                 this.update();
             });
@@ -146,40 +146,13 @@ project-selector
         };
         /**
          * Creates a new project.
-         * Technically it creates an empty project in-memory, then saves it to a directory.
-         * Creates basic directories for sounds and textures.
          */
-        this.newProject = async (way, codename) => {
-            way = path.join(way, codename);
+        this.newProject = async (targetFolder, codename) => {
+            projectDir = path.join(targetFolder, codename);
             sessionStorage.showOnboarding = true;
-            const gitignoreData = require('./data/node_requires/resources/projects/gitignore').get();
-            const defaultProject = require('./data/node_requires/resources/projects/defaultProject').get();
-            const YAML = require('js-yaml');
-            const projectYAML = YAML.safeDump(defaultProject);
-            fs.outputFile(path.join(way, codename + '.ict'), projectYAML)
-            .catch(e => {
-                alertify.error(this.voc.unableToWriteToFolders + '\n' + e);
-                throw e;
-            });
-            fs.outputFile(path.join(way, '.gitignore'), gitignoreData)
-            .catch(e => {
-                alertify.error(this.voc.unableToWriteToFolders + '\n' + e);
-                throw e;
-            });
-            global.projdir = way;
-            sessionStorage.projname = codename + '.ict';
-            await fs.ensureDir(path.join(global.projdir, '/img'));
-            fs.ensureDir(path.join(global.projdir, '/snd'));
-            fs.ensureDir(path.join(global.projdir, '/include'));
-            setTimeout(() => { // for some reason, it must be done through setTimeout; otherwise it fails
-                fs.copy('./data/img/notexture.png', path.join(global.projdir + '/img/splash.png'), e => {
-                    if (e) {
-                        alertify.error(e);
-                        console.error(e);
-                    }
-                });
-            }, 0);
-            loadProject(path.join(way, codename + '.ict'));
+            const {createProject} = require('./data/node_requires/resources/projects');
+            await createProject(projectDir, codename);
+            loadProject(projectDir);
         };
 
         /**
@@ -195,7 +168,7 @@ project-selector
         this.forgetProject = e => {
             const {project} = e.item;
             this.latestProjects.splice(this.latestProjects.indexOf(project), 1);
-            localStorage.lastProjects = this.latestProjects.join(';');
+            localStorage.latestProjects = this.latestProjects.join(';');
             e.stopPropagation();
         };
 

@@ -1,13 +1,20 @@
 import {defaultProject} from './defaultProject';
 import gitignore from './gitignore';
 
-// These must return a path to a **DIRECTORY**
+const path = require('path');
+
+/** projectPath must return a path to a **DIRECTORY** */
 let projectPath: string | void = void 0;
 let currentProject: IProject | void = void 0;
+
 const getProjectPath = (): string|void => projectPath;
-const setProjectPath = (newPath: string): void => {
+const setProjectPath = async (newPath: string): Promise<void> => {
     if (newPath.endsWith('project.yaml')) {
         throw new Error('[resources/projects/index] The path to a project must not point to the project.yaml file, but to its directory.');
+    }
+    const fs = require('fs-extra');
+    if (!(await fs.pathExists(path.join(newPath, 'project.yaml')))) {
+        throw new Error('[resources/projects/index] The project\'s folder does not have project.yaml');
     }
     projectPath = newPath;
 };
@@ -23,7 +30,6 @@ const getDefaultProjectDir = function (): Promise<string> {
 };
 
 const getExamplesDir = function (): string {
-    const path = require('path');
     try {
         require('gulp');
         // Most likely, we are in a dev environment
@@ -39,7 +45,6 @@ const getExamplesDir = function (): string {
  * @param {boolean} [fs] Whether to return a filesystem path (true) or a URL (false; default).
  */
 const getProjectThumbnail = function (projPath: string, fs?: boolean): string {
-    const path = require('path');
     if (fs) {
         return path.join(projPath, 'img', 'splash.png');
     }
@@ -54,31 +59,48 @@ const putGitignore = async (projectPath: string) => {
 };
 
 const loadProject = async (projectPath: string): Promise<IProject> => {
-    const path = require('path'),
-          fs = require('fs-extra');
+    const fs = require('fs-extra');
+    await setProjectPath(projectPath);
     await Promise.all(['actions', 'assets', 'includes', 'scripts'].map(subpath =>
         fs.ensureDir(path.join(projectPath, subpath))));
     await putGitignore(projectPath);
-    currentProject = fs.readYaml(path.join(projectPath, 'project.yaml')) as IProject;
-    setProjectPath(projectPath);
+    currentProject = await fs.readYaml(path.join(projectPath, 'project.yaml')) as IProject;
+
+    // Update the list of latest projects
+    const latestProjects = localStorage.latestProjects ? localStorage.latestProjecs.split(';') : [];
+    const lpId = latestProjects.indexOf(projectPath);
+    if (lpId !== -1) {
+        latestProjects.splice(lpId, 1);
+    }
+    latestProjects.unshift(projectPath);
+    localStorage.latestProjects = latestProjects.join(';');
+
+    window.signals.trigger('projectLoaded');
     return currentProject;
 };
 
-const saveProject = async (): Promise<void> => {
+const saveProject = async (customData?: IProject, customProjPath?: string): Promise<void> => {
     const fs = require('fs-extra');
-    await fs.outputYaml(path.json(getProjectPath(), 'project.yaml'));
+    if (customData) {
+        await fs.outputYaml(path.join(customProjPath, 'project.yaml'), customData);
+        return;
+    }
+    await fs.outputYaml(path.join(getProjectPath(), 'project.yaml'), currentProject);
 };
 
-const createProject = async (projectPath: string, name: string): Promise<void> => {
-    const path = require('path'),
-          fs = require('fs-extra');
+/**
+ * @param {string} projectPath The path to the root folder of a project
+ * @param {string} [name] Optional name to be set inside the created project.yaml
+ */
+const createProject = async (newProjectPath: string, name?: string): Promise<void> => {
+    const fs = require('fs-extra');
     await Promise.all(['actions', 'assets', 'includes', 'scripts'].map(subpath =>
-        fs.ensureDir(path.join(projectPath, subpath))));
-    await putGitignore(projectPath);
-    currentProject = defaultProject.get();
-    currentProject.settings.authoring.title = name;
-    setProjectPath(projectPath);
-    saveProject();
+        fs.ensureDir(path.join(newProjectPath, subpath))));
+    await putGitignore(newProjectPath);
+    await fs.copy('./data/img/notexture.png', path.join(newProjectPath, 'splash.png'));
+    const newProject = defaultProject.get();
+    newProject.settings.authoring.title = name;
+    await saveProject(newProject, newProjectPath);
 };
 
 export {

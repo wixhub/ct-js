@@ -7,6 +7,9 @@
         return YAML.load(textProjData);
     };
     fs.outputYaml = fs.outputYAML = async function outputYAML(file, object) {
+        if (!object) {
+            throw new Error('[fs-extra/yamlPatch] YAML object was not passed!');
+        }
         await fs.ensureFile(file);
         const YAML = require('js-yaml');
         await fs.outputFile(file, YAML.dump(object));
