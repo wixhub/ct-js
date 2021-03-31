@@ -67,7 +67,7 @@ const loadProject = async (projectPath: string): Promise<IProject> => {
     currentProject = await fs.readYaml(path.join(projectPath, 'project.yaml')) as IProject;
 
     // Update the list of latest projects
-    const latestProjects = localStorage.latestProjects ? localStorage.latestProjecs.split(';') : [];
+    const latestProjects = localStorage.latestProjects ? localStorage.latestProjects.split(';') : [];
     const lpId = latestProjects.indexOf(projectPath);
     if (lpId !== -1) {
         latestProjects.splice(lpId, 1);

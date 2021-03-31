@@ -99,7 +99,9 @@ app-view.flexcol
             }
             this.saveRecoveryDebounce();
         };
-        this.saveRecoveryDebounce = window.debounce(this.saveRecovery, 1000 * 60 * 5);
+
+        const debounce = require('./data/node_requires/utils/debounce').default;
+        this.saveRecoveryDebounce = debounce(this.saveRecovery, 1000 * 60 * 5);
         window.signals.on('saveProject', this.saveProject);
         this.on('unmount', () => {
             window.signals.off('saveProject', this.saveProject);
