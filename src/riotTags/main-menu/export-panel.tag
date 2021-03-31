@@ -52,9 +52,10 @@ export-panel
         this.working = false;
         this.log = [];
 
-        global.currentProject.settings.export = global.currentProject.settings.export || {};
-        const projSettings = global.currentProject.settings;
-        this.projSettings = global.currentProject.settings;
+        const {getProject} = require('./data/node_requires/resources/projects');
+        getProject().settings.export = getProject().settings.export || {};
+        const projSettings = getProject().settings;
+        this.projSettings = getProject().settings;
 
         const bakeIcons = async exportDir => {
             const path = require('path'),
@@ -95,7 +96,7 @@ export-panel
 
                 this.log.push('Exporting the project…');
                 this.update();
-                await runCtExport(global.currentProject, projectDir, true);
+                await runCtExport(getProject(), projectDir, true);
                 this.log.push('Adding desktop resources…');
                 this.update();
                 await fs.copy('./data/ct.release/desktopPack/', exportDir);
@@ -110,8 +111,8 @@ export-panel
                     packageJson.name = projSettings.authoring.title;
                     packageJson.window.title = projSettings.authoring.title;
                 }
-                const startingRoom = global.currentProject.rooms.find(room =>
-                    room.uid === global.currentProject.startroom) || global.currentProject.rooms[0];
+                const startingRoom = getProject().rooms.find(room =>
+                    room.uid === getProject().startroom) || getProject().rooms[0];
                 packageJson.window.width = startingRoom.width;
                 packageJson.window.height = startingRoom.height;
                 packageJson.window.mode = projSettings.rendering.desktopMode || 'maximized';

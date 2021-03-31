@@ -6,7 +6,7 @@ branding-settings
             hover-hint(text="{voc.iconNotice}")
         br
         texture-input(
-            val="{global.currentProject.settings.branding.icon || -1}"
+            val="{currentProject.settings.branding.icon || -1}"
             showempty="yep"
             onselected="{updateGameIcon}"
             header="{voc.icon}"
@@ -16,17 +16,18 @@ branding-settings
         b
             span {voc.accent}
             hover-hint(text="{voc.accentNotice}")
-        color-input(onchange="{wire('global.currentProject.settings.branding.accent', true)}" color="{global.currentProject.settings.branding.accent}")
+        color-input(onchange="{wire('this.currentProject.settings.branding.accent', true)}" color="{currentProject.settings.branding.accent}")
     .spacer
     .block.checkbox
-        input(type="checkbox" value="{global.currentProject.settings.branding.invertPreloaderScheme}" checked="{global.currentProject.settings.branding.invertPreloaderScheme}" onchange="{wire('this.currentProject.settings.branding.invertPreloaderScheme')}")
+        input(type="checkbox" value="{this.currentProject.settings.branding.invertPreloaderScheme}" checked="{currentProject.settings.branding.invertPreloaderScheme}" onchange="{wire('this.currentProject.settings.branding.invertPreloaderScheme')}")
         span {voc.invertPreloaderScheme}
     script.
         this.namespace = 'settings.branding';
         this.mixin(window.riotVoc);
         this.mixin(window.riotWired);
-        this.currentProject = global.currentProject;
+        const {getProject} = require('./data/node_requires/resources/projects');
+        this.currentProject = getProject();
 
         this.updateGameIcon = tex => {
-            global.currentProject.settings.branding.icon = tex.uid;
+            getProject().settings.branding.icon = tex.uid;
         };

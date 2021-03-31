@@ -18,5 +18,6 @@ export-settings
         this.namespace = 'settings.export';
         this.mixin(window.riotVoc);
         this.mixin(window.riotWired);
-        this.currentProject = global.currentProject;
+        const {getProject} = require('./data/node_requires/resources/projects');
+        this.currentProject = getProject();
         this.exportSettings = this.currentProject.settings.export;

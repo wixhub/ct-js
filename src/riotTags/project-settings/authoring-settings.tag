@@ -26,7 +26,8 @@ authoring-settings
         this.namespace = 'settings.authoring';
         this.mixin(window.riotVoc);
         this.mixin(window.riotWired);
-        this.currentProject = global.currentProject;
+        const {getProject} = require('./data/node_requires/resources/projects');
+        this.currentProject = getProject();
         this.authoring = this.currentProject.settings.authoring;
 
         this.changeTitle = e => {

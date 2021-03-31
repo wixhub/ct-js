@@ -7,12 +7,12 @@
         Sets the filter's value on startup (e.g. forcefilter="{['texture', 'skeleton']}" will show
         only textures and skeletons) and removes filter controls from UI
 
-asset-browser.flexfix
-    .flexfix-header
+asset-browser.flexfix.pad
+    .flexfix-header.flexrow
         .nogrow
             h1
                 virtual(each="{piece in breadcrumbs}")
-                    span(onclick="{navigateTo(piece.path)}")
+                    span(onclick="{navigateTo(piece.path)}") {piece.name}
                     |
                     |
                     svg.feather.dim
@@ -22,15 +22,16 @@ asset-browser.flexfix
                     svg.feather.dim(onclick="{navigateUp}")
                         use(xlink:href="data/icons.svg#chevron-up")
         .filler
-        .nogrow(if="{!opts.nocreation}")
-            button
-                svg.feather.dim(onclick="{promptNewFolder}")
-                    use(xlink:href="data/icons.svg#folder-plus")
-                span {voc.newFolder}
+        .nogrow.flexrow(if="{!opts.nocreation}")
             .relative
                 button
+                    svg.feather.dim(onclick="{promptNewFolder}")
+                        use(xlink:href="data/icons.svg#folder-plus")
+                    span {voc.newFolder}
+            .relative
+                button.nm
                     // Targets the context-menu tag at the bottom of this tag
-                    svg.feather.dim(onclick="{() => refs.newAssetMenu.toggle())}")
+                    svg.feather.dim(onclick="{() => refs.newAssetMenu.toggle()}")
                         use(xlink:href="data/icons.svg#plus")
                     span {voc.newAsset}
                 context-menu(menu="{newAssetMenu}" ref="newAssetMenu")
@@ -50,16 +51,22 @@ asset-browser.flexfix
                 img(if="{parent.opts.thumbnails}" src="{parent.opts.thumbnails(asset)}")
     // Bottom row
     .flexfix-footer.flexrow
-        .nogrow(if="{!opts.forcefilter}")
+        .flexrow.nogrow(if="{!opts.forcefilter}")
             // Filter settings
-            h3 {voc.filterHeader}
-            - var assetTypes = ['all', 'textures', 'styles', 'tandems', 'sounds', 'types', 'rooms']
-            for type in assetTypes
-                label.checkbox
-                    input(type="checkbox" value=type checked=`{filter.incudes('${key}')}` onchange="{toggleFilter('${key}')}")
-                    span=`{voc.assetTypes.${type}}`
+            h3.nmt {voc.filterHeader}
+            .flexrow
+                - var assetTypes = ['all', 'textures', 'styles', 'tandems', 'sounds', 'types', 'rooms']
+                for type in assetTypes
+                    label.checkbox
+                        input(
+                            type="checkbox"
+                            value=type
+                            checked=`{filter.incudes('${type}')}`
+                            onchange="{toggleFilter('${type}')}"
+                        )
+                        span=`{voc.assetTypes.${type}}`
         .filler
-        .nogrow
+        .nogrow.flexrow
             // Search
             .aSearchWrap
                 input.inline(type="text" onkeyup="{fuseSearch}")
@@ -126,8 +133,23 @@ asset-browser.flexfix
 
         const projects = require('./data/node_requires/resources/projects');
 
+
         // Navigation stuff
         this.path = './';
+
+        const updateBreadcrumbs = () => {
+            this.breadcrumbs = [];
+            const slices = this.path.split(path.separator);
+            let currentPath = '';
+            for (const slice of slices) {
+                currentPath = path.join(currentPath, slice);
+                this.breadcrumbs.push({
+                    path: currentPath,
+                    name: path.normalize(slice) === './' ? 'Root' : slice
+                });
+            }
+        };
+
         this.navigateTo = p => () => {
             if (path.isAbsolute(p)) {
                 throw new Error(`[asset-viewer] Cannot navigate by absolute path. Got ${p}`);
@@ -135,6 +157,7 @@ asset-browser.flexfix
             if (path.normalize(p).startsWith('..')) {
                 throw new Error(`[asset-viewer] Cannot navigate to ${p}`);
             }
+            updateBreadcrumbs();
         };
         this.navigateUp = () => () => {
             if (path.normalize(this.path) !== '.') {
@@ -142,16 +165,19 @@ asset-browser.flexfix
             }
             resetSelection();
             rescan();
+            updateBreadcrumbs();
         };
         this.navigateDown = subfolder => () => {
             this.navigateTo(path.join(this.path, subfolder));
+            updateBreadcrumbs();
         };
+        updateBreadcrumbs();
 
         const ctAssetPattern = /^([^\n]+)\.ct([a-z]+)$/; // filename should be at least one symbol
         const ctDataPattern = /^[^\n]+\.ct[a-z]+\.data$/;
         this.rescan = async () => {
-            let entries = await fs.readdir(path.join(projects.getProjectPath(), this.path), {
-                withFIleTypes: true
+            let entries = await fs.readdir(path.join(projects.getProjectPath(), this.path, 'assets'), {
+                withFileTypes: true
             });
             entries = entries.filter(entry =>
                 (entry.isDirectory() && !ctDataPattern.test(entry.name)) || // skip data folders
@@ -302,8 +328,8 @@ asset-browser.flexfix
             }
         };
 
-        const names = this.vocGlob.common.resourceNames;
-        const hints = this.vocGlob.common.resourceHints;
+        const names = this.vocGlob.resourceNames;
+        const hints = this.vocGlob.resourceHints;
         this.newAssetMenu = {
             opened: false,
             items: []

@@ -64,8 +64,47 @@
             "skeleton": "skeletal animation",
             "font": "font",
             "style": "style"
+        },
+        "resourceHints": {
+            "type": "A template that describes gameplay logic for copies.",
+            "room": "A 2D space where you layout copies, tiles, and other objects to create a level.",
+            "texture": "An image used by a game in types, backgrounds, and tiles.",
+            "tandem": "A visual effect made of particles.",
+            "sound": "An audio file that can be played in-game.",
+            "skeleton": "An animated armature made in DragonBones.",
+            "font": "An asset that allows using a custom font in your game.",
+            "style": "A preset for drawing UI stuff."
         }
     },
+    "assetViewer": {
+        "newFolder": "New Folder",
+        "newAsset": "New Asset",
+        "filterHeader": "Filter",
+        "assetTypes": {
+            "all": "All",
+            "textures": "Textures",
+            "styles": "Styles",
+            "tandems": "Tandems",
+            "sounds": "Sounds",
+            "types": "Types",
+            "rooms": "Rooms"
+        },
+        "sortByDate": "Sort by date",
+        "sortByName": "Sort by name",
+        "sortByType": "Sort by type"
+    },
+
+    "appView": {
+        "assets": "Assets",
+        "ctIDE": "ct.IDE",
+        "launch": "Launch",
+        "launchHotkeys": "(F5; Alt+F5 to run in your default browser)",
+        "min": "Windowed",
+        "patrons": "Patrons",
+        "restart": "Restart",
+        "project": "Project"
+    },
+
     "colorPicker": {
         "current": "New",
         "globalPalette": "Global Palette",
@@ -675,20 +714,5 @@
             "visitDiscordForGamedevSupport": "Join Discord server for gamedev support",
             "openIconList": "Open the list of icons"
         }
-    },
-    "appView": {
-        "ctIDE": "ct.IDE",
-        "texture": "Textures",
-        "launch": "Launch",
-        "launchHotkeys": "(F5; Alt+F5 to run in your default browser)",
-        "min": "Windowed",
-        "patrons": "Patrons",
-        "restart": "Restart",
-        "rooms": "Rooms",
-        "project": "Project",
-        "sounds": "Sounds",
-        "ui": "UI",
-        "fx": "FX",
-        "types": "Types"
     }
 }

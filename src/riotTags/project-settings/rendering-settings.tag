@@ -31,5 +31,6 @@ rendering-settings
         this.namespace = 'settings.rendering';
         this.mixin(window.riotVoc);
         this.mixin(window.riotWired);
-        this.currentProject = global.currentProject;
+        const {getProject} = require('./data/node_requires/resources/projects');
+        this.currentProject = getProject();
         this.renderSettings = this.currentProject.settings.rendering;

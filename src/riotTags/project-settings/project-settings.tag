@@ -38,12 +38,14 @@ project-settings.panel.view.pad.flexrow
                 #{name + '-settings'}
         .pad(if="{currentModule}")
             h1 {currentModule.manifest.main.name}
-            extensions-editor(customextends="{currentModule.manifest.fields}" entity="{global.currentProject.libs[currentModule.name]}")
+            extensions-editor(customextends="{currentModule.manifest.fields}" entity="{currentProject.libs[currentModule.name]}")
     script.
         this.namespace = 'settings';
         this.mixin(window.riotVoc);
         this.mixin(window.riotWired);
-        this.currentProject = global.currentProject;
+
+        const {getProject} = require('./data/node_requires/resources/projects');
+        this.currentProject = getProject();
         this.currentProject.settings.fps = this.currentProject.settings.fps || 30;
 
         this.tab = 'authoring';
@@ -58,7 +60,7 @@ project-settings.panel.view.pad.flexrow
         this.modulesWithDocs = [];
         this.updateModulesWithDocs = async () => {
             this.modulesWithDocs = (await loadModules())
-                .filter(module => module.name in global.currentProject.libs)
+                .filter(module => module.name in this.currentProject.libs)
                 .filter(module => module.manifest.fields);
             this.update();
         };

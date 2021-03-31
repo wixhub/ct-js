@@ -1,7 +1,7 @@
 app-view.flexcol
-    nav.nogrow.flexrow(if="{global.currentProject}")
+    nav.nogrow.flexrow
         // Smaller control buttons
-        ul#app.nav.tabs
+        ul#app.nav.tabs.nogrow
             li.it30#ctlogo(onclick="{changeTab('menu')}" title="{voc.ctIDE}" class="{active: tab === 'menu'}")
                 svg.feather.nmr
                     use(xlink:href="data/icons.svg#menu")
@@ -18,8 +18,8 @@ app-view.flexcol
                     use(xlink:href="data/icons.svg#play")
                 span(if="{tab !== 'debug'}") {voc.launch}
                 span(if="{tab === 'debug'}") {voc.restart}
-        // Persistent tabs for project settings and assets
-        ul.nav.tabs.nogrow
+        ul.nav.tabs
+            // Persistent tabs for project settings and assets
             li(onclick="{changeTab('project')}" class="{active: tab === 'project'}" data-hotkey="Control+1" title="Control+1")
                 svg.feather
                     use(xlink:href="data/icons.svg#sliders")
@@ -28,10 +28,7 @@ app-view.flexcol
                 svg.feather
                     use(xlink:href="data/icons.svg#sliders")
                 span {voc.assets}
-        // Dynamic assets' tabs
-        ul.nav.tabs.horizontalscroll
-            // @see https://css-tricks.com/pure-css-horizontal-scrolling/
-            // But as we call it in Russia, this implementation is a polniy pizdets.
+            // Opened assets
             virtual(each="{asset, i in openedAssets}")
                 li(onclick="{openAsset(asset)}" class="{active: tab === asset}" data-hotkey="Control+{i + 3}" title="{i + 3 < 10 ? 'Control+' + (i+3) : ''}")
                     svg.feather
@@ -39,9 +36,9 @@ app-view.flexcol
                     span {voc.texture}
         .nogrow
             // TODO: implement long-press animation and deletion event
-            svg.feather(onclick="{closeTabs}")
-                use(xlink:href="data/icons.svg#texture")
-    div.flexitem.relative(if="{global.currentProject}")
+            svg.feather.anActionableIcon(onclick="{closeTabs}")
+                use(xlink:href="data/icons.svg#x")
+    div.flexitem.relative
         // Persistent views
         main-menu(show="{tab === 'menu'}")
         debugger-screen-embedded(if="{tab === 'debug'}" params="{debugParams}" data-hotkey-scope="play" ref="debugger")
@@ -77,26 +74,17 @@ app-view.flexcol
         });
 
         this.saveProject = async () => {
+            const {saveProject} = require('./data/node_requires/resources/projects');
             try {
-                const fs = require('fs-extra');
-                const YAML = require('js-yaml');
-                const projectYAML = YAML.dump(global.currentProject);
-                await fs.outputFile(global.projdir + '.ict', projectYAML);
-                this.saveRecoveryDebounce();
-                fs.remove(global.projdir + '.ict.recovery')
-                .catch(console.error);
-                // TODO: glob.modified = false;
+                await saveProject();
                 alertify.success(window.languageJSON.common.savedcomm, 'success', 3000);
             } catch (e) {
                 alertify.error(e);
             }
         };
         this.saveRecovery = () => {
-            if (global.currentProject) {
-                const YAML = require('js-yaml');
-                const recoveryYAML = YAML.dump(global.currentProject);
-                fs.outputFile(global.projdir + '.ict.recovery', recoveryYAML);
-            }
+            const {saveProject, getProjectPath, getProject} = require('./data/node_requires/resources/projects');
+            saveProject(getProject(), getProjectPath());
             this.saveRecoveryDebounce();
         };
 
@@ -129,11 +117,12 @@ app-view.flexcol
         }
 
         this.runProject = () => {
+            const {getProject} = require('./data/node_requires/resources/projects');
             document.body.style.cursor = 'progress';
             this.exportingProject = true;
             this.update();
             const runCtExport = require('./data/node_requires/exporter');
-            runCtExport(global.currentProject, global.projdir)
+            runCtExport(getProject(), global.projdir)
             .then(() => {
                 if (localStorage.disableBuiltInDebugger === 'yes') {
                     // Open in default browser
@@ -145,7 +134,7 @@ app-view.flexcol
                     // Open the debugger as usual
                     this.tab = 'debug';
                     this.debugParams = {
-                        title: global.currentProject.settings.authoring.title,
+                        title: getProject().settings.authoring.title,
                         link: `http://localhost:${fileServer.address().port}/`
                     };
                 }
@@ -161,8 +150,9 @@ app-view.flexcol
             });
         };
         this.runProjectAlt = () => {
+            const {getProject} = require('./data/node_requires/resources/projects');
             const runCtExport = require('./data/node_requires/exporter');
-            runCtExport(global.currentProject, global.projdir)
+            runCtExport(getProject(), global.projdir)
             .then(() => {
                 nw.Shell.openExternal(`http://localhost:${fileServer.address().port}/`);
             });

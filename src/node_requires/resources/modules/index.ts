@@ -1,40 +1,46 @@
 const moduleDir = './data/ct.libs';
 
 /* async */
-const loadModule = dir => {
+const loadModule = (dir: string): Promise<ICatmodManifest> => {
     const fs = require('fs-extra'),
           path = require('path');
     return fs.readJSON(dir, path.join(dir, 'module.json'));
 };
 /* async */
-const loadModuleByName = name => {
+const loadModuleByName = (name: string): Promise<ICatmodManifest> => {
     const path = require('path');
     return loadModule(path.join(moduleDir, name));
 };
-const loadModules = async () => {
+const loadModules = async (): Promise<ICatmod[]> => {
     const fs = require('fs-extra'),
           path = require('path');
 
     // Reads the modules directory
     const files = await fs.readdir(moduleDir);
 
-    const modules = (await Promise.all(files.map(async file => {
+    const modules = (await Promise.all(files.map(async (file: string) => {
         // We include only those folders that have `module.json` inside
         if (await fs.pathExists(path.join(moduleDir, file, 'module.json'))) {
             const moduleName = file;
             return {
                 name: moduleName,
                 path: path.join(moduleDir, file),
-                manifest: await fs.readJSON(path.join(moduleDir, file, 'module.json'))
-            };
+                manifest: await fs.readJSON(path.join(moduleDir, file, 'module.json')) as ICatmodManifest
+            } as ICatmod;
         }
         return false;
     }))).filter(module => module); // Remove `false` results from array
 
-    return modules;
+    return modules as ICatmod[];
 };
 
-const getModuleDocStructure = async module => {
+declare interface IModuleDocStructure {
+    name?: string,
+    vocKey?: string,
+    path?: string
+}
+
+const getModuleDocStructure = async (module: ICatmod): Promise<IModuleDocStructure[]> => {
     const path = require('path'),
           fs = require('fs-extra');
     const docStructure = [];
@@ -57,7 +63,7 @@ const getModuleDocStructure = async module => {
     try { // Search for a docs folder and add its items
         if ((await docsStat).isDirectory()) {
             const files = (await fs.readdir(path.join(module.path, 'docs')))
-                .filter(file => /\.md$/.test(file));
+                .filter((file : string) => /\.md$/.test(file));
             for (const file of files) {
                 docStructure.push({
                     name: path.basename(file, path.extname(file)),
@@ -100,7 +106,7 @@ const categoryToIconMap = {
     default: 'ctmod'
 };
 
-const getIcon = module => {
+const getIcon = (module: ICatmod): string => {
     const {categories} = module.manifest.main;
     if (!categories || categories.length === 0) {
         return categoryToIconMap.default;
@@ -111,7 +117,7 @@ const getIcon = module => {
     return categoryToIconMap.default;
 };
 
-module.exports = {
+export {
     loadModule,
     loadModuleByName,
     loadModules,

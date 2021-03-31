@@ -77,7 +77,8 @@ notepad-panel#notepad.panel.dockright(class="{opened: opened}")
             localStorage.UItheme === 'Night' || localStorage.UItheme === 'Horizon';
 
         this.on('update', () => {
-            this.notepadlocal.setValue(global.currentProject.notes || '');
+            const {getProject} = require('./data/node_requires/resources/projects');
+            this.notepadlocal.setValue(getProject().notes || '');
         });
 
         this.on('mount', () => {
@@ -89,8 +90,9 @@ notepad-panel#notepad.panel.dockright(class="{opened: opened}")
                     language: 'typescript'
                 });
 
+                const {getProject} = require('./data/node_requires/resources/projects');
                 this.notepadlocal.onDidChangeModelContent(() => {
-                    global.currentProject.notes = this.notepadlocal.getValue();
+                    getProject().notes = this.notepadlocal.getValue();
                     glob.modified = true;
                 });
                 this.notepadglobal.onDidChangeModelContent(() => {

@@ -27,8 +27,9 @@ docs-panel
 
         this.refreshDocs = async () => {
             const modules = require('./data/node_requires/resources/modules');
+            const {getProject} = require('./data/node_requires/resources/projects');
             const catmods = (await modules.loadModules())
-                .filter(module => module.name in global.currentProject.libs);
+                .filter(module => module.name in getProject().libs);
             const docOrders = catmods.map(modules.getModuleDocStructure);
             const unfilteredDocs = await Promise.all(docOrders);
             this.docs = [];
