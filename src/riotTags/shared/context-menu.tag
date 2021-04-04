@@ -29,7 +29,7 @@
     @method open
     @method close
 
-context-menu(class="{opened: opts.menu.opened}" ref="root" style="{opts.menu.columns? 'columns: '+opts.menu.columns+';' : ''}")
+context-menu(class="{opts.class} {opened: opts.menu.opened}" ref="root" style="{opts.menu.columns? 'columns: '+opts.menu.columns+';' : ''}")
     a(
         each="{item in opts.menu.items}"
         href="javascript: void 0;"

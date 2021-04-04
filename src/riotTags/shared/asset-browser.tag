@@ -7,7 +7,7 @@
         Sets the filter's value on startup (e.g. forcefilter="{['texture', 'skeleton']}" will show
         only textures and skeletons) and removes filter controls from UI
 
-asset-browser.flexfix.pad
+asset-browser.flexfix.pad.view
     .flexfix-header.flexrow
         .nogrow
             h1
@@ -34,7 +34,7 @@ asset-browser.flexfix.pad
                     svg.feather.dim(onclick="{() => refs.newAssetMenu.toggle()}")
                         use(xlink:href="data/icons.svg#plus")
                     span {voc.newAsset}
-                context-menu(menu="{newAssetMenu}" ref="newAssetMenu")
+                context-menu.asset-browser-aCreateAssetMenu(menu="{newAssetMenu}" ref="newAssetMenu")
     .flexfix-body
         // Asset cards
         ul.cards(class="{list: localStorage[opts.namespace? (opts.namespace+'Layout') : 'defaultAssetLayout'] === 'list'}")
