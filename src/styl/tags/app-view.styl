@@ -4,29 +4,14 @@ app-view
     left 0
     right 0
     bottom 0
-    & > .flexrow > nav
-        flex-flow row wrap
-    li
-        position relative
-    .horizontalscroll
-        position absolute
-        height calc(100% - 20rem)
-        width 2rem
-        transform rotate(-90deg) translateY(-80px)
-        transform-origin right top
-        & > *
-            transform rotate(90deg)
-            transform-origin right top
-
-#theCatMenu
-    top 100%
-    left 0
-#fullscreen
-    flex 0 0 3rem
-#app
-    flex 0.35 1 12rem
-#mainnav
-    flex 1 1 60rem
+    .&-aDefaultTabGroup, .&-aHorizontalScrollPortion
+        border-radius 0
+        li
+            position relative
+    .&-aDefaultTabGroup
+        li
+            padding-left 1rem
+            padding-right 1rem
 
 body.maximized #mainnav
     @media (max-width 1000px)

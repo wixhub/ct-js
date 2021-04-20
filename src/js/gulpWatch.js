@@ -40,9 +40,9 @@
                     // eslint-disable-next-line no-eval
                     eval(script);
                     riot.reload(riotTag);
-                    alertify.success(`Updated ${riotTag} tag.`);
+                    window.alertify.success(`Updated ${riotTag} tag.`);
                 } catch (err) {
-                    alertify.error(`Could not update ${riotTag} tag. See the console for details.`);
+                    window.alertify.error(`Could not update ${riotTag} tag. See the console for details.`);
                     throw err;
                 }
             });

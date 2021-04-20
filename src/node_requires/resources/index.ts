@@ -84,6 +84,11 @@ const throwIfInvalidAssetType = function (typeOrAsset: string | IAsset): void {
     }
 };
 
+const getAssetTypeIcon = function (type: string): string {
+    throwIfInvalidAssetType(type);
+    return assetTypes[type].icon;
+};
+
 /**
  * @param dest Must be a path relative to the `project/assets` folder.
  */
@@ -247,6 +252,10 @@ import {register as registerStyles} from './styles';
 registerStyles();
 import {register as registerSounds} from './sounds';
 registerSounds();
+import {register as registerRooms} from './rooms';
+registerRooms();
+import {register as registerSkeletons} from './skeletons';
+registerSkeletons();
 
 /* * * * * * * * * * * * * * * * * */
 /* * * * * * * Exports * * * * * * */
@@ -260,6 +269,7 @@ export {
     moveAsset,
     deleteAsset,
     getAssetPath,
+    getAssetTypeIcon,
     getAssetDataFolder,
     pushDependent,
     removeDependent,

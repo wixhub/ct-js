@@ -151,7 +151,7 @@ const concatScripts = () =>
             objectMode: true
         },
         gulp.src('./src/js/3rdparty/riot.min.js'),
-        gulp.src(['./src/js/**.js', '!./src/js/3rdparty/riot.min.js'])
+        gulp.src(['./src/js/**/*.js', '!./src/js/3rdparty/riot.min.js'])
     )
     .pipe(sourcemaps.init({
         largeFile: true

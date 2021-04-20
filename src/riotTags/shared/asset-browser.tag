@@ -15,7 +15,7 @@ asset-browser.flexfix.pad.view
                     span(onclick="{navigateTo(piece.path)}") {piece.name}
                     |
                     |
-                    svg.feather.dim
+                    svg.feather.dim(if="{piece !== breadcrumbs[breadcrumbs.length - 1]}")
                         use(xlink:href="data/icons.svg#chevron-right")
                 span {currentFolderName}
                 .anActionableIcon
@@ -29,11 +29,11 @@ asset-browser.flexfix.pad.view
                         use(xlink:href="data/icons.svg#folder-plus")
                     span {voc.newFolder}
             .relative
-                button.nm
+                button.nm(onclick="{() => refs.newAssetMenu.toggle()}")
                     // Targets the context-menu tag at the bottom of this tag
-                    svg.feather.dim(onclick="{() => refs.newAssetMenu.toggle()}")
-                        use(xlink:href="data/icons.svg#plus")
                     span {voc.newAsset}
+                    svg.feather
+                        use(xlink:href="data/icons.svg#chevron-down")
                 context-menu.asset-browser-aCreateAssetMenu(menu="{newAssetMenu}" ref="newAssetMenu")
     .flexfix-body
         // Asset cards
@@ -51,7 +51,7 @@ asset-browser.flexfix.pad.view
                 img(if="{parent.opts.thumbnails}" src="{parent.opts.thumbnails(asset)}")
     // Bottom row
     .flexfix-footer.flexrow
-        .flexrow.nogrow(if="{!opts.forcefilter}")
+        .flexrow.nogrow.asset-browser-aFilterRow(if="{!opts.forcefilter}")
             // Filter settings
             h3.nmt {voc.filterHeader}
             .flexrow
@@ -61,7 +61,7 @@ asset-browser.flexfix.pad.view
                         input(
                             type="checkbox"
                             value=type
-                            checked=`{filter.incudes('${type}')}`
+                            checked=`{filter.includes('${type}')}`
                             onchange="{toggleFilter('${type}')}"
                         )
                         span=`{voc.assetTypes.${type}}`
@@ -335,11 +335,12 @@ asset-browser.flexfix.pad.view
             items: []
         };
         // Create items from bare strings, for brewity
+        const {getAssetTypeIcon} = require('./data/node_requires/resources');
         const bakeMenuEntry = type => ({
-            label: names[type],
-            icon: type,
+            label: names[type].slice(0, 1).toUpperCase() + names[type].slice(1),
+            icon: getAssetTypeIcon(type),
             title: hints[type],
-            onclick: () => {
+            click: () => {
                 this.promptNewAsset(type);
             }
         });
@@ -350,7 +351,7 @@ asset-browser.flexfix.pad.view
         this.newAssetMenu.items.push(...['sound', 'tandem', 'skeleton', 'style'].map(bakeMenuEntry));
 
         this.promptNewAsset = type => {
-            alertify
+            window.alertify
             .defaultValue('')
             .prompt(window.languageJSON.common.newname)
             .then(async e => {
@@ -361,7 +362,7 @@ asset-browser.flexfix.pad.view
                         const resources = require(`./data/node_requires/resources`);
                         resources.createAsset({}, manifest)
                     } else {
-                        alertify.error('Such asset already exists, or its name matches the name of a folder');
+                        window.alertify.error('Such asset already exists, or its name matches the name of a folder');
                     }
                 }
             });

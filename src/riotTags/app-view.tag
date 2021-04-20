@@ -1,7 +1,7 @@
 app-view.flexcol
     nav.nogrow.flexrow
         // Smaller control buttons
-        ul#app.nav.tabs.nogrow
+        ul.nav.tabs.nogrow.app-view-aDefaultTabGroup
             li.it30#ctlogo(onclick="{changeTab('menu')}" title="{voc.ctIDE}" class="{active: tab === 'menu'}")
                 svg.feather.nmr
                     use(xlink:href="data/icons.svg#menu")
@@ -18,7 +18,7 @@ app-view.flexcol
                     use(xlink:href="data/icons.svg#play")
                 span(if="{tab !== 'debug'}") {voc.launch}
                 span(if="{tab === 'debug'}") {voc.restart}
-        ul.nav.tabs
+
             // Persistent tabs for project settings and assets
             li(onclick="{changeTab('project')}" class="{active: tab === 'project'}" data-hotkey="Control+1" title="Control+1")
                 svg.feather
@@ -28,16 +28,16 @@ app-view.flexcol
                 svg.feather
                     use(xlink:href="data/icons.svg#sliders")
                 span {voc.assets}
+        ul.nav.tabs.app-view-aHorizontalScrollPortion
             // Opened assets
             virtual(each="{asset, i in openedAssets}")
                 li(onclick="{openAsset(asset)}" class="{active: tab === asset}" data-hotkey="Control+{i + 3}" title="{i + 3 < 10 ? 'Control+' + (i+3) : ''}")
                     svg.feather
                         use(xlink:href="data/icons.svg#texture")
                     span {voc.texture}
-        .nogrow
-            // TODO: implement long-press animation and deletion event
-            svg.feather.anActionableIcon(onclick="{closeTabs}")
-                use(xlink:href="data/icons.svg#x")
+        // TODO: implement long-press animation and deletion event
+        svg.feather.anActionableIcon(onclick="{closeTabs}" if="{openedAssets && openedAssets.length}")
+            use(xlink:href="data/icons.svg#x")
     div.flexitem.relative
         // Persistent views
         main-menu(show="{tab === 'menu'}")
