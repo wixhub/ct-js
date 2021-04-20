@@ -347,7 +347,7 @@ asset-browser.flexfix.pad.view
         this.newAssetMenu.items.push({
             type: 'separator'
         });
-        this.newAssetMenu.items.push(...['sound', 'tandem', 'skeleton', 'style', 'font'].map(bakeMenuEntry));
+        this.newAssetMenu.items.push(...['sound', 'tandem', 'skeleton', 'style'].map(bakeMenuEntry));
 
         this.promptNewAsset = type => {
             alertify

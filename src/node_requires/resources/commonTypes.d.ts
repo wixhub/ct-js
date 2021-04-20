@@ -1,4 +1,4 @@
-type resourceType = 'type' | 'room' | 'sound' | 'style' | 'font' | 'skeleton' | 'texture' | 'tandem';
+type resourceType = 'type' | 'room' | 'sound' | 'style' | 'skeleton' | 'texture' | 'tandem';
 
 type fontWeight = '100' | '200' | '300' | '400' | '500' | '600' | '700' | '800' | '900';
 
