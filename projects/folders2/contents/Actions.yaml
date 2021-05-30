@@ -1,5 +1,0 @@
-- name: NewAction
-  methods:
-    - code: mouse.Left
-    - code: mouse.Right
-      multiplier: -1
