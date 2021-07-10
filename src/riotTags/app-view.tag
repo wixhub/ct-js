@@ -26,7 +26,7 @@ app-view.flexcol
                 span {voc.project}
             li(onclick="{changeTab('assets')}" class="{active: tab === 'assets'}" data-hotkey="Control+2" title="Control+2")
                 svg.feather
-                    use(xlink:href="data/icons.svg#sliders")
+                    use(xlink:href="data/icons.svg#folder")
                 span {voc.assets}
         ul.nav.tabs.app-view-aHorizontalScrollPortion
             // Opened assets

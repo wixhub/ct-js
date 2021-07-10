@@ -298,6 +298,8 @@ import {registerAssetType} from './../index';
 const register = function (): void {
     registerAssetType('texture', {
         editor: 'texture-editor',
+        creatable: false,
+        importable: true,
         format: 'yaml',
         hasDataFolder: true,
         icon: 'texture',

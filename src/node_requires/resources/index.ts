@@ -12,6 +12,8 @@ const getAssetDataFolder = (uidOrPath: string | IAsset): string => {
 interface IAssetType {
     /** How the metadata file should be loaded and saved: as a JSON file or a YAML file. */
     format: 'json' | 'yaml',
+    /** Default contents of a newly-created asset's manifest */
+    defaultAsset?: IAsset,
     /** Whether each asset of this type has a supplemental data folder */
     hasDataFolder: boolean,
     /**
@@ -20,6 +22,17 @@ interface IAssetType {
      * this asset type on any attempts to do so.
      */
     editor?: string,
+
+    /** Whether or not one can create this asset from scratch */
+    creatable: boolean,
+    /** Whether or not this asset can be imported from file system */
+    importable: boolean,
+    /**
+     * Whether the import action should be preferred over a creation
+     * of a blank asset. Works when both `creatable` and `importable` are `true`.
+     */
+    favorImport?: boolean,
+
     /** The name of an SVG icon from ct.IDE to be used in asset viewers and other situations */
     icon: string,
     /** The path to a translatable key in i18n files that is used to name this asset type. */
@@ -89,6 +102,11 @@ const getAssetTypeIcon = function (type: string): string {
     return assetTypes[type].icon;
 };
 
+const getAssetType = function (type: string): IAssetType {
+    throwIfInvalidAssetType(type);
+    return assetTypes[type];
+};
+
 /**
  * @param dest Must be a path relative to the `project/assets` folder.
  */
@@ -109,9 +127,9 @@ const dumpAsset = async (dest: string, fileType: 'json' | 'yaml', asset: IAsset)
     throwIfInvalidAssetType(asset);
     dest = ensureAbsoluteAssetPath(dest);
     if (fileType === 'json') {
-        await fs.writeJson(dest, asset);
+        await fs.outputJson(dest, asset);
     } else if (fileType === 'yaml') {
-        await fs.writeYaml(dest, asset);
+        await fs.outputYaml(dest, asset);
     } else {
         throw Error(`[resources] Unknown asset format: ${fileType} for asset ${dest}`);
     }
@@ -127,6 +145,9 @@ const dumpAsset = async (dest: string, fileType: 'json' | 'yaml', asset: IAsset)
 const createAsset = async (asset: IAsset, dest: string): Promise<void> => {
     throwIfOutsideAssets(dest);
     const typeSpec = assetTypes[asset.type];
+    if (typeSpec.defaultAsset) {
+        asset = Object.assign({}, typeSpec.defaultAsset, asset);
+    }
     await dumpAsset(dest, typeSpec.format, Object.assign(asset, {
         mtime: Number(new Date())
     }));
@@ -270,6 +291,7 @@ export {
     deleteAsset,
     getAssetPath,
     getAssetTypeIcon,
+    getAssetType,
     getAssetDataFolder,
     pushDependent,
     removeDependent,

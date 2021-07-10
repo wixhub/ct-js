@@ -3,6 +3,8 @@
  * Forward keys are referred to as simply "keys"; backward keys are referred to as "values".
  * Both keys and values must be unique.
  *
+ * Throws errors when trying to get a non-existing key.
+ *
  * Can be used as a generic class in TypeScript to enforce types on both keys and values.
  *
  * @class
@@ -12,10 +14,18 @@ export default class DoubleMap<forward, backward> {
     private backwardMap: Map<backward, forward>;
     // Let's name forward keys as keys, and backward keys as values.
 
+    constructor() {
+        this.forwardMap = new Map();
+        this.backwardMap = new Map();
+    }
+
     hasKey(key: forward): boolean {
         return this.forwardMap.has(key);
     }
     getKey(value: backward): forward {
+        if (!this.hasValue(value)) {
+            throw new Error(`[ct-DoubleMap] Attempt to get a non-existing key; value ${value} does not exist`);
+        }
         return this.backwardMap.get(value);
     }
     deleteByKey(key: forward): void {
@@ -28,6 +38,9 @@ export default class DoubleMap<forward, backward> {
         return this.backwardMap.has(value);
     }
     getValue(key: forward): backward {
+        if (!this.hasKey(key)) {
+            throw new Error(`[ct-DoubleMap] Attempt to get a non-existing key; key ${key} does not exist`);
+        }
         return this.forwardMap.get(key);
     }
     deleteByValue(value: backward): void {

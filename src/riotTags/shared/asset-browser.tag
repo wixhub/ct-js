@@ -157,6 +157,9 @@ asset-browser.flexfix.pad.view
             if (path.normalize(p).startsWith('..')) {
                 throw new Error(`[asset-viewer] Cannot navigate to ${p}`);
             }
+            this.path = p;
+            resetSelection();
+            rescan();
             updateBreadcrumbs();
         };
         this.navigateUp = () => () => {
@@ -335,13 +338,18 @@ asset-browser.flexfix.pad.view
             items: []
         };
         // Create items from bare strings, for brewity
-        const {getAssetTypeIcon} = require('./data/node_requires/resources');
+        const {getAssetTypeIcon, getAssetType} = require('./data/node_requires/resources');
         const bakeMenuEntry = type => ({
             label: names[type].slice(0, 1).toUpperCase() + names[type].slice(1),
             icon: getAssetTypeIcon(type),
+            altIcon: getAssetType(type).creatable ? false : 'download',
             title: hints[type],
             click: () => {
-                this.promptNewAsset(type);
+                if (getAssetType(type).creatable) {
+                    this.promptNewAsset(type);
+                } else {
+                    this.promptImportAssets(type);
+                }
             }
         });
         this.newAssetMenu.items.push(...['texture', 'type', 'room'].map(bakeMenuEntry));
@@ -355,7 +363,7 @@ asset-browser.flexfix.pad.view
             .defaultValue('')
             .prompt(window.languageJSON.common.newname)
             .then(async e => {
-                if (e.inputValue.trim() && e.buttonClicked !== 'cancel') {
+                if (e.buttonClicked !== 'cancel' && e.inputValue.trim()) {
                     const fileName = e.inputValue.trim() + `.ct${type}`;
                     const manifest = makeAssetPathAbsolute(path.join(this.path, fileName));
                     if (!(await fs.pathExists(manifest))) {
@@ -366,6 +374,34 @@ asset-browser.flexfix.pad.view
                     }
                 }
             });
+        };
+
+        this.promptImportAssets = type => {
+            if (type === 'texture') {
+                return window.showOpenDialog({
+                    multiple: true,
+                    filter: 'image/*'
+                })
+                .then(files => {
+                    const {importImageToTexture} = require('./data/node_requires/resources/textures');
+                    if (files && files.length) {
+                        const promises = files.map(file =>
+                            importImageToTexture(
+                                file,
+                                path.basename(file, path.extname(file)),
+                                this.path
+                            )
+                        );
+                        return Promise.all(promises)
+                            .then(() => {
+                                this.rescan();
+                            });
+                    }
+                    console.log(files);
+                });
+            } else {
+                throw new Error(`[asset-browser] Attempt to import an asset type not supported by the asset browser: ${type}`);
+            }
         };
 
         this.promptNewFolder = () => {

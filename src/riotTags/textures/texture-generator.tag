@@ -21,6 +21,17 @@ texture-generator.view
                         b {voc.color}
                     color-input(onchange="{changeColor}" color="{textureColor}")
                 fieldset
+                    b {voc.hape}
+                    label.block.checkbox
+                        input(type="radio" value="rectangle" checked="{shape === 'rectangle'}" onchange="{wire('this.shape')}")
+                        span {voc.shapeRectangle}
+                    label.block.checkbox
+                        input(type="radio" value="ellipse" checked="{shape === 'ellipse'}" onchange="{wire('this.shape')}")
+                        span {voc.shapeEllipse}
+                    label.block.checkbox
+                        input(type="radio" value="rhombus" checked="{shape === 'rhombus'}" onchange="{wire('this.shape')}")
+                        span {voc.shapeRhombus}
+                fieldset
                     b {voc.filler}
                     label.block.checkbox
                         input(type="radio" value="none" checked="{filler === 'none'}" onchange="{wire('this.filler')}")
@@ -64,6 +75,7 @@ texture-generator.view
         this.textureColor = '#446adb';
         this.textureLabel = '';
         this.filler = 'label';
+        this.shape = 'rectangle';
 
         this.changeColor = e => {
             this.wire('this.textureColor')(e);
@@ -82,7 +94,24 @@ texture-generator.view
             x.clearRect(0, 0, canvas.width, canvas.height);
 
             x.fillStyle = this.textureColor;
-            x.fillRect(0, 0, canvas.width, canvas.height);
+
+            if (this.shape === 'rectangle') {
+                x.fillRect(0, 0, canvas.width, canvas.height);
+            } else if (this.shape === 'ellipse'){
+                x.ellipse(
+                    canvas.width / 2, canvas.height / 2,
+                    canvas.width / 2, canvas.height / 2,
+                    0,
+                    0, Math.pi * 2
+                );
+            } else if (this.shape === 'rhombus') {
+                x.moveTo(canvas.width / 2, 0);
+                x.lineTo(canvas.width, canvas.height / 2);
+                x.lineTo(canvas.width / 2, canvas.height);
+                x.lineTo(0, canvas.height / 2);
+                x.closePath();
+                x.fill();
+            }
 
             const dark = window.brehautColor(this.textureColor).getLuminance() < 0.5;
 
@@ -112,10 +141,24 @@ texture-generator.view
             } else if (this.filler === 'cross') {
                 x.strokeStyle = dark ? '#fff' : '#000';
                 x.lineWidth = (canvas.width > 16 && canvas.height > 16) ? 2 : 1;
-                x.moveTo(0, 0);
-                x.lineTo(canvas.width, canvas.height);
-                x.moveTo(canvas.width, 0);
-                x.lineTo(0, canvas.height);
+                if (this.shape === 'rectangle') {
+                    x.moveTo(0, 0);
+                    x.lineTo(canvas.width, canvas.height);
+                    x.moveTo(canvas.width, 0);
+                    x.lineTo(0, canvas.height);
+                } else if (this.shape === 'ellipse') {
+                    const dx = canvas.width / Math.sqrt(2),
+                          dy = canvas.height / Math.sqrt(2);
+                    x.moveTo(canvas.width / 2 - dx, canvas.height / - dy);
+                    x.lineTo(canvas.width / 2 + dx, canvas.height / + dy);
+                    x.moveTo(canvas.width / 2 + dx, canvas.height / - dy);
+                    x.lineTo(canvas.width / 2 - dx, canvas.height / + dy);
+                } else if (this.shape === 'rhombus') {
+                    x.moveTo(canvas.width * 0.25, canvas.height * 0.25);
+                    x.lineTo(canvas.width * 0.75, canvas.height * 0.75);
+                    x.moveTo(canvas.width * 0.25, canvas.height * 0.75);
+                    x.lineTo(canvas.width * 0.75, canvas.height * 0.25);
+                }
                 x.stroke();
             }
         };

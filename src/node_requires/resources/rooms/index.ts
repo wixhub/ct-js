@@ -28,6 +28,8 @@ import {registerAssetType} from './../index';
 const register = function (): void {
     registerAssetType('room', {
         editor: 'room-editor',
+        creatable: true,
+        importable: false,
         format: 'json',
         hasDataFolder: true,
         icon: 'room',

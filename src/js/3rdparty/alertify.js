@@ -69,7 +69,7 @@
                     ok: '<button class=\'ok\' tabindex=\'1\'>{{ok}}</button>',
                     cancel: '<button class=\'cancel\' tabindex=\'2\'>{{cancel}}</button>'
                 },
-                input: '<input type=\'text\'>',
+                input: '<input type=\'text\' class=\'alertify-prompt\'>',
                 message: '<p class=\'msg\'>{{message}}</p>',
                 log: '<div class=\'{{class}}\'>{{message}}</div>'
             },

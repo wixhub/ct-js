@@ -132,6 +132,8 @@ import {registerAssetType} from './../index';
 const register = function (): void {
     registerAssetType('skeleton', {
         format: 'json',
+        creatable: false,
+        importable: true,
         hasDataFolder: true,
         icon: 'texture', // TODO:
         nounAccessor: 'common.resourceNames.skeleton',

@@ -44,13 +44,20 @@ context-menu
             font-size 0.85rem
             line-height 2.25rem
             clear right
-        .context-menu-anIcon
+        .context-menu-anIcon, .context-menu-anAltIcon
             position absolute
             left 0.8rem
             top 0.65rem
             color act
             width 1.125rem
             height @width
+        .context-menu-anAltIcon
+            left unset
+            right 0.5rem
+            color inherit
+            opacity 0.65
+        &.hasalticon
+            padding-right 2.5rem
         &:hover, &:focus
             color background
             background-color act

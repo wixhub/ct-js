@@ -21,6 +21,8 @@ import {registerAssetType} from './../index';
 const register = function (): void {
     registerAssetType('style', {
         editor: 'style-editor',
+        creatable: true,
+        importable: false,
         format: 'yaml',
         hasDataFolder: true,
         icon: 'droplet',

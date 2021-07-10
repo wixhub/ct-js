@@ -6,6 +6,8 @@ import {registerAssetType} from './../index';
 const register = function (): void {
     registerAssetType('type', {
         editor: 'type-editor',
+        creatable: true,
+        importable: false,
         format: 'yaml',
         hasDataFolder: true,
         icon: 'type',

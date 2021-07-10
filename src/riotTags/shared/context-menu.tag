@@ -11,7 +11,11 @@
         IMenuItem is:
         {
             label: string,
-            icon?: string, // a name of an svg icon, e.g. 'check',
+            icon?: string | Function<string>, // a name of an svg icon, e.g. 'check',
+            altIcon?: string | Function<string>, // a name of an svg icon, e.g. 'check', which will be grayed out
+                              // and displayed on the right of the menu item
+            iconClass?: string,
+            altIconClass?: string,
             title?: string, // a helpful notice shown on hover
 
             type?: 'checkbox'|'separator'|any,
@@ -33,7 +37,7 @@ context-menu(class="{opts.class} {opened: opts.menu.opened}" ref="root" style="{
     a(
         each="{item in opts.menu.items}"
         href="javascript: void 0;"
-        class="{item.type || 'item'} {checkbox: item.type === 'checkbox'} {submenu: item.submenu}"
+        class="{item.type || 'item'} {checkbox: item.type === 'checkbox'} {submenu: item.submenu} {hasalticon: item.altIcon}"
         disabled="{item.disabled}"
         onclick="{onItemClick}"
         tabindex="{'-1': item.type === 'separator'}"
@@ -47,6 +51,8 @@ context-menu(class="{opts.class} {opened: opts.menu.opened}" ref="root" style="{
         span.hotkey(if="{!item.type !== 'separator' && item.hotkey}") ({item.hotkeyLabel || item.hotkey})
         svg.feather.context-menu-aChevron(if="{item.submenu && item.type !== 'separator'}")
             use(xlink:href="data/icons.svg#chevron-right")
+        svg.context-menu-anIcon.context-menu-anAltIcon(if="{!item.submenu && item.altIcon && item.type !== 'separator'}" class="{item.altIconClass || 'feather'}")
+            use(xlink:href="data/icons.svg#{item.altIcon instanceof Function? item.altIcon() : item.altIcon}")
         context-menu(if="{item.submenu && item.type !== 'separator'}" menu="{item.submenu}")
     script.
         var noFakeClicks;
