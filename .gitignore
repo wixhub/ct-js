@@ -39,6 +39,9 @@ desktop\.ini
 
 # Generated files
 src/typedefs/ct.js/types.d.ts
+app/data/typedefs/ct.js.d.ts
+app/data/typedefs/global.d.ts
+app/data/typedefs/pixi.js.d.ts
 app/examples
 app/data/bundle.js
 app/data/riotTags.js
@@ -49,8 +52,6 @@ app/data/node_requires/**/*
 app/data/hotLoadTags
 app/data/fonts/style/.css
 app/data/theme*.css
-app/data/typedefs/global.d.ts
-app/data/typedefs/pixi.js.d.ts
 app/data/icons.svg
 app/data/icons.json
 /app/data/docs

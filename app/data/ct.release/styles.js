@@ -3,7 +3,7 @@
  */
 ct.styles = {
     types: { },
-    /**
+    /*
      * Creates a new style with a given name.
      * Technically, it just writes `data` to `ct.styles.types`
      */

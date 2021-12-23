@@ -113,32 +113,33 @@ type-editor.aPanel.aView.flexrow
                 lockWrapper: true
             };
             setTimeout(() => {
+                const imports = window.monacoGlobalsImport;
                 this.typeoncreate = window.setupCodeEditor(
                     this.refs.typeoncreate,
                     Object.assign({}, editorOptions, {
                         value: this.type.oncreate,
-                        wrapper: ['function onCreate(this: Copy) {', '}']
+                        wrapper: [ imports + 'function onCreate(this: Copy) {', '}']
                     })
                 );
                 this.typeonstep = window.setupCodeEditor(
                     this.refs.typeonstep,
                     Object.assign({}, editorOptions, {
                         value: this.type.onstep,
-                        wrapper: ['function onStep(this: Copy) {', '}']
+                        wrapper: [imports + 'function onStep(this: Copy) {', '}']
                     })
                 );
                 this.typeondraw = window.setupCodeEditor(
                     this.refs.typeondraw,
                     Object.assign({}, editorOptions, {
                         value: this.type.ondraw,
-                        wrapper: ['function onDraw(this: Copy) {', '}']
+                        wrapper: [imports + 'function onDraw(this: Copy) {', '}']
                     })
                 );
                 this.typeondestroy = window.setupCodeEditor(
                     this.refs.typeondestroy,
                     Object.assign({}, editorOptions, {
                         value: this.type.ondestroy,
-                        wrapper: ['function onDestroy(this: Copy) {', '}']
+                        wrapper: [imports + 'function onDestroy(this: Copy) {', '}']
                     })
                 );
 

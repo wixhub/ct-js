@@ -3,7 +3,7 @@
  * Usually you won't create new instances of it, but if you need, you can substitute
  * ct.camera with a new one.
  *
- * @extends {PIXI.DisplayObject}
+ * @extends {PIXI.Container}
  * @class
  *
  * @property {number} x The real x-coordinate of the camera.
@@ -118,7 +118,7 @@ const Camera = (function Camera() {
             camera.targetY = Math.min(boundary, camera.targetY);
         }
     };
-    class Camera extends PIXI.DisplayObject {
+    class Camera extends PIXI.Container {
         constructor(x, y, w, h) {
             super();
             this.follow = this.rotate = false;
@@ -447,3 +447,4 @@ const Camera = (function Camera() {
     }
     return Camera;
 })(ct);
+void Camera; // Suppress linter's "Camera is not used" warning.

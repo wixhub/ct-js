@@ -5,5 +5,9 @@
         "noImplicitAny": true,
         "moduleResolution": "node",
         "baseUrl": "./src"
-    }
+    },
+    "exclude": [
+      "temp",
+      "app/data"
+    ],
 }

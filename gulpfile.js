@@ -16,8 +16,6 @@ const path = require('path'),
       filemode = require('filemode'),
       zip = require('gulp-zip'),
 
-      jsdocx = require('jsdoc-x'),
-
       streamQueue = require('streamqueue'),
       notifier = require('node-notifier'),
       fs = require('fs-extra'),
@@ -348,104 +346,42 @@ const docs = async () => {
     }
 };
 
-// @see https://microsoft.github.io/monaco-editor/api/enums/monaco.languages.completionitemkind.html
-const kindMap = {
-    function: 'Function',
-    class: 'Class'
-};
-const getAutocompletion = doc => {
-    if (doc.kind === 'function') {
-        if (!doc.params || doc.params.length === 0) {
-            return doc.longname + '()';
-        }
-        return doc.longname + `(${doc.params.map(param => param.name).join(', ')})`;
-    }
-    if (doc.kind === 'class') {
-        return doc.name;
-    }
-    return doc.longname;
-};
-const getDocumentation = doc => {
-    if (!doc.description) {
-        return void 0;
-    }
-    if (doc.kind === 'function') {
-        return {
-            value: `${doc.description}
-${(doc.params || []).map(param => `* \`${param.name}\` (${param.type.names.join('|')}) ${param.description} ${param.optional ? '(optional)' : ''}`).join('\n')}
 
-Returns ${doc.returns[0].type.names.join('|')}, ${doc.returns[0].description}`
-        };
-    }
-    return {
-        value: doc.description
-    };
-};
-
-const bakeCompletions = () =>
-    jsdocx.parse({
-        files: './app/data/ct.release/**/*.js',
-        excludePattern: '(DragonBones|pixi)',
-        undocumented: false,
-        allowUnknownTags: true
-    })
-    .then(docs => {
-        const registry = [];
-        for (const doc of docs) {
-            console.log(doc);
-            if (doc.params) {
-                for (const param of doc.params) {
-                    console.log(param);
-                }
-            }
-            const item = {
-                label: doc.name,
-                insertText: doc.autocomplete || getAutocompletion(doc),
-                documentation: getDocumentation(doc),
-                kind: kindMap[doc.kind] || 'Property'
-            };
-            registry.push(item);
-        }
-        fs.outputJSON('./app/data/node_requires/codeEditor/autocompletions.json', registry, {
-            spaces: 2
-        });
-    });
-const bakeCtTypedefs = cb => {
-    spawnise.spawn(npm, ['run', 'ctTypedefs'])
-    .then(cb);
-};
-const concatTypedefs = () =>
-    gulp.src(['./src/typedefs/ct.js/types.d.ts', './src/typedefs/ct.js/**/*.ts', './src/typedefs/default/**/*.ts'])
+const concatGlobalTypedefs = () =>
+    gulp.src(['./src/typedefs/default/**/*.ts'])
     .pipe(concat('global.d.ts'))
-    // patch the generated output so ct classes allow custom properties
-    .pipe(replace('declare class Copy extends PIXI.AnimatedSprite {', `
-        declare class Copy extends PIXI.AnimatedSprite {
-            [key: string]: any
-        `))
-    .pipe(replace('declare class Room extends PIXI.Container {', `
-        declare class Room extends PIXI.Container {
-            [key: string]: any
-        `))
-    // also, remove JSDOC's @namespace flags so the popups in ct.js become more clear
-    .pipe(replace(`
- * @namespace
- */
-declare namespace`, `
- */
-declare namespace`))
-    .pipe(replace(`
-     * @namespace
-     */
-    namespace`, `
-     */
-    namespace`))
     .pipe(gulp.dest('./app/data/typedefs/'));
 
-// electron-builder ignores .d.ts files no matter how you describe your app's contents.
-const copyPixiTypedefs = () => gulp.src('./app/node_modules/pixi.js/pixi.js.d.ts')
-    .pipe(gulp.dest('./app/data/typedefs'));
+const rollup = require('rollup');
+const dts = require('rollup-plugin-dts').default;
 
-const bakeTypedefs = gulp.series([bakeCtTypedefs, concatTypedefs, copyPixiTypedefs]);
+const copyCtJsTypedefs = () =>
+    gulp.src(['./src/typedefs/ct.js/index.d.ts'])
+    .pipe(concat('ct.js.d.ts'))
+    .pipe(gulp.dest('./app/data/typedefs/'));
+
+
+const rollupPixiTypedefs = async function rollupPixiTypedefs() {
+    const bundle = await rollup.rollup({
+        input: 'app/node_modules/pixi.js/index.d.ts',
+        plugins: [dts({
+            respectExternal: true
+        })]
+    });
+    // write the bundle to disk
+    await bundle.write({
+        file: 'app/data/typedefs/pixi.js.d.ts',
+        format: 'es',
+        name: 'PIXI'
+    });
+    await bundle.close();
+};
+
+const bakeTypedefs = gulp.parallel([
+    concatGlobalTypedefs,
+    copyCtJsTypedefs,
+    rollupPixiTypedefs
+]);
 
 
 const build = gulp.parallel([
@@ -665,5 +601,4 @@ exports.deploy = deploy;
 exports.deployOnly = deployOnly;
 exports.default = defaultTask;
 exports.dev = devNoNW;
-exports.bakeCompletions = bakeCompletions;
 exports.bakeTypedefs = bakeTypedefs;

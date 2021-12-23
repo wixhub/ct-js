@@ -4,12 +4,11 @@
     const {extend} = require('./data/node_requires/objectUtils');
     const fs = require('fs-extra');
     const path = require('path');
+    const generateGUID = require('./data/node_requires/generateGUID');
 
-    const lib = [
-        './data/typedefs/pixi.js.d.ts',
-        './data/typedefs/global.d.ts',
-        './data/typedefs/keywordWorkarounds.d.ts'
-    ];
+    window.monacoGlobalsImport = [
+        'import * as PIXI from \'pixi.js\';'
+    ].join('');
 
     window.signals = window.signals || riot.observable({});
     window.signals.on('monacoBooted', () => {
@@ -24,15 +23,33 @@
             allowNonTsExtensions: true
         });
 
-        for (const file of lib) {
-            fs.readFile(path.join(__dirname, file), {
+        // Add pixi.js typings as a module
+        fs.readFile(path.join(__dirname, './data/typedefs/pixi.js.d.ts'), {
+            encoding: 'utf-8'
+        })
+        .then(pixiTypings => {
+            pixiTypings = 'declare module \'pixi.js\' {\n' + pixiTypings + '\n}';
+            monaco.languages.typescript.javascriptDefaults.addExtraLib(pixiTypings, 'file:///node_modules/pixi.js/index.d.ts');
+            monaco.languages.typescript.typescriptDefaults.addExtraLib(pixiTypings, 'file:///node_modules/pixi.js/index.d.ts');
+            // Add ct.js typings as a module
+            fs.readFile(path.join(__dirname, './data/typedefs/ct.js.d.ts'), {
                 encoding: 'utf-8'
             })
-            .then(ctTyping => {
-                monaco.languages.typescript.javascriptDefaults.addExtraLib(ctTyping);
-                monaco.languages.typescript.typescriptDefaults.addExtraLib(ctTyping);
+            .then(ctTypings => {
+                // ctTypings = 'declare module \'ct.js\' {\n' + ctTypings + '\n}';
+                monaco.languages.typescript.javascriptDefaults.addExtraLib(ctTypings, 'file:///node_modules/ct.js/index.d.ts');
+                monaco.languages.typescript.typescriptDefaults.addExtraLib(ctTypings, 'file:///node_modules/ct.js/index.d.ts');
             });
-        }
+        });
+
+        // Add general HTMLDOM/Browser API typings as is
+        fs.readFile(path.join(__dirname, './data/typedefs/global.d.ts'), {
+            encoding: 'utf-8'
+        })
+        .then(globalTypings => {
+            monaco.languages.typescript.javascriptDefaults.addExtraLib(globalTypings);
+            monaco.languages.typescript.typescriptDefaults.addExtraLib(globalTypings);
+        });
     });
 
     /**
@@ -274,7 +291,9 @@
      * @returns {any} Editor instance
      */
     window.setupCodeEditor = (textarea, options) => {
-        const opts = extend(extend({}, defaultOptions), options);
+        const opts = extend(extend({}, defaultOptions), options, {
+            model: monaco.editor.createModel('', 'typescript', `file:///${generateGUID()}.ts`)
+        });
         opts.value = opts.value || textarea.value || '';
         opts.value = opts.value.replace(/\r\n/g, '\n');
         if (opts.wrapper) {
