@@ -18,6 +18,8 @@
         "couldNotLoadFromClipboard": "Could not load data from clipboard",
         "cut": "Cut",
         "delete": "Delete",
+        "docsShort": "Docs",
+        "docsLong": "Documentation",
         "donate": "Donate",
         "done": "Done!",
         "duplicate": "Duplicate",
@@ -81,12 +83,10 @@
         "tileLayer": "tile layer",
         "ctSite": "ct.js homepage"
     },
-    "copyCustomProperties": {
-        "customProperties": "Custom Properties",
-        "addProperty": "Add Property",
-        "property": "Property",
-        "value": "Value",
-        "delete": "Delete"
+    "assetInput": {
+        "changeAsset": "Press to change the asset",
+        "jumpToAsset": "Jump to this asset",
+        "selectAssetHeader": "Select an asset"
     },
     "assetViewer": {
         "addNewGroup": "New Group",
@@ -99,6 +99,13 @@
         "globalPalette": "Global Palette",
         "old": "Old",
         "projectPalette": "Project's Palette"
+    },
+    "copyCustomProperties": {
+        "customProperties": "Custom Properties",
+        "addProperty": "Add Property",
+        "property": "Property",
+        "value": "Value",
+        "delete": "Delete"
     },
     "curveEditor": {
         "curveLineHint": "Click the curve to add a point",
@@ -260,6 +267,7 @@
             "highDensity": "Support high pixel density (e.g. on retina screens)",
             "maxFPS": "Max framerate:",
             "hideCursor": "Hide system cursor",
+            "usePixiLegacy": "Add a legacy, canvas-based renderer to support older browsers and graphics cards (adds ~20kb up to your game)",
             "desktopBuilds": "Desktop builds",
             "launchMode": "Launch mode:",
             "launchModes": {
@@ -330,6 +338,7 @@
         "create": "Create",
         "import": "Import",
         "skeletons": "Skeletal Animation",
+        "textures": "Textures",
         "createType": "Create a type from it",
         "importFromClipboard": "Import from clipboard",
         "generatePlaceholder": "Generate a placeholder"

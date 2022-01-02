@@ -9,7 +9,7 @@ const defaultProjectTemplate = {
         fittoscreen: {
             mode: 'scaleFit'
         },
-        mouse: {},
+        pointer: {},
         keyboard: {},
         'keyboard.polyfill': {},
         'sound.howler': {}
@@ -24,6 +24,16 @@ const defaultProjectTemplate = {
     emitterTandems: [],
     scripts: [],
     starting: 0,
+    contentTypes: [],
+    groups: {
+        fonts: [],
+        textures: [],
+        styles: [],
+        rooms: [],
+        types: [],
+        sounds: [],
+        emitterTandems: []
+    },
     settings: {
         authoring: {
             author: '',
