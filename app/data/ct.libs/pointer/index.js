@@ -35,6 +35,8 @@
             id: e.pointerId,
             x: positionGame.x,
             y: positionGame.y,
+            clientX: e.clientX,
+            clientY: e.clientY,
             xui: xui,
             yui: yui,
             xprev: positionGame.x,
@@ -62,6 +64,8 @@
             y: positionGame.y,
             xui: xui,
             yui: yui,
+            clientX: e.clientX,
+            clientY: e.clientY,
             pressure: e.pressure,
             buttons: e.buttons,
             tiltX: e.tiltX,
@@ -99,29 +103,42 @@
     };
     var handleHoverEnd = function (e) {
         const pointer = ct.pointer.hover.find(p => p.id === e.pointerId);
-        pointer.invalid = true;
         if (pointer) {
+            pointer.invalid = true;
             ct.pointer.hover.splice(ct.pointer.hover.indexOf(pointer), 1);
+        }
+        // Handles mouse pointers that were dragged out of the ct.js frame while pressing,
+        // as they don't trigger pointercancel or such
+        const downId = ct.pointer.down.findIndex(p => p.id === e.pointerId);
+        if (downId !== -1) {
+            ct.pointer.down.splice(downId, 1);
         }
     };
     var handleMove = function (e) {
         if (![/*%preventdefault%*/][0]) {
             e.preventDefault();
         }
-        const pointerHover = ct.pointer.hover.find(p => p.id === e.pointerId);
+        let pointerHover = ct.pointer.hover.find(p => p.id === e.pointerId);
+        if (!pointerHover) {
+            // Catches hover events that started before the game has loaded
+            handleHoverStart(e);
+            pointerHover = ct.pointer.hover.find(p => p.id === e.pointerId);
+        }
+        const pointerDown = ct.pointer.down.find(p => p.id === e.pointerId);
+        if (!pointerHover && !pointerDown) {
+            return;
+        }
         if (pointerHover) {
             updatePointer(pointerHover, e);
         }
-        const pointerDown = ct.pointer.down.find(p => p.id === e.pointerId);
         if (pointerDown) {
             updatePointer(pointerDown, e);
-            ct.pointer.updateGestures();
         }
         if (e.isPrimary) {
             writePrimary(pointerHover || pointerDown);
         }
     };
-    var handleStart = function (e) {
+    var handleDown = function (e) {
         if (![/*%preventdefault%*/][0]) {
             e.preventDefault();
         }
@@ -133,7 +150,7 @@
             writePrimary(pointer);
         }
     };
-    var handleRelease = function (e) {
+    var handleUp = function (e) {
         if (![/*%preventdefault%*/][0]) {
             e.preventDefault();
         }
@@ -185,15 +202,15 @@
         return false;
     };
     ct.pointer = {
-        released: [],
         setupListeners() {
             document.addEventListener('pointerenter', handleHoverStart, false);
             document.addEventListener('pointerout', handleHoverEnd, false);
-            document.addEventListener('pointerstart', handleStart, false);
-            document.addEventListener('pointerend', handleRelease, false);
-            document.addEventListener('pointercancel', handleRelease, false);
+            document.addEventListener('pointerleave', handleHoverEnd, false);
+            document.addEventListener('pointerdown', handleDown, false);
+            document.addEventListener('pointerup', handleUp, false);
+            document.addEventListener('pointercancel', handleUp, false);
             document.addEventListener('pointermove', handleMove, false);
-            document.addEventListener('wheel', handleWheel, false, {
+            document.addEventListener('wheel', handleWheel, {
                 passive: false
             });
             document.addEventListener('DOMMouseScroll', handleWheel, {
@@ -205,8 +222,9 @@
                 }
             });
         },
-        down: [],
         hover: [],
+        down: [],
+        released: [],
         x: 0,
         y: 0,
         xprev: 0,
@@ -257,6 +275,7 @@
             let x = 0,
                 y = 0;
             const rect = ct.pixiApp.view.getBoundingClientRect();
+            // Get the middle point of all the pointers
             for (const event of ct.pointer.down) {
                 x += (event.clientX - rect.left) / rect.width;
                 y += (event.clientY - rect.top) / rect.height;
@@ -284,7 +303,6 @@
                     events[1].y
                 );
             }
-
             if (lastPanNum === ct.pointer.down.length) {
                 if (ct.pointer.down.length > 1) {
                     setKey('DeltaRotation', (ct.u.degToRad(ct.u.deltaDir(lastAngle, angle))));
@@ -314,4 +332,5 @@
             lastScaleDistance = distance;
         }
     };
+    setKey('Wheel', 0);
 })(ct);

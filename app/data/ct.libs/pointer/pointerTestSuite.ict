@@ -7,9 +7,6 @@ libs:
   fittoscreen:
     mode: scaleFit
   pointer: {}
-  keyboard: {}
-  keyboard.polyfill: {}
-  sound.howler: {}
 textures:
   - name: Press
     untill: 0
@@ -89,21 +86,166 @@ textures:
     padding: 1
     group: !<tag:yaml.org,2002:js/undefined> ''
     lastmod: 1640319076860
+  - name: Bg
+    untill: 0
+    grid:
+      - 1
+      - 1
+    axis:
+      - 0
+      - 0
+    marginx: 0
+    marginy: 0
+    imgWidth: 1280
+    imgHeight: 720
+    width: 1280
+    height: 720
+    offx: 0
+    offy: 0
+    origname: iCgmBww2DztC53h.png
+    shape: rect
+    left: 0
+    right: 1280
+    top: 0
+    bottom: 720
+    uid: CgmBww2DztC53h
+    padding: 1
+    group: !<tag:yaml.org,2002:js/undefined> ''
+    tiled: true
 skeletons: []
 templates:
   - name: Hover
     depth: 0
     oncreate: ''
-    onstep: this.move();
-    ondraw: ''
+    onstep: ''
+    ondraw: |
+      this.tint = ct.pointer.hovers(this) ? 0x666666 : 0xffffff;
     ondestroy: ''
     texture: Djtt24dc8DC67M
     extends: {}
     uid: 59pLLrnNj8NjCw
     lastmod: 1640513224389
+  - name: Press
+    depth: 0
+    oncreate: ''
+    onstep: ''
+    ondraw: |
+      this.tint = ct.pointer.collides(this) ? 0x666666 : 0xffffff;
+    ondestroy: ''
+    texture: T3kM653njnNzKf
+    extends: {}
+    uid: Mrnzw5H89kgcWc
+    lastmod: 1641143596363
+  - name: Release
+    depth: 0
+    oncreate: ''
+    onstep: ''
+    ondraw: |
+      this.tint = ct.pointer.collides(this, false, true) ? 0x666666 : 0xffffff;
+    ondestroy: ''
+    texture: 7pM3DLmBcCLKNK
+    extends: {}
+    uid: L4G83w3cfhtdmp
+    lastmod: 1641145962425
 sounds: []
 styles: []
-rooms: []
+rooms:
+  - type: room
+    oncreate: >-
+      this.coordText = new PIXI.Text('');
+
+      this.keysText = new PIXI.Text('');
+
+      this.pointersText = new PIXI.Text('', {
+          fontSize: 10
+      });
+
+      this.pointersHoverText = new PIXI.Text('', {
+          fontSize: 10
+      });
+
+
+
+      this.addChild(this.coordText, this.keysText, this.pointersText,
+      this.pointersHoverText);
+
+
+      this.coordText.x = this.coordText.y = 20;
+
+
+      this.keysText.x = 20;
+
+      this.keysText.y = 150;
+
+
+      this.pointersHoverText.x = 850;
+
+      this.pointersHoverText.y = 20;
+
+
+      this.pointersText.x = 1050;
+
+      this.pointersText.y = 20;
+
+
+      this.coordText.depth = this.keysText.depth = this.pointersText.depth = 10;
+    onstep: ''
+    ondraw: |-
+      this.coordText.text = `x: ${ct.pointer.x}
+      y: ${ct.pointer.y}
+      xui: ${ct.pointer.xui}
+      yui: ${ct.pointer.yui}`;
+
+      this.keysText.text = JSON.stringify(ct.inputs.registry, void 0, 2);
+      this.pointersText.text = JSON.stringify(ct.pointer.down, void 0, 2);
+      this.pointersHoverText.text = JSON.stringify(ct.pointer.hover, void 0, 2);
+    onleave: ''
+    gridX: 64
+    gridY: 64
+    width: 1280
+    height: 720
+    name: TestRoom
+    backgrounds:
+      - depth: -10
+        texture: CgmBww2DztC53h
+        extends: {}
+    copies:
+      - x: 576
+        'y': 128
+        uid: 59pLLrnNj8NjCw
+        exts: {}
+      - x: 704
+        'y': 256
+        uid: Mrnzw5H89kgcWc
+        exts: {}
+      - x: 576
+        'y': 384
+        uid: L4G83w3cfhtdmp
+        exts: {}
+      - x: 448
+        'y': 256
+        uid: 59pLLrnNj8NjCw
+        exts: {}
+      - x: 512
+        'y': 512
+        uid: Mrnzw5H89kgcWc
+        exts: {}
+      - x: 768
+        'y': 448
+        uid: L4G83w3cfhtdmp
+        exts: {}
+      - x: 640
+        'y': 640
+        uid: L4G83w3cfhtdmp
+        exts: {}
+    tiles:
+      - depth: -10
+        tiles: []
+        extends: {}
+    extends: {}
+    lastmod: 1641142684830
+    thumbnail: Twr3J22MrT9dg4
+    uid: Twr3J22MrT9dg4
 actions: []
 emitterTandems: []
 scripts: []
@@ -144,3 +286,5 @@ settings:
     invertPreloaderScheme: true
   fps: 30
 fonts: []
+contentTypes: []
+palette: []

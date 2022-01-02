@@ -10,4 +10,5 @@ for (const pointer of ct.pointer.hover) {
     pointer.xuiprev = pointer.x;
     pointer.yuiprev = pointer.y;
 }
+ct.inputs.registry['pointer.Wheel'] = 0;
 ct.pointer.clearReleased();
